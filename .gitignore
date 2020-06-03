@@ -1,0 +1,12 @@
+*.bbl
+*.blg
+*.log
+*.out
+*.pdf
+*.gz
+*.sublime-project
+*.sublime-workspace
+*.DS_Store
+*.aux
+*.fls
+*.fdb_latexmk
