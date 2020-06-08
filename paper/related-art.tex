@@ -1,4 +1,17 @@
+\begin{itemize}
+\item \cite{CDSS15}: depth optimized sorting algorithm for HE. Reduce the depth from $\mathcal{O}(l\log^2(N))$ of Batcher network to $\mathcal{O}(\log(N) + \log(l))$ for sorting $N$ $l$-bits integers.
 
+\item \cite{EGNS15}: sorting algorithm for HE. Conclusion: average case in the encrypted domain corresponds to the worst-case in plain domain, better use sorting networks.
+
+\item \cite{NGEG17}: analysis of bit-wise and digit-wise comparison. Conclusion: bit-wise is more efficient because it has depth $\mathcal{O}(\log(l))$ instead of $\mathcal{O}(l)$ for digit-wise comparisons.
+
+\item \cite{JS19}: bit-wise comparison using SIMD. Conclusion: more efficient than without SIMD.
+ 
+\item \cite{LKN19}: modified shell sort. Make shell sort more efficient for HE from $\mathcal{O}(n^2)$ to $\mathcal{O}(n^{3/2}\sqrt{\alpha+\log\log n})$ with failure probability of $2^{-\alpha}$. Complexity worst than for Batcher even-odd merge sort network.
+
+\item \cite{TLWRK20}: Digit-wise comparison using SIMD. Reduce complexity of digit-wise comparison withfrom $\mathcal{O}(t^{d})$ to $\mathcal{O}(t^{r})$ for $r < d$ by decomposing each element in several digits. Compare numbers up to $64$ bits. Depth smaller than $\log(t-1) + \log(d) + 1$ (same algo than us, probably the work to compare with).
+\end{itemize}
+  
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "main"
