@@ -79,8 +79,8 @@
 \newcommand{\R}{\mathbb{R}} %real numbers
 \newcommand{\C}{\mathbb{C}} %complex numbers
 \newcommand{\F}{\mathbb{F}} %finite field
-\newcommand{\K}{\mathcal{K}}
-\renewcommand{\S}{\mathcal{S}}
+\newcommand{\K}{\mathcal{K}} %arbitrary set
+\renewcommand{\S}{\mathcal{S}} %arbitrary set
 
 %complex numbers
 \newcommand{\conj}[1]{\overline{#1}}
@@ -304,6 +304,7 @@
 \newcommand{\NAND}{\mathtt{NAND}}
 \newcommand{\AND}{\mathtt{AND}}
 \newcommand{\EQ}{\mathtt{EQ}}
+\newcommand{\LT}{\mathtt{LT}}
 \newcommand{\OR}{\mathtt{OR}}
 \newcommand{\NOT}{\mathtt{NOT}}
 \newcommand{\MOD}{\mathtt{MOD}}
@@ -317,7 +318,7 @@
 
 %comments
 \newcommand{\que}[1]{{\color{red} {\textbf{question:} #1}\xspace}}
-\newcommand{\todo}{\textcolor{red}{TODO }}
+\newcommand{\todo}[1]{\textcolor{red}{TODO: #1}}
 
 %cryptographic acronyms
 \acrodef{GC}{Garbled Circuit}
