@@ -1,4 +1,4 @@
-\documentclass[a4paper,11pt]{article}
+\documentclass{llncs}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% General %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage[dvipsnames]{xcolor}
@@ -19,7 +19,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Maths %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{bm}
-\usepackage{amsthm}
+%\usepackage{amsthm}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage[cmintegrals]{newtxmath}
@@ -45,63 +45,17 @@
 \usepackage{epstopdf}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Commands %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newcommand{\Z}{\mathbb{Z}}
-\newcommand{\Q}{\mathbb{Q}}
-\newcommand{\F}{\mathbb{F}}
-\newcommand{\R}{\mathcal{R}}
-\newcommand{\K}{\mathcal{K}}
-\renewcommand{\S}{\mathcal{S}}
-\newcommand{\rand}{\xleftarrow{\$}}
-\newcommand{\todo}{\textcolor{red}{TODO }}
-\newcommand{\prodscal}[2]{\left\langle#1, #2\right\rangle}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Math Operators %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\DeclareMathOperator{\Gal}{Gal}
+\input{commands}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Theorems %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\theoremstyle{definition}
-\newtheorem{theorem}{\bf{Theorem}}[section]
-\newtheorem{lemma}[theorem]{\bf{Lemma}}
-\newtheorem{remark}[theorem]{\bf{Remark}}
-\newtheorem{example}[theorem]{\bf{Example}}
-\newtheorem{corollary}[theorem]{\bf{Corollary}}
-\newtheorem{definition}[theorem]{\bf{Definition}}
-\newtheorem{proposition}[theorem]{\bf{Proposition}}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Acro-Def %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\acrodef{GC}{Garbled Circuit}
-\acrodef{FV}{Fan-Vercauteren}
-\acrodef{SP}{Streaming Processor}
-\acrodef{GSW}{Gentry-Sahai-Waters}
-\acrodef{HAO}{Hiromasa-Abe-Okamoto}
-\acrodef{LWE}{Learning With Errors}
-\acrodef{HE}{Homomorphic Encryption}
-\acrodef{LSB}{Least Significant Bit}
-\acrodef{ANF}{Algebraic Normal Form}
-\acrodef{RNS}{Residue Number System}
-\acrodef{SVM}{Support Vector Machine}
-\acrodef{SVP}{Shortest Vector Problem}
-\acrodef{CPU}{Central Processing Unit}
-\acrodef{GPU}{Graphics Processor Unit}
-\acrodef{CRT}{Chinese Remainder Theorem}
-\acrodef{SMP}{Symmetric Multiprocessing}
-\acrodef{LLL}{Lenstra Lenstra Lov{\'a}sz}
-\acrodef{NTT}{Number Theoretic Transform}
-\acrodef{DFT}{Discrete Fourier Transform}
-\acrodef{HPC}{High Performance Computing}
-\acrodef{APU}{Accelerated Processing Unit}
-\acrodef{LTV}{Lopez-Tromer-Vaikuntanathan}
-\acrodef{FHE}{Fully Homomorphic Encryption}
-\acrodef{GMDH}{Group Method of Data Handling}
-\acrodef{Ring-LWE}{Ring-Learning With Errors}
-\acrodef{FPGA}{Field-Programmable Gate Array}
-\acrodef{SHE}{Somewhat Homomorphic Encryption}
-\acrodef{BGV}{Brakerski-Gentry-Vaikuntanathan}
-\acrodef{SIMD}{Single Instruction Multiple Data}
-\acrodef{DSPR}{Decisional Small Polynomial Ratio}
-\acrodef{SIVP}{Shortest Independent Vectors Problem}
-\acrodef{S(I)VP}{Shortest (Independent) Vector Problem}
-\acrodef{YASHE'}{Yet Another Somewhat Homomorphic Encryption'}
+%\theoremstyle{definition}
+%\newtheorem{theorem}{\bf{Theorem}}[section]
+%\newtheorem{lemma}[theorem]{\bf{Lemma}}
+%\newtheorem{remark}[theorem]{\bf{Remark}}
+%\newtheorem{example}[theorem]{\bf{Example}}
+%\newtheorem{corollary}[theorem]{\bf{Corollary}}
+%\newtheorem{definition}[theorem]{\bf{Definition}}
+%\newtheorem{proposition}[theorem]{\bf{Proposition}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

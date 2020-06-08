@@ -1,0 +1,356 @@
+
+%footnotes
+%\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+% Maths
+%Vectors
+\newcommand{\va}{\mathbf{a}} % arbitrary vectors
+\newcommand{\vb}{\mathbf{b}}
+\newcommand{\vc}{\mathbf{c}}
+\newcommand{\vd}{\mathbf{d}}
+\newcommand{\ve}{\mathbf{e}}
+\newcommand{\vf}{\mathbf{f}}
+\newcommand{\vg}{\mathbf{g}}
+\newcommand{\vh}{\mathbf{h}}
+\newcommand{\vi}{\mathbf{i}}
+\newcommand{\vj}{\mathbf{j}}
+\newcommand{\vk}{\mathbf{k}}
+\newcommand{\vl}{\mathbf{l}}
+\newcommand{\vm}{\mathbf{m}}
+\newcommand{\vn}{\mathbf{n}}
+\newcommand{\vo}{\mathbf{o}}
+\newcommand{\vp}{\mathbf{p}}
+\newcommand{\vq}{\mathbf{q}}
+\newcommand{\vr}{\mathbf{r}}
+\newcommand{\vs}{\mathbf{s}}
+\newcommand{\vt}{\mathbf{t}}
+\newcommand{\vu}{\mathbf{u}}
+\newcommand{\vv}{\mathbf{v}}
+\newcommand{\vw}{\mathbf{w}}
+\newcommand{\vx}{\mathbf{x}}
+\newcommand{\vy}{\mathbf{y}}
+\newcommand{\vz}{\mathbf{z}}
+\newcommand{\0}{\mathbf{0}}  % The zero vector
+\newcommand{\1}{\mathbf{1}}  % The vector of ones
+
+%Matrices
+\newcommand{\mA}{\mathbf{A}} % arbitrary vectors
+\newcommand{\mB}{\mathbf{B}}
+\newcommand{\mC}{\mathbf{C}}
+\newcommand{\mD}{\mathbf{D}}
+\newcommand{\mE}{\mathbf{E}}
+\newcommand{\mF}{\mathbf{F}}
+\newcommand{\mG}{\mathbf{G}}
+\newcommand{\mH}{\mathbf{H}}
+\newcommand{\mI}{\mathbf{I}} %identity matrix
+\newcommand{\mJ}{\mathbf{J}}
+\newcommand{\mK}{\mathbf{K}}
+\newcommand{\mL}{\mathbf{L}}
+\newcommand{\mM}{\mathbf{M}}
+\newcommand{\mN}{\mathbf{N}}
+\newcommand{\mO}{\mathbf{O}}
+\newcommand{\mP}{\mathbf{P}}
+\newcommand{\mQ}{\mathbf{Q}}
+\newcommand{\mR}{\mathbf{R}}
+\newcommand{\mS}{\mathbf{S}}
+\newcommand{\mSigma}{\mathbf{\Sigma}}
+\newcommand{\mT}{\mathbf{T}}
+\newcommand{\mU}{\mathbf{U}}
+\newcommand{\mV}{\mathbf{V}}
+\newcommand{\mW}{\mathbf{W}}
+\newcommand{\mX}{\mathbf{X}}
+\newcommand{\mY}{\mathbf{Y}}
+\newcommand{\mZ}{\mathbf{Z}}
+
+%functions over vectors and matrices
+\newcommand{\proj}{\pi}
+\newcommand{\transpose}[1]{#1^{\intercal}} %transpose
+\newcommand{\inprod}[2]{\langle #1, #2 \rangle} %inner product
+\newcommand{\prodscal}[2]{\left\langle#1, #2\right\rangle} %inner product (Vincent)
+\newcommand{\Tr}{\mathrm{Tr}} %trace
+\newcommand{\TrOf}[1]{\Tr\!\left(#1\right)}
+\newcommand{\No}{\mathrm{No}} %norm
+
+%numerical sets
+\newcommand{\Z}{\mathbb{Z}} %integers
+\newcommand{\N}{\mathbb{N}} %natural numbers
+\newcommand{\Q}{\mathbb{Q}} %rational numbers
+\newcommand{\R}{\mathbb{R}} %real numbers
+\newcommand{\C}{\mathbb{C}} %complex numbers
+\newcommand{\F}{\mathbb{F}} %finite field
+\newcommand{\K}{\mathcal{K}}
+\renewcommand{\S}{\mathcal{S}}
+
+%complex numbers
+\newcommand{\conj}[1]{\overline{#1}}
+
+%special constants
+\newcommand{\iu}{{i\mkern1mu}} %imaginary i
+
+%ideals
+\newcommand{\ideal}[1]{\left\langle #1 \right\rangle}
+\newcommand{\idealI}{\mathcal{I}}
+\newcommand{\idealJ}{\mathcal{J}}
+\newcommand{\idealp}{\mathfrak{p}}
+
+\newcommand{\idealNormOf}[1]{N\!\left(#1\right)}
+
+%sets
+\newcommand{\cardinOf}[1]{\left\lvert#1\right\rvert}
+
+%arithmetic functions
+\newcommand{\mult}{{\mathrm{mult}}}
+\newcommand{\mul}{{\mathrm{mul}}}
+\newcommand{\add}{{\mathrm{add}}}
+\newcommand{\erf}{{\mathrm{erf}}}
+\newcommand{\erfc}{{\mathrm{erfc}}}
+\newcommand{\inv}[1]{{{#1}^{-1}}}
+
+%size
+\newcommand{\size}{{\mathrm{size}}}
+
+%probability
+\newcommand{\Prob}{{\mathrm{Prob}}} % probability
+
+%parameters of any generalized encryption scheme
+\newcommand{\ctxtSpace}{\mathcal{C}} %ciphertext space
+\newcommand{\ptxtSpace}{\mathcal{P}} %plaintext space
+\newcommand{\msgSpace}{\mathcal{M}} %message space
+\newcommand{\secpar}{\lambda} %security parameter
+
+%elements of any encryption scheme
+\newcommand{\sk}{{\mathtt{sk}}}
+\newcommand{\pk}{{\mathtt{pk}}}
+\newcommand{\rlk}{{\mathtt{rlk}}}
+\newcommand{\ct}{{\mathtt{ct}}}
+\newcommand{\pt}{{\mathtt{pt}}}
+
+%basic encryption operations
+\newcommand{\KeyGen}{{\mathtt{KeyGen}}}
+\newcommand{\SKGen}{{\mathtt{SecretKeyGen}}}
+\newcommand{\PKGen}{{\mathtt{PublicKeyGen}}}
+\newcommand{\EVGen}{{\mathtt{EvaluateKeyGen}}}
+\newcommand{\RKGen}{{\mathtt{RelinKeyGen}}}
+\newcommand{\BKGen}{{\mathtt{BootKeyGen}}}
+\newcommand{\Encrypt}{{\mathtt{Encrypt}}}
+\newcommand{\Enc}{\mathtt{Enc}}
+\newcommand{\Decrypt}{{\mathtt{Decrypt}}}
+\newcommand{\Dec}{\mathtt{Dec}}
+\newcommand{\Encode}{{\mathtt{Encode}}}
+\newcommand{\Decode}{{\mathtt{Decode}}}
+\newcommand{\Pack}{{\mathtt{Pack}}}
+\newcommand{\Unpack}{{\mathtt{Unpack}}}
+
+%homomorphic encryption operations
+\newcommand{\Add}{{\mathtt{Add}}}
+\newcommand{\AddPlain}{{\mathtt{AddPlain}}}
+\newcommand{\Sub}{{\mathtt{Sub}}}
+\newcommand{\SubPlain}{{\mathtt{SubPlain}}}
+\newcommand{\BasicMul}{{\mathtt{BasicMul}}}
+\newcommand{\Mul}{{\mathtt{Mul}}}
+\newcommand{\MulPlain}{{\mathtt{MulPlain}}}
+\newcommand{\ModSwitch}{{\mathtt{ModSwitch}}}
+\newcommand{\Relin}{{\mathtt{Relin}}}
+\newcommand{\Rescale}{{\mathtt{Rescale}}}
+\newcommand{\Rotate}{{\mathtt{Rot}}}
+\newcommand{\Frob}{{\mathtt{Frob}}}
+\newcommand{\Eval}{{\mathtt{Evaluate}}}
+\newcommand{\Select}{{\mathtt{Select}}}
+
+%lattices
+\newcommand{\lat}{\mathcal{L}}
+\newcommand{\mindist}{{\lambda_1}}
+\newcommand{\mindistOf}[1]{{\lambda_1}\!\left(#1\right)}
+\newcommand{\sucmin}[1]{{\lambda_#1}}
+\newcommand{\sucminOf}[2]{{\lambda_#1}\!\left(#2\right)}
+\newcommand{\smoothpar}[1]{{\eta_#1}}
+\newcommand{\smoothparOf}[2]{{\eta_#1}\!\left(#2\right)}
+\newcommand{\duallat}[1]{{#1^*}}
+
+%number theory
+\newcommand{\numfield}{K} %the number field 
+\newcommand{\numfieldDim}{n} %the dimension of the number field over the field of rational numbers
+\newcommand{\defpoly}{f} %the definining polynomial of the number field
+\newcommand{\intring}{R} %the ring of integers of a number field
+\newcommand{\expfactor}{\delta} %expansion factor 
+\newcommand{\dual}[1]{\ensuremath{#1^\vee}} %the dual of an ideal
+\newcommand{\codif}{\dual{\intring}}
+\newcommand{\canemb}{\sigma} %canonical embedding
+\newcommand{\canembMat}{\boldsymbol{\Sigma}} %linear operator of the canonical embedding
+\newcommand{\invCanembMat}{\inv{\canembMat}} %invers of the linear operator of the canonical embedding
+\newcommand{\canembImg}{H} %image of the canonical embedding in the complex vector space
+\newcommand{\canembImgBasis}{\mB} %basis of the can. embedding image over real numbers
+\newcommand{\realembNum}{{s_1}} %number of real embeddings
+\newcommand{\cmplxembNum}{{s_2}} %number of non-cojugate complex embeddings
+\newcommand{\cyclpoly}[1]{{\Phi_{#1}}} %cyclotomic polynomial
+\newcommand{\cyclpolyOrd}{m} %order of a cyclotomic polynomial
+\newcommand{\CRT}{\mathsf{CRT}} %Chinese remainder theorem ring isomorphism
+\newcommand{\disc}{\mathrm{disc}}
+\newcommand{\ord}{{\mathrm{ord}}} %order of an element
+\newcommand{\eulerphi}[1]{\phi\left(#1\right)} %Euler totient function
+\DeclareMathOperator{\Gal}{Gal} %Galois group
+
+%lattice problems
+\acrodef{BDD}{Bounded Distance Decoding}
+\acrodef{SIS}{Short Integer Solution}
+\acrodef{SVP}{Shortest Vector Problem}
+\acrodef{uSVP}{Unique Shortest Vector Problem}
+\acrodef{GapSVP}{Decision Shortest Vector Problem}
+\acrodef{SIVP}{Shortest Independent Vectors Problem}
+\acrodef{DGS}{Discrete Gaussian Sampling}
+\acrodef{LWE}{Learning with Errors}
+\acrodef{SLWE}{Search Learning with Errors}
+\acrodef{DLWE}{Decision Learning with Errors}
+\acrodef{S(I)VP}{Shortest (Independent) Vector Problem}
+
+%lattice acronyms
+\acrodef{ANF}{Algebraic Normal Form}
+\acrodef{HNF}{Hermite Normal Form}
+
+%LWE parameters
+\newcommand{\LWEdim}{n}
+\newcommand{\LWEmod}{q}
+
+%RLWE parameters
+\newcommand{\RLWE}{\textsf{RLWE}}
+\newcommand{\SRLWE}{\textsf{S-RLWE}}
+\newcommand{\DRLWE}{\textsf{D-RLWE}}
+\newcommand{\RLWEbasicRing}{\intring}
+\newcommand{\RLWEdim}{n}
+\newcommand{\RLWEmod}{\LWEmod}
+\newcommand{\RLWEring}{{\RLWEbasicRing_\RLWEmod}}
+\newcommand{\SCGLWE}{\text{SCG}\textsf{-LWE}}
+
+%HE names
+\acrodef{HE}{Homomorphic Encryption}
+\acrodef{FHE}{Fully Homomorphic Encryption}
+\acrodef{SHE}{Somewhat Homomorphic Encryption}
+\acrodef{LHE}{Leveled Homomorphic Encryption}
+\acrodef{BGV}{Brakerski-Gentry-Vaikuntanathan}
+\acrodef{FV}{Fan-Vercauteren}
+\acrodef{GSW}{Gentry-Sahai-Waters}
+\acrodef{HAO}{Hiromasa-Abe-Okamoto}
+\acrodef{LTV}{Lopez-Tromer-Vaikuntanathan}
+\acrodef{YASHE}{Yet Another Somewhat Homomorphic Encryption}
+%\newcommand{\BCIV}{\mathtt{BCIV}}
+%\newcommand{\HEAAN}{\mathtt{HEAAN}}
+%\newcommand{\TFHE}{\mathtt{TFHE}}
+
+%FV parameters
+\newcommand{\FVringDim}{n}
+\newcommand{\FVctxtMod}{\LWEmod}
+\newcommand{\FVptxtMod}{t}
+\newcommand{\FVDelta}{\Delta}
+\newcommand{\FVrelinBase}{w}
+\newcommand{\FVrlkNum}{\ell}
+\newcommand{\FVctxtSpace}{\RLWEbasicRing_\FVctxtMod^2}
+\newcommand{\FVptxtSpace}{\RLWEbasicRing_\FVptxtMod}
+
+%BGV parameters
+\newcommand{\BGVptxtMod}{t}
+
+%HEAAN parameters
+\newcommand{\HEAANscale}{\Delta}
+
+%RNS operations
+\newcommand{\FastBconv}{{\mathtt{FastBconv}}}
+
+%message
+\newcommand{\msg}{\mathsf{msg}}
+
+%norms
+\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\canorm}[1]{\left\lVert #1 \right\rVert^{\textup{can}}}
+\newcommand{\infnorm}[1]{\left\lvert#1\right\rvert_\infty}
+
+%modular operation
+\newcommand{\modq}[1]{\left[ #1 \right]_\RLWEmod} %modulo (R)LWE modulus in the symmetric interval
+\newcommand{\modx}[2]{\left[ #2 \right]_{#1}} %modulo any modulus in the symmetric interval
+\newcommand{\modp}[1]{\left[ #1 \right]_p} %modulo p in the symmetric interval
+\newcommand{\modt}[1]{\left[ #1 \right]_\FVptxtMod} %modulo the FV plaintext modulus in the symmetric interval
+\newcommand{\rem}[2]{\left| #2 \right|_{#1}} %remainder after division
+
+%rounding operations
+\newcommand{\round}[1]{\left\lfloor #1 \right\rceil} %rounding
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor} %floor
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil} %ceiling
+
+%distributions
+\newcommand{\rand}{\xleftarrow{\$}} %sampled from (Vincent)
+\newcommand{\from}{\leftarrow} %sampled from
+\newcommand{\ufrom}{\xleftarrow{\$}} %sampled uniformly random from
+\newcommand{\udist}{\mathcal{U}} %uniform distribution
+\newcommand{\normdist}{\Gamma} %normal distribution
+\newcommand{\dgaussdist}{\mathcal{DG}} %discrete Gaussian distribution
+\newcommand{\keydist}{\chi_{\text{k}}} %key distribution
+\newcommand{\errdist}{\chi_{\text{e}}} %error distribution
+\newcommand{\stdev}{\sigma} %standard deviation
+
+%indistinguishability of distributions
+\newcommand{\cindist}{\stackrel{\rm c}{\approx}} %computational
+\newcommand{\sindist}{\stackrel{\rm s}{\approx}} %statistical
+
+%proof start/end
+\newcommand{\bproof}{\noindent {\scshape Proof: }}
+\newcommand{\eproof}{\ \mbox{} \hfill $\square$\mbox{}\newline}
+
+%circuits
+\newcommand{\circuit}{\mathcal{C}}
+
+%boolean operators
+\newcommand{\XOR}{\mathtt{XOR}}
+\newcommand{\NAND}{\mathtt{NAND}}
+\newcommand{\AND}{\mathtt{AND}}
+\newcommand{\EQ}{\mathtt{EQ}}
+\newcommand{\OR}{\mathtt{OR}}
+\newcommand{\NOT}{\mathtt{NOT}}
+\newcommand{\MOD}{\mathtt{MOD}}
+
+%complexity classes
+\newcommand{\poly}{\mathrm{poly}}
+
+%technical commands
+\newcommand{\remove}[1]{}
+\newcommand{\alert}[1]{\textcolor{red}{#1}}
+
+%comments
+\newcommand{\que}[1]{{\color{red} {\textbf{question:} #1}\xspace}}
+\newcommand{\todo}{\textcolor{red}{TODO }}
+
+%cryptographic acronyms
+\acrodef{GC}{Garbled Circuit}
+\acrodef{DSPR}{Decisional Small Polynomial Ratio}
+
+%algorithmic acronyms
+\acrodef{SVM}{Support Vector Machine}
+\acrodef{LLL}{Lenstra Lenstra Lov{\'a}sz}
+\acrodef{GMDH}{Group Method of Data Handling}
+
+%math acronyms
+\acrodef{CRT}{Chinese Remainder Theorem}
+\acrodef{RNS}{Residue Number System}
+\acrodef{NTT}{Number Theoretic Transform}
+\acrodef{DFT}{Discrete Fourier Transform}
+
+%computer science acronyms
+\acrodef{SIMD}{Single Instruction Multiple Data}
+\acrodef{SP}{Streaming Processor}
+\acrodef{LSB}{Least Significant Bit}
+\acrodef{CPU}{Central Processing Unit}
+\acrodef{GPU}{Graphics Processor Unit}
+\acrodef{SMP}{Symmetric Multiprocessing}
+\acrodef{HPC}{High Performance Computing}
+\acrodef{APU}{Accelerated Processing Unit}
+\acrodef{FPGA}{Field-Programmable Gate Array}
+
+\newcommand\blankfootnote[1]{%
+  \begingroup
+  \renewcommand\thefootnote{}\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \endgroup
+}
+\newcommand*{\skipnumber}[2][1]{%
+{\renewcommand*{\alglinenumber}[1]{}\State #2}%
+\addtocounter{ALG@line}{-#1}}
