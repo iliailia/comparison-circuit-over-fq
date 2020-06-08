@@ -1,3 +1,49 @@
+%%%%%%%
+Let $\S$ be a totally ordered set with a binary relation $<$.
+For any $x,y \in \S$, we can define the less-than and the equality functions as follows.
+\begin{align*}
+  \LT_\S(x,y) = 
+  \begin{cases}
+    1, & \text{if } x < y; \\
+    0, & \text{if } x \ge y, \\
+  \end{cases}
+  \qquad
+  \EQ_\S(x,y) = 
+  \begin{cases}
+    1, & \text{if } x = y; \\
+    0, & \text{if } x \neq y. \\
+  \end{cases}
+\end{align*}
+If $\S$ is a complete set of representatives of a finite field $\F_\fieldcard$, then the equality function can be easily realized using the principal character of $\F_\fieldcard$, namely $\EQ_\S(x,y) = 1 - \princhar(x-y)$.
+Since this function is independent of the choice of $\S$, we can write
+\begin{align*}
+  \EQ_{\F_{\fieldcard}}(x,y) = 1 - \princhar(x-y).
+\end{align*}
+The less-than function can be interpolated using Lemma~\ref{lem:interpolation} and the following truth table
+\begin{align*}
+  \begin{array}{c|ccccc}
+    < & a_0 & a_1 & a_2 & \cdots & a_{q-1} \\
+    \hline
+    a_0 & 0 & 1 & 1 & \cdots & 1 \\
+    a_1 & 0 & 0 & 1 & \cdots & 1 \\
+    a_2 & 0 & 0 & 0 & \cdots & 1 \\
+    \vdots & \vdots & \vdots & \vdots & \ddots & \vdots \\
+    a_{q-1} & 0 & 0 & 0 & \cdots & 0 \\
+  \end{array}
+\end{align*}
+where $a_i \in \S$ for any $i \in [0,q-1]$ and $a_i < a_j$ if $i < j$.
+In particular,
+\begin{align*}
+  \LT_\S(x,y) &= \sum_{a,b \in \S} \LT_\S(a,b) (1-\princhar(x - a)) (1-\princhar(x - b)) \\
+  &= \sum_{a \in \S} (1-\princhar(x - a)) \sum_{b \in \S} \LT_\S(a,b)  (1-\princhar(x - b)) \\
+  &= \sum_{a \in \S} (1-\princhar(x - a)) \sum_{b \in \S, a < b} (1-\princhar(x - b)).
+\end{align*}
+In contrast to equality, this function depends on the choice of $\S$.
+Nevertheless, we can fix a certain $\S$ as the default set of representatives and denote $\LT_\S(x,y)$ as $\LT_{\F_\fieldcard}(x,y)$.
+\todo{Continue on the less-than function}
+%%%%%%%
+
+\todo{Rewrite the following.}
 We want to compare two vectors $X=(x_1,x_2,\ldots,x_\ell)$ and $Y=(y_1,y_2,\ldots,y_\ell)\in\mathbb{F}_{p^d}^\ell$ for the lexicographical order $<_L$:
 
 $$X <_L Y \Leftrightarrow \exists i\in[1,\ell] \text{ such that } x_i < y_i \text{ and } \forall j\leq i ~~ x_j = y_j $$
@@ -6,36 +52,14 @@ where $x<y$ compare $x$ and $y$ as if they were elements of $[0,p^d-1]$. Let us 
 
 $$ X <_L Y = \sum_{i=1}^\ell \left( (x_i < y_i).\prod_{j=1}^{i-1} (x_i = y_j) \right)$$
 
-We can evaluate the term $\prod_{j=1}^{i-1} (x_i = y_j)$ using the randomized vector equality testing with a depth independant of $i$. We are left with evaluating $<$ over $\mathbb{F}_q$ for $q=p^d$ whose truth table is given hereafter:
+We can evaluate the term $\prod_{j=1}^{i-1} (x_i = y_j)$ using the randomized vector equality testing with a depth independent of $i$. 
 
-$$
-\begin{array}{c|ccccc}
-  < & 0 & 1 & 2 & \cdots & q-1 \\
-  \hline
-  0 & 0 & 1 & 1 & \cdots & 1 \\
-  1 & 0 & 0 & 1 & \cdots & 1 \\
-  2 & 0 & 0 & 0 & \cdots & 1 \\
-  \vdots & \vdots & \vdots & \vdots & \ddots & \vdots \\
-  q-1 & 0 & 0 & 0 & \cdots & 0 \\
-\end{array}
-$$
-
-Therefore it can be evaluated as:
-
-\begin{align*}
-  x < y & = \sum_{i=0}^{q-2} \left( (x = i)\cdot \prod_{j=0}^i (y \neq j) \right) \\
-        & = \sum_{i=0}^{q-2} \left( (x = i)\cdot \sum_{j=i+1}^{q-1} (y = j) \right) \\
-\end{align*}
-
-We denote the function $f: \mathbb{F}_q \rightarrow \mathbb{F}_q$ defined by $f(x) = x^{q-1}$ which is equal to $0$ if $x = 0$ and $1$ otherwise, thus we have $(x = j) = 1-f(x-j)$. As a consequence we can write $<$ as:
-
-$$ x < y = \sum_{i=0}^{q-2} \left( (1-f(x-i)) \cdot \sum_{j=i+1}^{q-1} (1 - f(y-j)) \right) $$
-
-Suppose we have two ciphertexts encrypting the vectors of length $q-1$ (can be of length $k\geq q-1$ with $0$s padding) $(x,0,\ldots,0)$ and $(y,0,\ldots,0)$ in an SIMD fashion. We can obtain ciphertexts encrypting $(x,x,\ldots, x)$ and $(y,y,\ldots, y)$ with $2\log_2(q-1)\texttt{Rot}$ and $2\log_2(q-1)\texttt{Add}$. 
+Suppose we have two ciphertexts encrypting the vectors of length $q-1$ (can be of length $k\geq q-1$ with $0$s padding) $(x,0,\ldots,0)$ and $(y,0,\ldots,0)$ in an SIMD fashion. 
+We can obtain ciphertexts encrypting $(x,x,\ldots, x)$ and $(y,y,\ldots, y)$ with $2\log_2(q-1)\texttt{Rot}$ and $2\log_2(q-1)\texttt{Add}$. 
 
 From there we can obtain encryptions of $(x,x-1,\ldots, x-q-2)$ and $(y-1,y-2,\ldots, y-q-1)$ with $2\texttt{Add}$. We can apply $f$ to these vectors in parallel with a depth of $\log (p-1) + \log d$ for a cost of $2(\log (p-1) + wt(p-1) + d - 2) \texttt{Mult}$. This can be minimized by choosing $p = 2^d + 1$ for some $d$.
 
-With $2$ more $\texttt{Sub}$ we obtain encryptions of $(1-f(x), 1-f(x-1), \ldots, 1-f(x-q-2))$ and $(1-f(y-1), 1-f(y-2), \ldots, 1-f(y-q-1))$. From there we can get an ecryption of the different partial sums in $\log_2(q-1)\texttt{Rot}$, $\log_2(q-1)\texttt{Select}$ and $\log_2(q-1)\texttt{Add}$. The algorithm works as follow:
+With $2$ more $\texttt{Sub}$ we obtain encryptions of $(1-f(x), 1-f(x-1), \ldots, 1-f(x-q-2))$ and $(1-f(y-1), 1-f(y-2), \ldots, 1-f(y-q-1))$. From there we can get an encryption of the different partial sums in $\log_2(q-1)\texttt{Rot}$, $\log_2(q-1)\texttt{Select}$ and $\log_2(q-1)\texttt{Add}$. The algorithm works as follow:
 
 \begin{center}
   \begin{tikzpicture}

@@ -7,12 +7,11 @@
 \usepackage{enumitem}
 \usepackage{multirow}
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Mise en page %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage[left=2cm,right=2cm,top=3cm,bottom=3.2cm]{geometry}
-\usepackage[T1]{fontenc}
-\usepackage[english]{babel}
-\usepackage[latin1]{inputenc}
+%\usepackage[left=2cm,right=2cm,top=3cm,bottom=3.2cm]{geometry}
+%\usepackage[T1]{fontenc}
+%\usepackage[english]{babel}
+%\usepackage[latin1]{inputenc}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Références %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage[colorlinks=true,linkcolor=black,filecolor=magenta,urlcolor=black,citecolor=blue]{hyperref}  
@@ -22,7 +21,8 @@
 %\usepackage{amsthm}
 \usepackage{amsmath}
 \usepackage{amssymb}
-\usepackage[cmintegrals]{newtxmath}
+\usepackage{amsfonts}
+%\usepackage[cmintegrals]{newtxmath}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TIK'Z %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{tikz,tkz-tab}
@@ -46,6 +46,9 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Commands %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \input{commands}
+\newcommand{\fieldcard}{q} %cardinality of a finite field
+\newcommand{\fieldchar}{p} %characteristic of a finite field
+\newcommand{\princhar}{\chi} %principal character of a finite field
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Theorems %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\theoremstyle{definition}
@@ -59,7 +62,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\title{Comparison circuit over $\mathbb{F}_{p^d}$}
+\title{Comparison circuit over $\F_\fieldcard$}
 \date{}
 \author{}
 
