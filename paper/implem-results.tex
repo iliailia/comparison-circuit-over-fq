@@ -2,7 +2,7 @@
   \centering
   \begin{tabular}{||c|c|c||ccccc||}
     \hline
-    $m$ & $n$ & $\delta_\mathcal{R}$ & $t$ & $d$ & $\ell$ & $s$ & $\log_2(t^d)$ \\
+    $~m~$ & $~n~$ & $~\delta_\mathcal{R}~$ & $~t~$ & $~d~$ & $~\ell~$ & $~s~$ & $~\log_2(t^d)~$ \\
     \hline
     $22,383$ & $14,904$ & $7n$ & $5$  & $18$ & $828$  & $1$ &  $41.7$ \\
     $25,623$ & $15,552$ & $175n$ & $2$ & $36$ & $432$ & $2$ & $36.0$ \\
@@ -17,6 +17,17 @@
   \caption{Potential parameters}
   \label{tab:params}
 \end{table}
+
+\begin{itemize}
+\item $m$: cyclotomic order;
+\item $n$: degree of the cyclotomic;
+\item $\delta_\mathcal{R}$: expansion factor (upper-bound);
+\item $t$: plaintext modulus;
+\item $d$: degree of the factors of $\phi_m$ modulo $t$;
+\item $\ell$: numbers of factors of of $\phi_m$ modulo $t$;
+\item $s$: number of generators for $(\Z/m\Z)^*/<t>$;
+\item $\log_2(t^d)$: size of the slots/inverse of the probability of failure for one equality check.
+\end{itemize}
 
 %%% Local Variables:
 %%% mode: latex
