@@ -3,8 +3,8 @@
 
 \subsection{Finite fields}
 	Let $\F_\fieldcard$ be a finite field of characteristic $\fieldchar$.
-	We define the multiplicative map $\princhar: \F_\fieldcard \rightarrow \{0,1\}, x \mapsto x^{\fieldcard-1} \mod \fieldchar$, which is called the \emph{principal character}.
-	Due to Euler's theorem, $\princhar(0) = 0$ and $\princhar(x) = 1$ for any $x \in \F_\fieldcard^\times$.
+	We define the multiplicative map $\princhar_\fieldcard: \F_\fieldcard \rightarrow \{0,1\}, x \mapsto x^{\fieldcard-1} \mod \fieldchar$, which is called the \emph{principal character}.
+	Due to Euler's theorem, $\princhar_\fieldcard(0) = 0$ and $\princhar_\fieldcard(x) = 1$ for any $x \in \F_\fieldcard^\times$.
 	%Since
 	%\begin{align}\label{eq:exp_frob}
 	%	a^{t^d-1} = a^{(t-1)(t^{d-1} + \dots + 1)} = \prod_{i=0}^{d-1} (a^{t-1})^{t^i},
@@ -15,7 +15,7 @@
 		Every function $f: \F_\fieldcard^\ell \rightarrow \F_\fieldcard$ is a polynomial function represented by a unique polynomial $P_f(X_0,\dots,X_{\ell-1})$ of degree at most $\fieldcard-1$ in each variable.
 		In particular,
 		\begin{align*}
-			P_f(X_0,\dots,X_{\ell-1}) = \sum_{a_0,\dots,a_{\ell-1} \in \F_\fieldcard} f(a_0,\dots,a_{\ell-1}) \prod_{i=0}^{\ell-1} \left(1 - \princhar(X_i - a_i)\right)\,.
+			P_f(X_0,\dots,X_{\ell-1}) = \sum_{a_0,\dots,a_{\ell-1} \in \F_\fieldcard} f(a_0,\dots,a_{\ell-1}) \prod_{i=0}^{\ell-1} \left(1 - \princhar_\fieldcard(X_i - a_i)\right)\,.
 		\end{align*}
 	\end{lemma}
 %%% Local Variables:
