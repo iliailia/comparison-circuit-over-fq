@@ -50,44 +50,13 @@ void convertToBaset(vector<long>& decomp, unsigned int input, unsigned int base,
 
 void shift_and_add(Ctxt& x, long range_len, const EncryptedArray& ea)
 {
-  long nb_slots = ea.size();
-  if (range_len == 0)
-  {
-    vector<long> ptxt1(nb_slots,0);
-    ea.encrypt(x,x.getPubKey(),ptxt1);
-    return;
+  long e = 1;
+  while (e < range_len){
+    Ctxt tmp = x;
+    ea.shift(tmp, -e);
+    x += tmp;
+    e *=2;
   }
-  Ctxt y(x.getPubKey());
-  vector<long> ptxt0(nb_slots,0);
-  ea.encrypt(y,x.getPubKey(),ptxt0);
-  int rot_x = 1;
-  int rot_y = range_len;
-  Ctxt temp(x.getPubKey());
-  int tmp_len = range_len;
-  while (tmp_len > 1)
-    {
-      if (tmp_len % 2 == 0)
-        {
-          temp = x;
-          ea.shift(temp, -rot_x);
-          x += temp;
-          rot_x *=2;
-          tmp_len = tmp_len/2;
-        }
-      else //if (tmp_len % 2 == 1)
-        {
-          rot_y -= rot_x;
-          temp = x;
-          ea.shift(temp, -rot_y);
-          y += temp;
-          temp = x;
-          ea.shift(temp, -rot_x);
-          x += temp;
-          rot_x *= 2;
-          tmp_len = (tmp_len - 1)/2;
-        }
-    }
-  x +=y;
 }
 
 void rotate_and_add(Ctxt& x, long range_len, const EncryptedArray& ea)
@@ -191,7 +160,7 @@ void print_decrypted(Ctxt& ctxt, long ord_p, const EncryptedArray& ea, const Sec
     }
 }
 
-void less_simple(Ctxt& ctxt_x, Ctxt& ctxt_y, long p, long ord_p, const EncryptedArray& ea, const SecKey& sk)
+void less_simple(Ctxt& ctxt_x, Ctxt& ctxt_y, long p, long ord_p, const EncryptedArray& ea, const SecKey& sk, bool verbose)
 {
   FHE_NTIMER_START(ComparisonCircuit);
   long nSlots = ea.size(); 
@@ -202,9 +171,13 @@ void less_simple(Ctxt& ctxt_x, Ctxt& ctxt_y, long p, long ord_p, const Encrypted
   cout << "Replication" << endl;
   replicate_n_times(ctxt_x, p-1, ea);
   replicate_n_times(ctxt_y, p-1, ea);
-  //print_decrypted(ctxt_x, ord_p, ea, sk);
-  //cout << endl;
-  //print_decrypted(ctxt_y, ord_p, ea, sk);
+
+  if(verbose)
+  {
+    print_decrypted(ctxt_x, ord_p, ea, sk);
+    cout << endl;
+    print_decrypted(ctxt_y, ord_p, ea, sk);
+  }
   //generate a plaintext with slots {0,...,p-2}
   cout << "Subtraction of field elements" << endl;
   vector<long> vec_field_elements(nSlots,0);
@@ -224,16 +197,24 @@ void less_simple(Ctxt& ctxt_x, Ctxt& ctxt_y, long p, long ord_p, const Encrypted
   ea.encode(ptxt_field_elements, vec_field_elements);
   //subtract this plaintext from y
   ctxt_y.addConstant(ptxt_field_elements);
-  //print_decrypted(ctxt_x, ord_p, ea, sk);
-  //cout << endl;
-  //print_decrypted(ctxt_y, ord_p, ea, sk);
+
+  if(verbose)
+  {
+    print_decrypted(ctxt_x, ord_p, ea, sk);
+    cout << endl;
+    print_decrypted(ctxt_y, ord_p, ea, sk);
+  }
   //compute mapTo01
   cout << "Mapping to 0 and 1" << endl;
   mapTo01_subfield(ea, ctxt_x, 1);
   mapTo01_subfield(ea, ctxt_y, 1);
-  //print_decrypted(ctxt_x, ord_p, ea, sk);
-  //cout << endl;
-  //print_decrypted(ctxt_y, ord_p, ea, sk);
+
+  if(verbose)
+  {
+    print_decrypted(ctxt_x, ord_p, ea, sk);
+    cout << endl;
+    print_decrypted(ctxt_y, ord_p, ea, sk);
+  }
   //generate a plaintext with 1 in all the slots
   cout << "Computing NOT" << endl;
   vector<long> vec_ones(nSlots,0);
@@ -246,23 +227,33 @@ void less_simple(Ctxt& ctxt_x, Ctxt& ctxt_y, long p, long ord_p, const Encrypted
   ctxt_x.addConstant(ptxt_ones,1);
   ctxt_y.negate();
   ctxt_y.addConstant(ptxt_ones,1);
-  //print_decrypted(ctxt_x, ord_p, ea, sk);
-  //cout << endl;
-  //print_decrypted(ctxt_y, ord_p, ea, sk);
+
+  if(verbose)
+  {
+    print_decrypted(ctxt_x, ord_p, ea, sk);
+    cout << endl;
+    print_decrypted(ctxt_y, ord_p, ea, sk);
+  }
   //compute shift_and_add that results in a ciphertext containing the partial sums of (1 - mapTo01(y-i)) in different slots
   //DEBUG HERE
   cout << "Rotating and adding y slots" << endl;
   shift_and_add(ctxt_y, p-1, ea);
-  //print_decrypted(ctxt_y, ord_p, ea, sk);
+
+  if(verbose)
+    print_decrypted(ctxt_y, ord_p, ea, sk);
 
   //multiply the result by 1 - mapTo01(x-i)
   cout << "Multiplying" << endl;
   ctxt_x.multiplyBy(ctxt_y);
-  //print_decrypted(ctxt_x, ord_p, ea, sk);
+
+  if(verbose)
+    print_decrypted(ctxt_x, ord_p, ea, sk);
   //rotate_and_add
   cout << "Final summation" << endl;
   shift_and_add(ctxt_x, p-1, ea);
-  //print_decrypted(ctxt_x, ord_p, ea, sk);
+
+  if(verbose)
+    print_decrypted(ctxt_x, ord_p, ea, sk);
   FHE_NTIMER_STOP(ComparisonCircuit);
 }
 
@@ -271,8 +262,22 @@ void less_simple(Ctxt& ctxt_x, Ctxt& ctxt_y, long p, long ord_p, const Encrypted
 // argv[2] - the order of the cyclotomic ring
 // argv[3] - the bitsize of the ciphertext modulus in ciphertexts (HElib increases it to fit the moduli chain). The modulus used for public-key generation
 // argv[4] - the length of vectors to be compared
-// argv[5] - the number of experiment repetitions 
+// argv[5] - the number of experiment repetitions
+// argv[6] - print debug info or not (y/n)
+
+// some parameters for quick testing
+// 7 75 90 1 10 y
+// 17 145 120 1 10 y
 int main(int argc, char *argv[]) {
+  if(argc < 7)
+  {
+   throw invalid_argument("There should be exactly 6 arguments\n");
+  }
+
+  bool verbose = false;
+  if (!strcmp(argv[6], "y"))
+    verbose = true;
+
   // initialize the random generator
   random_device rd;
   mt19937 eng(rd());
@@ -347,6 +352,8 @@ int main(int argc, char *argv[]) {
   long capacity;
   for (int run = 0; run < runs; run++)
   {
+    printf("Run %d started\n", run);
+
     vector<ZZX> expected_result(nslots);
     vector<ZZX> decrypted(nslots);
 
@@ -363,8 +370,12 @@ int main(int argc, char *argv[]) {
       input_coef_x = distr_u(eng) % p;
       input_coef_y = distr_u(eng) % p;
 
-      cout << input_coef_x << endl;
-      cout << input_coef_y << endl;
+      if(verbose)
+      {
+        cout << "Input" << endl;
+        cout << input_coef_x << endl;
+        cout << input_coef_y << endl;
+      }
 
       if (input_coef_x < input_coef_y)
       {
@@ -377,14 +388,19 @@ int main(int argc, char *argv[]) {
 
       vector<long> decomp_char;
       convertToBaset(decomp_char, input_coef_x, p, ord_p);
-      cout << decomp_char << endl;
+      if(verbose)
+      {
+        cout << "Input slots" << endl;
+        cout << decomp_char << endl;
+      }
       for (int j = 0; j < ord_p; j++)
       {
         SetCoeff(pol_slot, j, decomp_char[j]);
       }
       pol_x[i] = pol_slot;
       convertToBaset(decomp_char, input_coef_y, p, ord_p);
-      cout << decomp_char << endl;
+      if(verbose)
+        cout << decomp_char << endl;
       for (int j = 0; j < ord_p; j++)
       {
         SetCoeff(pol_slot, j, decomp_char[j]);
@@ -400,12 +416,9 @@ int main(int argc, char *argv[]) {
     Ctxt ctxt_y(public_key);
     ea.encrypt(ctxt_x, public_key, pol_x);
     ea.encrypt(ctxt_y, public_key, pol_y);
-    
-    //compute the equality
-    printf("Run %d started\n", run);
 
     FHE_NTIMER_START(Comparison);
-    less_simple(ctxt_x, ctxt_y, p, ord_p, ea, secret_key);
+    less_simple(ctxt_x, ctxt_y, p, ord_p, ea, secret_key, verbose);
     printNamedTimer(cout, "ComparisonCircuit");
     FHE_NTIMER_STOP(Comparison);
     printNamedTimer(cout, "Comparison");
@@ -439,6 +452,7 @@ int main(int argc, char *argv[]) {
         return 1;
       }
     }
+    cout << endl;
   }
 
   return 0;
