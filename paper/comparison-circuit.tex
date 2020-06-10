@@ -82,9 +82,9 @@ Unlike the prior works (\todo{cite}) that evaluate this circuit as a multivariat
 \subsection{Lexicographic order}
   Let $\vx=(x_0,x_1,\ldots,x_{\ell-1})$ and $\vy=(y_0,y_1,\ldots,y_{\ell-1}) \in \F_\fieldcard^\ell$ for the lexicographical order $<$ defined by the choice of $\S$:
   \begin{align*}
-    \vx < \vy \Leftrightarrow \exists i\in[0,\ell-1] \text{ such that } x_i < y_i \text{ and } \forall j\geq i ~~ x_j = y_j\,.
+    \vx < \vy \Leftrightarrow \exists i\in[0,\ell-1] \text{ such that } x_i < y_i \text{ and } \forall j > i ~~ x_j = y_j\,.
   \end{align*}
-  This order induces a function $\LT_{\F_\fieldcard}(\vx, \vy)$ that return $1$ if $\vx < \vy$ and $0$ otherwise. 
+  This order induces a function $\LT_{\F_\fieldcard}(\vx, \vy)$ that returns $1$ if $\vx < \vy$ and $0$ otherwise. 
   According to~\cite{TLWRK20}, we can employ $\EQ_{\F_\fieldcard}$ and $\LT_{\F_\fieldcard}$ to compute $\LT_{\F_\fieldcard}(\vx, \vy)$ as follows
   \begin{align*}
     \LT_{\F_\fieldcard}(\vx, \vy) = \sum_{i=0}^{\ell-2} \LT_{\F_\fieldcard}(x_{i}, y_{i}) \prod_{j=i+1}^{\ell-1} \EQ_{\F_\fieldcard}(x_{j}, y_{j}) + \LT_{\F_\fieldcard}(x_{\ell-1}, y_{\ell-1}).

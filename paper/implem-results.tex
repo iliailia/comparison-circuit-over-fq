@@ -1,16 +1,21 @@
 \begin{table}
+  \setlength{\tabcolsep}{1em}
   \centering
-  \begin{tabular}{||c|c|c||ccccc||}
+  \begin{tabular}{||ccc||ccccc||}
     \hline
-    $~m~$ & $~n~$ & $~\delta_\mathcal{R}~$ & $~t~$ & $~d~$ & $~\ell~$ & $~s~$ & $~\log_2(t^d)~$ \\
+    $~m~$ & $~n~$ & $~\delta_\mathcal{R}~$ & $~t~$ & $~d~$ & $~\ell~$ & $~s~$ & $~\varepsilon~$ \\
     \hline
-    $22,383$ & $14,904$ & $7n$ & $5$  & $18$ & $828$  & $1$ &  $41.7$ \\
-    $25,623$ & $15,552$ & $175n$ & $2$ & $36$ & $432$ & $2$ & $36.0$ \\
-    $31,726$ & $15,288$ & $59n$ & $3$ & $28$ & $546$ & $1$ & $44.3$ \\
+    $22,383$ & $14,904$ & $7n$ & $5$  & $18$ & $828$  & $1$ &  $2^{-41.7}$ \\
+    $25,623$ & $15,552$ & $175n$ & $2$ & $36$ & $432$ & $2$ & $2^{-36.0}$ \\
+    $31,132$ & $15,120$ & $87n$ & $7$ & $12$ & $1,260$ & $2$ & $2^{-33.6}$ \\
+    $31,726$ & $15,288$ & $59n$ & $3$ & $28$ & $546$ & $1$ & $2^{-44.3}$ \\
+    $50,112$ & $16,128$ & $7n$ & $17$ & $12$ & $1,344$ & $3$ & $2^{-49.0}$ \\
     \hline
-    $31,697$ & $30,576$ & $59n$ & $3$ & $28$ & $1092$ & $1$ & $44.3$ \\
-    $65,536$ & $32,768$ & $2n$ & $2$ & $32$ & $2,048$ & $1$ & $32.0$ \\
-    $93,006$ & $30,996$ & $7n$ & $5$ & $18$ & $1,722$ & $1$ & $41.7$ \\
+    $31,697$ & $30,576$ & $59n$ & $3$ & $28$ & $1,092$ & $1$ & $2^{-44.3}$ \\
+    $48,771$ & $32,508$ & $7n$ & $2$ & $42$ & $774$ & $1$ & $2^{-42.0}$ \\
+    $57,368$ & $28,000$ & $143n$ & $17$ & $10$ & $2,800$ & $3$ & $2^{-40.8}$ \\
+    $72,400$ & $28,800$ & $11n$ & $7$ & $12$ & $2,400$ & $3$ & $2^{-33.6}$ \\
+    $93,006$ & $30,996$ & $7n$ & $5$ & $18$ & $1,722$ & $1$ & $2^{-41.7}$ \\
     \hline
                                                    
   \end{tabular}
@@ -25,8 +30,8 @@
 \item $t$: plaintext modulus;
 \item $d$: degree of the factors of $\phi_m$ modulo $t$;
 \item $\ell$: numbers of factors of of $\phi_m$ modulo $t$;
-\item $s$: number of generators for $(\Z/m\Z)^*/<t>$;
-\item $\log_2(t^d)$: size of the slots/inverse of the probability of failure for one equality check.
+\item $s$: number of generators for $(\Z/m\Z)^\times/<t>$;
+\item $\varepsilon$: approximative probability of failure for one equality check.
 \end{itemize}
 
 %%% Local Variables:
