@@ -50,12 +50,36 @@ void convertToBaset(vector<long>& decomp, unsigned int input, unsigned int base,
 
 void shift_and_add(Ctxt& x, long range_len, const EncryptedArray& ea)
 {
+  long nSlots = ea.size();
+  long numbers_size = nSlots / range_len;
   long e = 1;
+
+  // create a mask
+  vector<long> mask_vec(nSlots,1);
+  // set zeros in the unused slots
+  long nEndZeros = nSlots - numbers_size * range_len;
+  for (int i = 1; i <= nEndZeros; i++)
+  	mask_vec[nSlots - i] = 0;
+
+  // shift and add
   while (e < range_len){
     Ctxt tmp = x;
-    ea.shift(tmp, -e);
+    // left cyclic rotation
+    ea.rotate(tmp, -e);
+    // masking values rotated outside their batches
+    for (long i = 0; i < numbers_size; i++)
+    {
+      for (long j = (e >> 1);  j < e; j++)
+      {
+        mask_vec[(i + 1) * range_len - j - 1] = 0;
+      }
+    }
+    /////////////
+    ZZX mask_ptxt;
+    ea.encode(mask_ptxt, mask_vec);
+    tmp.multByConstant(mask_ptxt);
     x += tmp;
-    e *=2;
+    e <<=1;
   }
 }
 
@@ -160,10 +184,11 @@ void print_decrypted(Ctxt& ctxt, long ord_p, const EncryptedArray& ea, const Sec
     }
 }
 
-void less_simple(Ctxt& ctxt_x, Ctxt& ctxt_y, long p, long ord_p, const EncryptedArray& ea, const SecKey& sk, bool verbose)
+void basic_less(Ctxt& ctxt_x, Ctxt& ctxt_y, long p, long ord_p, const EncryptedArray& ea, const SecKey& sk, bool verbose)
 {
   FHE_NTIMER_START(ComparisonCircuit);
-  long nSlots = ea.size(); 
+  long nSlots = ea.size();
+  long numbers_size = nSlots / (p - 1); 
   //check that p <= number of slots
   assertInRange(p, 0l, nSlots, "replication failed (the plaintext modulus must be in [0, nSlots))");
 
@@ -181,18 +206,24 @@ void less_simple(Ctxt& ctxt_x, Ctxt& ctxt_y, long p, long ord_p, const Encrypted
   //generate a plaintext with slots {0,...,p-2}
   cout << "Subtraction of field elements" << endl;
   vector<long> vec_field_elements(nSlots,0);
-  for (long i = 0; i < p-1; i++)
+  for (long i = 0; i < numbers_size; i++)
   {
-    vec_field_elements[i] = -i;
+    for (long j = 0; j < p-1; j++)
+    {
+      vec_field_elements[i * (p-1) + j] = -j;
+    }
   }
   NTL::ZZX ptxt_field_elements;
   ea.encode(ptxt_field_elements, vec_field_elements);
   //subtract this plaintext from x
   ctxt_x.addConstant(ptxt_field_elements);
   //generate a plaintext with slots {1,...,p-1}
-  for (long i = 0; i < p-1; i++)
+  for (long i = 0; i < numbers_size; i++)
   {
-    vec_field_elements[i] = -i-1;
+    for (long j = 0; j < p-1; j++)
+    {
+      vec_field_elements[i * (p-1) + j] = -j - 1;
+    }
   }
   ea.encode(ptxt_field_elements, vec_field_elements);
   //subtract this plaintext from y
@@ -218,8 +249,13 @@ void less_simple(Ctxt& ctxt_x, Ctxt& ctxt_y, long p, long ord_p, const Encrypted
   //generate a plaintext with 1 in all the slots
   cout << "Computing NOT" << endl;
   vector<long> vec_ones(nSlots,0);
-  for (int i = 0; i< p-1; i++)
-    vec_ones[i] = 1;
+  for (long i = 0; i < numbers_size; i++)
+  {
+    for (long j = 0; j < p-1; j++)
+    {
+      vec_ones[i * (p-1) + j] = 1;
+    }
+  }
   NTL::ZZX ptxt_ones;
   ea.encode(ptxt_ones, vec_ones);
   //compute 1 - mapTo01(x-i) and 1 - mapTo01(y-i)
@@ -235,7 +271,7 @@ void less_simple(Ctxt& ctxt_x, Ctxt& ctxt_y, long p, long ord_p, const Encrypted
     print_decrypted(ctxt_y, ord_p, ea, sk);
   }
   //compute shift_and_add that results in a ciphertext containing the partial sums of (1 - mapTo01(y-i)) in different slots
-  //DEBUG HERE
+  //CONTINUE REWRITING HERE
   cout << "Rotating and adding y slots" << endl;
   shift_and_add(ctxt_y, p-1, ea);
 
@@ -267,6 +303,7 @@ void less_simple(Ctxt& ctxt_x, Ctxt& ctxt_y, long p, long ord_p, const Encrypted
 
 // some parameters for quick testing
 // 7 75 90 1 10 y
+// 7 300 90 1 10 y
 // 17 145 120 1 10 y
 int main(int argc, char *argv[]) {
   if(argc < 7)
@@ -340,8 +377,9 @@ int main(int argc, char *argv[]) {
 
   //vector length
   long vec_len = atol(argv[4]);
-  //pattern copies in one ciphertext
-  //long pat_copies = nslots/pat_len;
+  //amount of numbers in one ciphertext
+  long field_size = p;
+  long numbers_size = nslots / (field_size - 1);
 
   //timers
   setTimersOn();
@@ -365,10 +403,10 @@ int main(int argc, char *argv[]) {
     unsigned int input_coef_y;
     ZZX pol_slot;
 
-    for (int i = 0; i < vec_len; i++)
+    for (int i = 0; i < numbers_size; i++)
     {
-      input_coef_x = distr_u(eng) % p;
-      input_coef_y = distr_u(eng) % p;
+      input_coef_x = distr_u(eng) % field_size;
+      input_coef_y = distr_u(eng) % field_size;
 
       if(verbose)
       {
@@ -379,15 +417,15 @@ int main(int argc, char *argv[]) {
 
       if (input_coef_x < input_coef_y)
       {
-        expected_result[i] = ZZX(INIT_MONO, 0, 1);
+        expected_result[i * (field_size - 1)] = ZZX(INIT_MONO, 0, 1);
       }
       else
       {
-        expected_result[i] = ZZX(INIT_MONO, 0, 0);
+        expected_result[i * (field_size - 1)] = ZZX(INIT_MONO, 0, 0);
       }
 
       vector<long> decomp_char;
-      convertToBaset(decomp_char, input_coef_x, p, ord_p);
+      convertToBaset(decomp_char, input_coef_x, field_size, ord_p);
       if(verbose)
       {
         cout << "Input slots" << endl;
@@ -397,20 +435,27 @@ int main(int argc, char *argv[]) {
       {
         SetCoeff(pol_slot, j, decomp_char[j]);
       }
-      pol_x[i] = pol_slot;
-      convertToBaset(decomp_char, input_coef_y, p, ord_p);
+      pol_x[i * (field_size - 1)] = pol_slot;
+      convertToBaset(decomp_char, input_coef_y, field_size, ord_p);
       if(verbose)
         cout << decomp_char << endl;
       for (int j = 0; j < ord_p; j++)
       {
         SetCoeff(pol_slot, j, decomp_char[j]);
       }
-      pol_y[i] = pol_slot;
+      pol_y[i * (field_size - 1)] = pol_slot;
     }
 
-    //printZZX(cout, pol_x[0], 1);
-    //printZZX(cout, pol_y[0], 1);
-    cout << endl;
+    if(verbose)
+    {
+      cout << "Input" << endl;
+      for(int i = 0; i < nslots; i++)
+      {
+          printZZX(cout, pol_x[i], 1);
+          printZZX(cout, pol_y[i], 1);
+          cout << endl;
+      }
+    }
 
     Ctxt ctxt_x(public_key);
     Ctxt ctxt_y(public_key);
@@ -418,7 +463,7 @@ int main(int argc, char *argv[]) {
     ea.encrypt(ctxt_y, public_key, pol_y);
 
     FHE_NTIMER_START(Comparison);
-    less_simple(ctxt_x, ctxt_y, p, ord_p, ea, secret_key, verbose);
+    basic_less(ctxt_x, ctxt_y, p, ord_p, ea, secret_key, verbose);
     printNamedTimer(cout, "ComparisonCircuit");
     FHE_NTIMER_STOP(Comparison);
     printNamedTimer(cout, "Comparison");
@@ -441,12 +486,12 @@ int main(int argc, char *argv[]) {
     }
     */
 
-    for(int i = 0; i < vec_len; i++)
+    for(int i = 0; i < numbers_size; i++)
     { 
-      if (decrypted[i] != expected_result[i])
+      if (decrypted[i * (field_size - 1)] != expected_result[i * (field_size - 1)])
       {
-        printf("Slot %d: ", i);
-        printZZX(cout, decrypted[i], ord_p);
+        printf("Slot %ld: ", i * (field_size - 1));
+        printZZX(cout, decrypted[i * (field_size - 1)], ord_p);
         cout << endl;
         cout << "Failure" << endl;
         return 1;
