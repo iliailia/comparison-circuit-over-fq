@@ -16,18 +16,17 @@
 #include <helib/helib.h>
 #include <helib/debugging.h>
 #include <helib/Context.h>
-//#include <NTL/ZZ_pX.h>
 
 using namespace std;
 using namespace NTL;
 using namespace helib;
 
-double intlog(unsigned int base, unsigned int input)
+double intlog(unsigned long base, unsigned long input)
 {
   return floor(log2(input)/log2(base));
 }
 
-void digit_decomp(vector<long>& decomp, unsigned int input, unsigned int base, int nslots)
+void digit_decomp(vector<long>& decomp, unsigned long input, unsigned long base, int nslots)
 {
   decomp.clear();
   decomp.resize(nslots,0);
@@ -37,14 +36,14 @@ void digit_decomp(vector<long>& decomp, unsigned int input, unsigned int base, i
     cout << "Input character is too big to be converted" << endl;
     exit(1);
   }
-  unsigned int rest = input;
-  unsigned int coeff;
+  unsigned long rest = input;
+  unsigned long coeff;
 
   int i = 0;
   while(i < power)
     {
       coeff = rest % base;
-      decomp[i] = static_cast<long>(coeff);
+      decomp[i] = coeff;
       rest = (rest - coeff) / base;
       i++;
     }
@@ -94,6 +93,7 @@ void int_to_slot(ZZX& poly, unsigned long input, unsigned long p, unsigned long 
     digit_decomp(decomp, input, p, d);
     PolyMod poly_mod(ea.getContext().slotRing);
     poly_mod = ZZX(INIT_MONO, 0, 0);
+    //TODO: this loop works correctly only when d = 1
     for (int k = 0; k < d; k++)
     {
         //TODO: wrong assumption that X is the generator of the finite field
@@ -836,9 +836,9 @@ int main(int argc, char *argv[]) {
     ZZ_pX genP = ZZ_pX(INIT_MONO, 0, i);
     for (int j = 0; j < p; j++)
     {
-      genP += ZZ_pX(INIT_MONO, 1, j);
-      ZZ_pX G = conv<ZZ_pX>(getG(ea));
-      PowerMod(genP, genP, p, G);
+      //genP += ZZ_pX(INIT_MONO, 1, j);
+      //ZZ_pX G = conv<ZZ_pX>(getG(ea));
+      //genP = PowerMod(genP, p, G);
     }
   }*/
 
