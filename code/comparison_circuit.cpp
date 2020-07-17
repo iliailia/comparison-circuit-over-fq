@@ -805,8 +805,6 @@ int main(int argc, char *argv[]) {
   //size of a subfield
   unsigned long subfield_size = power_long(p,d);
 
-  return 0;
-
   // Print the security level
   cout << "Q size: " << context.logOfProduct(context.ctxtPrimes)/log(2.0) << endl;
   cout << "Q*P size: " << context.logOfProduct(context.fullPrimes())/log(2.0) << endl;
