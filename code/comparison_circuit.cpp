@@ -829,7 +829,7 @@ int main(int argc, char *argv[]) {
   const EncryptedArray& ea = *(context.ea);
 
   //find the generator of a slot
-  ZZX gen;
+  /*ZZX gen;
 
   for (int i = 0; i < p; i++)
   {
@@ -840,7 +840,7 @@ int main(int argc, char *argv[]) {
       ZZ_pX G = conv<ZZ_pX>(getG(ea));
       PowerMod(genP, genP, p, G);
     }
-  }
+  }*/
 
   // Get the number of slot (phi(m))
   unsigned long nslots = ea.size();
