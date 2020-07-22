@@ -68,6 +68,66 @@ ZZX getG(const EncryptedArray& ea)
   return G;
 }
 
+//TODO: finish this function
+ZZX get_subfield_gen(const EncryptedArray& ea)
+{
+  long p = ea.getPAlgebra().getP();
+  long ord_p = ea.getPAlgebra().getOrdP();
+
+  //find the generator of a slot
+  ZZX gen;
+  ZZ_p modP;
+  modP.init(ZZ(p));
+  modP = 0;
+  ZZ_pX genP(modP);
+
+  //polynomial modulus of a slot
+  ZZ_pXModulus G(conv<ZZ_pX>(getG(ea)));
+  cout << "G: " << G << endl;
+
+  //size of the slot finite field
+  ZZ slot_group_size = power_ZZ(p, ord_p) - ZZ(1);
+  cout << "Slot field size: " << slot_group_size << endl;
+
+  //factorize the order - 1
+  vector<ZZ> factors;
+  factorize(factors, slot_group_size);
+
+  //factor orders
+  vector<ZZ> factor_orders(factors.size(), ZZ(0));
+  for (int i = 0; i < factors.size(); i++)
+  {
+    ZZ tmp = slot_group_size;
+    ZZ factor_order(0);
+    while(true)
+    {
+      if(tmp%factors[i]!=0)
+        break;
+      tmp/=factors[i];
+      factor_order++;
+    }
+    factor_orders[i] = factor_order;
+  }
+  for (int i = 0; i < factor_orders.size(); i++)
+    cout << factors[i] << ' ' << factor_orders[i] << endl;
+  
+  //compute the number of divisors
+  ZZ orders_prod(1);
+  for (int i = 0; i < factor_orders.size(); i++)
+    orders_prod*=(factor_orders[i]+1);
+  cout << "Number of divisors: " << orders_prod << endl;
+
+  //TODO: exponentiate random polynomials to divisors of slot_field_size
+  //generate a random polynomial of a field
+  genP = random_ZZ_pX(ord_p);
+  cout << genP << endl;
+
+  genP = PowerMod(genP, 2, G);
+  cout << genP << endl;
+
+  return gen;
+}
+
 void int_to_slot(ZZX& poly, unsigned long input, unsigned long p, unsigned long d, unsigned long ord_p, const EncryptedArray& ea)
 {
     if (ord_p%d != 0)
@@ -189,6 +249,104 @@ void batch_shift(Ctxt& ctxt, const vector<long>& batch_borders, long shift, long
   ctxt.multByConstant(mask_ptxt);
 }
 
+void batch_shift_for_mul(Ctxt& ctxt, long start, long shift, long range_len, const EncryptedArray& ea)
+{
+  if(shift == 0)
+    return;
+
+  long nSlots = ea.size();
+  long batch_size = nSlots / range_len;
+
+  // left cyclic rotation
+  ea.rotate(ctxt, shift);
+
+  // create a mask
+  vector<long> mask_vec(nSlots,1);
+  // set zeros in the unused slots
+  long nEndZeros = nSlots - batch_size * range_len;
+  for (int i = 1; i <= nEndZeros; i++)
+  {
+    long indx = (start + nSlots - i)%nSlots;
+    mask_vec[indx] = 0;
+  }
+
+  // masking values rotated outside their batches
+  for (long i = 0; i < batch_size; i++)
+  {
+    if (shift < 0)
+    {
+      for (long j = 0;  j < -shift; j++)
+      {
+        long indx = (start + (i + 1) * range_len - j - 1)%nSlots;
+        mask_vec[indx] = 0;
+      }
+    }
+    else if (shift > 0)
+    {
+      for (long j = 0;  j < shift; j++)
+      {
+        long indx = (start + i * range_len + j)%nSlots;
+        mask_vec[indx] = 0;
+      }
+    }
+  }
+  ZZX mask_ptxt;
+  ea.encode(mask_ptxt, mask_vec);
+  ctxt.multByConstant(mask_ptxt);
+
+  //binary inversion of a mask to put ones in zero slots
+  for (size_t i = 0; i < mask_vec.size(); i++)
+    mask_vec[i] = 1 - mask_vec[i];
+
+  ea.encode(mask_ptxt, mask_vec);
+  ctxt.addConstant(mask_ptxt);
+}
+
+void batch_shift_for_mul(Ctxt& ctxt, const vector<long>& batch_borders, long shift, long range_len, const EncryptedArray& ea)
+{
+  if(shift == 0)
+    return;
+
+  long nSlots = ea.size();
+  size_t batch_size = batch_borders.size();
+
+  // left cyclic rotation
+  ea.rotate(ctxt, shift);
+
+  // create a mask
+  vector<long> mask_vec(nSlots,1);
+  ZZX mask_ptxt;
+  // masking values rotated outside their batches
+  for (size_t i = 0; i < batch_size; i++)
+  {
+    if (shift < 0)
+    {
+      for (long j = 0;  j < -shift; j++)
+      {
+        long indx = (nSlots + batch_borders[i] - j - 1)%nSlots;
+        mask_vec[indx] = 0;
+      }
+    }
+    else if (shift > 0)
+    {
+      for (long j = 0;  j < shift; j++)
+      {
+        long indx = (batch_borders[i] + j)%nSlots;
+        mask_vec[indx] = 0;
+      }
+    }
+  }
+  ea.encode(mask_ptxt, mask_vec);
+  ctxt.multByConstant(mask_ptxt);
+
+  //binary inversion of a mask to put ones in zero slots
+  for (size_t i = 0; i < mask_vec.size(); i++)
+    mask_vec[i] = 1 - mask_vec[i];
+
+  ea.encode(mask_ptxt, mask_vec);
+  ctxt.addConstant(mask_ptxt);
+}
+
 // shift_direction is false for the left shift and true for the right shift
 void shift_and_add(Ctxt& x, const vector<long>& batch_borders, long range_len, const EncryptedArray& ea, const long shift_direction = false)
 {
@@ -220,6 +378,41 @@ void shift_and_add(Ctxt& x, long start, long range_len, const EncryptedArray& ea
     Ctxt tmp = x;
     batch_shift(tmp, start, e * shift_sign, range_len, ea);
     x += tmp;
+    e <<=1;
+  }
+}
+
+// shift_direction is false for the left shift and true for the right shift
+void shift_and_mul(Ctxt& x, const vector<long>& batch_borders, long range_len, const EncryptedArray& ea, const long shift_direction = false)
+{
+  long shift_sign = -1;
+  if(shift_direction)
+    shift_sign = 1;
+
+  long e = 1;
+
+  // shift and add
+  while (e < range_len){
+    Ctxt tmp = x;
+    batch_shift_for_mul(tmp, batch_borders, e * shift_sign, range_len, ea);
+    x.multiplyBy(tmp);
+    e <<=1;
+  }
+}
+
+void shift_and_mul(Ctxt& x, long start, long range_len, const EncryptedArray& ea, const long shift_direction = false)
+{
+  long shift_sign = -1;
+  if(shift_direction)
+    shift_sign = 1;
+
+  long e = 1;
+
+  // shift and add
+  while (e < range_len){
+    Ctxt tmp = x;
+    batch_shift_for_mul(tmp, start, e * shift_sign, range_len, ea);
+    x.multiplyBy(tmp);
     e <<=1;
   }
 }
@@ -470,13 +663,13 @@ void basic_less(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y, unsigned
         vec_ones[indx] = 1;
       }
     }
-    NTL::ZZX ptxt_ones;
+    ZZX ptxt_ones;
     ea.encode(ptxt_ones, vec_ones);
     //compute 1 - mapTo01(x-i) and 1 - mapTo01(y-i)
     ctxt_tmp_x.negate();
-    ctxt_tmp_x.addConstant(ptxt_ones,1);
+    ctxt_tmp_x.addConstant(ptxt_ones);
     ctxt_tmp_y.negate();
-    ctxt_tmp_y.addConstant(ptxt_ones,1);
+    ctxt_tmp_y.addConstant(ptxt_ones);
 
     if(verbose)
     {
@@ -527,7 +720,6 @@ void random_equality(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y, lon
   Ctxt ctxt_tmp_y = ctxt_y;
 
   //Remove the least significant digit and shift to the left
-  //TODO: test the lines below
   cout << "Remove the least significant digit" << endl;
   batch_shift(ctxt_tmp_x, 0, -1, expansion_len, ea);
   batch_shift(ctxt_tmp_y, 0, -1, expansion_len, ea);
@@ -582,8 +774,9 @@ void random_equality(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y, lon
     print_decrypted(ctxt_res, ord_p, ea, sk);
     cout << endl;
   }
-  //generate a plaintext with 1 in all the slots
+  
   cout << "Computing NOT" << endl;
+  //generate a plaintext with 1 in all the data slots
   vector<long> vec_ones(nSlots,0);
   for (long i = 0; i < numbers_size; i++)
   {
@@ -597,7 +790,87 @@ void random_equality(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y, lon
 
   //compute 1 - mapTo01(r_i*(x_i - y_i))
   ctxt_res.negate();
-  ctxt_res.addConstant(ptxt_ones,1);
+  ctxt_res.addConstant(ptxt_ones);
+
+  if(verbose)
+  {
+    print_decrypted(ctxt_res, ord_p, ea, sk);
+    cout << endl;
+  }
+
+  FHE_NTIMER_STOP(RandomEqualityCircuit);
+}
+
+//exact equality circuit
+void exact_equality(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y, long expansion_len, unsigned long ord_p, unsigned long d, const EncryptedArray& ea, const SecKey& sk, bool verbose)
+{
+  FHE_NTIMER_START(RandomEqualityCircuit);
+  long nSlots = ea.size();
+  long numbers_size = nSlots / expansion_len; 
+
+  Ctxt ctxt_tmp_x = ctxt_x;
+  Ctxt ctxt_tmp_y = ctxt_y;
+
+  //Remove the least significant digit and shift to the left
+  cout << "Remove the least significant digit" << endl;
+  batch_shift(ctxt_tmp_x, 0, -1, expansion_len, ea);
+  batch_shift(ctxt_tmp_y, 0, -1, expansion_len, ea);
+
+  if(verbose)
+  {
+    print_decrypted(ctxt_tmp_x, ord_p, ea, sk);
+    cout << endl;
+    print_decrypted(ctxt_tmp_y, ord_p, ea, sk);
+    cout << endl;
+  }
+
+  // Subtraction (x_i - y_i)
+  cout << "Subtraction" << endl;
+  ctxt_res = ctxt_tmp_x;
+  ctxt_res -= ctxt_tmp_y;
+
+  if(verbose)
+  {
+    print_decrypted(ctxt_res, ord_p, ea, sk);
+    cout << endl;
+  }
+
+  //compute mapTo01: (x_i - y_i)^{p^d-1}
+  cout << "Mapping to 0 and 1" << endl;
+  mapTo01_subfield(ea, ctxt_res, d);
+
+  if(verbose)
+  {
+    print_decrypted(ctxt_res, ord_p, ea, sk);
+    cout << endl;
+  }
+
+  //compute 1 - (x_i - y_i)^{p^d-1}
+  cout << "Computing NOT" << endl;
+  //generate a plaintext with 1 in all the data slots
+  vector<long> vec_ones(nSlots,0);
+  for (long i = 0; i < numbers_size; i++)
+  {
+    for (long j = 0; j < expansion_len; j++)
+    {
+      vec_ones[i * (expansion_len) + j] = 1;
+    }
+  }
+  ZZX ptxt_ones;
+  ea.encode(ptxt_ones, vec_ones);
+
+  ctxt_res.negate();
+  ctxt_res.addConstant(ptxt_ones);
+
+  if(verbose)
+  {
+    print_decrypted(ctxt_res, ord_p, ea, sk);
+    cout << endl;
+  }
+
+  //compute running products: prod_i 1 - (x_i - y_i)^{p^d-1}
+  cout << "Rotating and multiplying slots" << endl;
+  shift_and_mul(ctxt_res, 0, expansion_len, ea);
 
   if(verbose)
   {
@@ -747,13 +1020,14 @@ bool test_equality(const PubKey& public_key, const EncryptedArray& ea, const Sec
 // argv[5] - the length of vectors to be compared
 // argv[6] - the number of experiment repetitions
 // argv[7] - print debug info (y/n)
+// argv[8] - exact or randomized circuit (e/r)
 
 // some parameters for quick testing
 // 7 75 90 1 10 y
 // 7 300 90 1 10 y
 // 17 145 120 1 10 y
 int main(int argc, char *argv[]) {
-  if(argc < 8)
+  if(argc < 9)
   {
    throw invalid_argument("There should be exactly 7 arguments\n");
   }
@@ -761,6 +1035,12 @@ int main(int argc, char *argv[]) {
   bool verbose = false;
   if (!strcmp(argv[7], "y"))
     verbose = true;
+
+  if(!strcmp(argv[8], "e") && !strcmp(argv[8], "r"))
+  {
+    throw invalid_argument("The last parameter must be 'e' (exact) or 'r' (randomized)\n");
+  }
+  char* circuit_type = argv[8];
 
   // initialize the random generator
   random_device rd;
@@ -827,20 +1107,6 @@ int main(int argc, char *argv[]) {
 
   // Get the EncryptedArray of the context
   const EncryptedArray& ea = *(context.ea);
-
-  //find the generator of a slot
-  /*ZZX gen;
-
-  for (int i = 0; i < p; i++)
-  {
-    ZZ_pX genP = ZZ_pX(INIT_MONO, 0, i);
-    for (int j = 0; j < p; j++)
-    {
-      //genP += ZZ_pX(INIT_MONO, 1, j);
-      //ZZ_pX G = conv<ZZ_pX>(getG(ea));
-      //genP = PowerMod(genP, p, G);
-    }
-  }*/
 
   // Get the number of slot (phi(m))
   unsigned long nslots = ea.size();
@@ -958,7 +1224,10 @@ int main(int argc, char *argv[]) {
 
     FHE_NTIMER_START(Comparison);
     basic_less(ctxt_less, ctxt_x, ctxt_y, p, d, ord_p, ea, secret_key, verbose);
-    random_equality(ctxt_res, ctxt_x, ctxt_y, expansion_len, ord_p, ea, secret_key, verbose);
+    if(strcmp(circuit_type, "r"))
+      random_equality(ctxt_res, ctxt_x, ctxt_y, expansion_len, ord_p, ea, secret_key, verbose);
+    if(strcmp(circuit_type, "e"))
+      exact_equality(ctxt_res, ctxt_x, ctxt_y, expansion_len, ord_p, d, ea, secret_key, verbose);
 
     ctxt_res.multiplyBy(ctxt_less);
     shift_and_add(ctxt_res, 0, expansion_len, ea);
