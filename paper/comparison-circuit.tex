@@ -85,7 +85,7 @@ Unlike the prior works (\todo{cite}) that evaluate this circuit as a multivariat
     \vx < \vy \Leftrightarrow \exists i\in[0,\ell-1] \text{ such that } x_i < y_i \text{ and } \forall j > i ~~ x_j = y_j\,.
   \end{align*}
   This order induces a function $\LT_{\F_\fieldcard}(\vx, \vy)$ that returns $1$ if $\vx < \vy$ and $0$ otherwise. 
-  According to~\cite{TLWRK20}, we can employ $\EQ_{\F_\fieldcard}$ and $\LT_{\F_\fieldcard}$ to compute $\LT_{\F_\fieldcard}(\vx, \vy)$ as follows
+  As done in~\cite{TLWRK20}, we can employ $\EQ_{\F_\fieldcard}$ and $\LT_{\F_\fieldcard}$ to compute $\LT_{\F_\fieldcard}(\vx, \vy)$ as follows
   \begin{align*}
     \LT_{\F_\fieldcard}(\vx, \vy) = \sum_{i=0}^{\ell-2} \LT_{\F_\fieldcard}(x_{i}, y_{i}) \prod_{j=i+1}^{\ell-1} \EQ_{\F_\fieldcard}(x_{j}, y_{j}) + \LT_{\F_\fieldcard}(x_{\ell-1}, y_{\ell-1}).
   \end{align*}

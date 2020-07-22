@@ -1,23 +1,59 @@
 \subsection{Notation}
-	The set of integers $\{\ell,\dots,k\}$ is denoted by $[\ell,k]$.
 
-\subsection{Finite fields}
-	Let $\F_\fieldcard$ be a finite field of characteristic $\fieldchar$.
-	We define the multiplicative map $\princhar_\fieldcard: \F_\fieldcard \rightarrow \{0,1\}, x \mapsto x^{\fieldcard-1} \mod \fieldchar$, which is called the \emph{principal character}.
-	Due to Euler's theorem, $\princhar_\fieldcard(0) = 0$ and $\princhar_\fieldcard(x) = 1$ for any $x \in \F_\fieldcard^\times$.
-	%Since
-	%\begin{align}\label{eq:exp_frob}
-	%	a^{t^d-1} = a^{(t-1)(t^{d-1} + \dots + 1)} = \prod_{i=0}^{d-1} (a^{t-1})^{t^i},
-	%\end{align}
-	%the principal character can be realized by Frobenius maps and multiplications.
-	It is a standard fact in the theory of finite fields that every function from $\F_\fieldcard^\ell$ to $\F_\fieldcard$ can be represented by a unique polynomial, which is defined with the help of the principal character. 
-	\begin{lemma}\label{lem:interpolation}
-		Every function $f: \F_\fieldcard^\ell \rightarrow \F_\fieldcard$ is a polynomial function represented by a unique polynomial $P_f(X_0,\dots,X_{\ell-1})$ of degree at most $\fieldcard-1$ in each variable.
-		In particular,
-		\begin{align*}
-			P_f(X_0,\dots,X_{\ell-1}) = \sum_{a_0,\dots,a_{\ell-1} \in \F_\fieldcard} f(a_0,\dots,a_{\ell-1}) \prod_{i=0}^{\ell-1} \left(1 - \princhar_\fieldcard(X_i - a_i)\right)\,.
-		\end{align*}
-	\end{lemma}
+Vectors will be written in column form and denoted by boldface lower-case letters. The vector containing only $1$'s in its coordinates is denoted by $\1$. We write $\0$ for the zero vector. The set of integers $\{\ell,\dots,k\}$ is denoted by $[\ell,k]$.
+
+For a positive integer $t$, let $\texttt{wt}(t)$ be the Hamming weight of its binary expansion. We denote the set of residue classes modulo $p$ by $\Z_p$ and the class representatives of $\Z_p$ are taken from the half-open interval $[-p/2, p/2)$.
+
+\subsection{Cyclotomic fields and Chinese Remainder Theorem}\label{subsec:crt}
+
+Let $m$ be a positive integer and $n = \varphi(m)$ where $\varphi$ is the Euler's totient function. 
+Let $\mathcal{K} = \Q(\zeta_{m})$ be the cyclotomic number field constructed by adjoining a primitive $m$-th root of unity $\zeta_{m}\in\C$ to the field of rational numbers. 
+The ring of integers of $\mathcal{K}$, denoted by $\intring$, is isomorphic to $\Z[X]/\ideal{\Phi_m(X)}$ where $\Phi_m(X)$ is the $m$-th cyclotomic polynomial. Let $p>1$ be a prime number coprime to $m$, then $\Phi_m(X)$ splits modulo $p$ into $\ell$ irreducible factors of same degree $d$: $\Phi_m(X) = F_1(X)\cdots F_\ell(X) \bmod p$. The degree $d$ is actually the order of $p$ modulo $m$, and $\ell = n/d$. As noticed in \cite{SV14}, the \ac{CRT} states that in this case the following ring isomorphism holds:
+
+\begin{align}\label{eq:crt}
+  \intring_p = \Z_p[X]/(\Phi_m(X)) \cong \Z_p[X]/(F_1(X)) \times \ldots \times \Z_p[X]/(F_{\ell}(X))
+\end{align}
+
+For each $i \in [1,\ell]$ the quotient ring $\Z_p[X]/(F_i(X))$ is isomorphic to the finite field $\F_{p^d}$. Hence, the isomorphism in~(\ref{eq:crt}) can be rewritten as:
+\begin{align*}
+  \intring_p \cong \F_{p^d}^\ell.
+\end{align*}
+We call every copy of $\F_{p^d}$ in the above isomorphism a \emph{slot}. Therefore, every element of $\intring_p$ contains $\ell$ slots, which implies that an array of $\ell$ independent $\F_{p^d}$-elements can be encoded as a unique element of $\intring_p$.
+We enumerate the slots according to the enumeration of the polynomials $F_i(X)$'s. Namely, the slot isomorphic to $\Z_p[X]/(F_i(X))$ is referred to as the \emph{$i$th} slot.
+
+Additions and multiplications of $\intring_p$-elements results in the corresponding coefficient-wise operations of their respective slots. In other words, each ring operation on $\intring_p$ is applied to every slot in parallel, this resembles the Single-Instruction Multiple-Data (SIMD) instructions used in parallel computing.
+
+Using multiplication, we can easily define a projection map $\proj_i$ on $\intring_p$ that sends $a \in \intring_p$ encoding slots $(m_0, \dots, m_{\ell-1})$ to $\pi_i(a)$ encoding $(0, \dots, m_i, \dots, 0)$.
+In particular, $\proj_i(a) = a g_i$, where $g_i \in \intring_t$ encodes $(0 \dots, 1, \dots, 0)$.
+We can generalize this projection for any $I \subseteq \{1,\dots,\ell\}$ to $\proj_I(a) = a g_I$ with $g_I \in \intring_p$ encoding $1$ in the SIMD slots indexed by $I$.\newline
+
+The field $\numfield = \Q(\zeta_{m})$ is a Galois extension and its Galois group $\mathcal{G} = \Gal{(\numfield/\Q)}$ is isomorphic to $\Z_m^\times$  through: $i \mapsto (\sigma_i: X \mapsto X^i)$ where $i \in \Z_m^\times$. The automorphism $\sigma_p$ corresponding to $p$ is called \emph{the Frobenius automorphism} and generates the Galois group $\Gal{(\F_{p^d}/\F_p)}$ of each slot. This means that $\mathcal{F} = <\sigma_p>\subset \mathcal{G}$ partitions the roots of $\Phi_m$  into $\ell$ sets $X_i$ of $d$ elements, each set corresponding to the roots of a factor $F_i$. Therefore the group $\mathcal{H} = \mathcal{G}/\mathcal{F}$ acts transitively on a set of representative $\bar{X}_i$ of each $X_i$ and thus maps a root $\bar{X}_i$ of $F_i$ to a root $\bar{X}_j$ of $F_j$ for $i\neq j$. In other words the elements of $\mathcal{H}$ permute the SIMD slots. However, the order of $\mathcal{H}$ is $n/d = \ell$, which is less than $\ell!$, the number of all possible permutations of the $\ell$ SIMD slots. Nonetheless, it was shown in~\cite{GHS12} that every permutation of SIMD slots can be realized by combination of automorphisms from $\mathcal{H}$, projection maps and additions.
+
+
+\subsection{Functions over finite fields}
+The map defined by $\princhar: x \mapsto x^{p^d-1}$ from $\F_{p^d}$ to the binary set $\{0,1\}$ is called the \emph{principal character}. According to Euler's theorem extended to finite fields, it returns $1$ if $x$ is non-zero and $0$ otherwise. It can thus be used to compute an equality check: $\EQ(x,y) = 1-\chi (x-y)$. Moreover, note that since:
+\begin{align}\label{eq:exp_frob}
+  a^{p^d-1} = a^{(p-1)(p^{d-1} + \dots + 1)} = \prod_{i=0}^{d-1} (a^{p-1})^{p^i},
+\end{align}
+$\chi$ can be computed with Frobenius maps and multiplications. Every function from $\F_{p^d}^l$ to $\F_{p^d}$ can be interpolated by a unique polynomial which can be defined with the help of the principal character. 
+\begin{lemma}\label{lem:interpolation}
+  Every function $f: \F_{p^d}^l \rightarrow \F_{p^d}$ is a polynomial function represented by a unique polynomial $P_f(X_1,\dots,X_{l})$ of degree at most $p^d - 1$ in each variable.
+  In particular,
+  \begin{align*}
+    P_f(X_1,\dots,X_{l}) = \sum_{a_1,\dots,a_l \in \F_{p^d}} f(a_1,\dots,a_l) \prod_{i=1}^{l} \left(1 - \princhar(X_i - a_i)\right)\,.
+  \end{align*}
+\end{lemma}
+
+
+% Let $\F_\fieldcard$ be a finite field of characteristic $\fieldchar$.
+% We define the multiplicative map $\princhar_\fieldcard: \F_\fieldcard \rightarrow \{0,1\}, x \mapsto x^{\fieldcard-1} \mod \fieldchar$, which is called the \emph{principal character}.
+% Due to Euler's theorem, $\princhar_\fieldcard(0) = 0$ and $\princhar_\fieldcard(x) = 1$ for any $x \in \F_\fieldcard^\times$.
+% Since
+% \begin{align}\label{eq:exp_frob}
+% a^{t^d-1} = a^{(t-1)(t^{d-1} + \dots + 1)} = \prod_{i=0}^{d-1} (a^{t-1})^{t^i},
+% \end{align}
+% the principal character can be realized by Frobenius maps and multiplications.
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "main"

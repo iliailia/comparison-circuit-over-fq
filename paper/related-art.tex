@@ -3,9 +3,13 @@
 
 \item \cite{EGNS15}: sorting algorithm for HE. Conclusion: average case in the encrypted domain corresponds to the worst-case in plain domain, better use sorting networks.
 
-\item \cite{NGEG17}: analysis of bit-wise and digit-wise comparison. Conclusion: bit-wise is more efficient because it has depth $\mathcal{O}(\log(l))$ instead of $\mathcal{O}(l)$ for digit-wise comparisons.
+\item \cite{CKK15,CKK16} (conference and journal extended version) bit wise comparison using SIMD. Algorithm to compute running products.
 
-\item \cite{JS19}: bit-wise comparison using SIMD. Conclusion: more efficient than without SIMD.
+\item \cite{KLLW18} equality circuit over non-binary fields. Use the Frobenius automorphism to reduce the depth. 
+  
+\item \cite{NGEG17}: analysis of bit-wise and digit-wise comparison. Conclusion: bit-wise is more efficient because it has depth $\mathcal{O}(\log(l))$ instead of $\mathcal{O}(l)$ for digit-wise comparisons. Does not use the depth-free Frobenius automorphism\dots
+
+\item \cite{JS19}: bit-wise comparison using SIMD. Conclusion: more efficient than without SIMD. Less interesting than \cite{CKK15} and does not even cite it.
  
 \item \cite{LKN19}: modified shell sort. Make shell sort more efficient for HE from $\mathcal{O}(n^2)$ to $\mathcal{O}(n^{3/2}\sqrt{\alpha+\log\log n})$ with failure probability of $2^{-\alpha}$. Complexity worst than for Batcher even-odd merge sort network.
 
