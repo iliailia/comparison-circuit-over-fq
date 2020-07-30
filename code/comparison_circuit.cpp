@@ -251,6 +251,7 @@ void batch_shift(Ctxt& ctxt, const vector<long>& batch_borders, long shift, long
 
 void batch_shift_for_mul(Ctxt& ctxt, long start, long shift, long range_len, const EncryptedArray& ea)
 {
+  FHE_NTIMER_START(BatchShiftForMul);
   if(shift == 0)
     return;
 
@@ -295,15 +296,18 @@ void batch_shift_for_mul(Ctxt& ctxt, long start, long shift, long range_len, con
   ctxt.multByConstant(mask_ptxt);
 
   //binary inversion of a mask to put ones in zero slots
-  for (size_t i = 0; i < mask_vec.size(); i++)
-    mask_vec[i] = 1 - mask_vec[i];
+  //for (size_t i = 0; i < mask_vec.size(); i++)
+  //  mask_vec[i] = 1 - mask_vec[i];
+  mask_ptxt = 1 - mask_ptxt;
 
-  ea.encode(mask_ptxt, mask_vec);
+  //ea.encode(mask_ptxt, mask_vec);
   ctxt.addConstant(mask_ptxt);
+  FHE_NTIMER_STOP(BatchShiftForMul);
 }
 
 void batch_shift_for_mul(Ctxt& ctxt, const vector<long>& batch_borders, long shift, long range_len, const EncryptedArray& ea)
 {
+  FHE_NTIMER_START(BatchShiftForMul);
   if(shift == 0)
     return;
 
@@ -345,6 +349,7 @@ void batch_shift_for_mul(Ctxt& ctxt, const vector<long>& batch_borders, long shi
 
   ea.encode(mask_ptxt, mask_vec);
   ctxt.addConstant(mask_ptxt);
+  FHE_NTIMER_STOP(BatchShiftForMul);
 }
 
 // shift_direction is false for the left shift and true for the right shift
@@ -402,6 +407,7 @@ void shift_and_mul(Ctxt& x, const vector<long>& batch_borders, long range_len, c
 
 void shift_and_mul(Ctxt& x, long start, long range_len, const EncryptedArray& ea, const long shift_direction = false)
 {
+  FHE_NTIMER_START(ShiftMul);
   long shift_sign = -1;
   if(shift_direction)
     shift_sign = 1;
@@ -415,6 +421,7 @@ void shift_and_mul(Ctxt& x, long start, long range_len, const EncryptedArray& ea
     x.multiplyBy(tmp);
     e <<=1;
   }
+  FHE_NTIMER_STOP(ShiftMul);
 }
 
 void rotate_and_add(Ctxt& x, long range_len, const EncryptedArray& ea)
@@ -518,6 +525,97 @@ void print_decrypted(Ctxt& ctxt, long ord_p, const EncryptedArray& ea, const Sec
     }
 }
 
+void basic_less(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y, const EncryptedArray& ea, const SecKey& sk, bool verbose)
+{
+  FHE_NTIMER_START(ComparisonCircuit);
+
+  long p = ea.getPAlgebra().getP();
+  long ord_p = ea.getPAlgebra().getOrdP();
+
+  // Subtraction z = x - y
+  cout << "Subtraction" << endl;
+  Ctxt ctxt_z = ctxt_x;
+  ctxt_z -= ctxt_y;
+
+  if(verbose)
+  {
+    print_decrypted(ctxt_z, ord_p, ea, sk);
+    cout << endl;
+  }
+
+  // z^2
+  cout << "Squaring" << endl;
+  Ctxt ctxt_z2 = ctxt_z;
+  ctxt_z2.square();
+
+  if(verbose)
+  {
+    print_decrypted(ctxt_z2, ord_p, ea, sk);
+    cout << endl;
+  }
+
+  // sum of odd monomials of f(z) = 'z < 0'
+  // z
+  Ctxt ctxt_zi = ctxt_z;
+  ZZ_p coef;
+  coef.init(ZZ(p));
+  ZZ_p field_elem;
+  field_elem.init(ZZ(p));
+  for (long indx = 1; indx < p - 1; indx+=2)
+  { 
+    // coefficient f_i
+    coef = 1;
+    for(long a = 2; a <= ((p-1) >> 1); a++)
+    {
+      field_elem = a;
+      coef += power(field_elem, p - 1 - indx);
+    }
+
+    if(verbose)
+    {
+      cout << "Coef " << indx << ": " << coef << endl;
+    }
+
+    // f_i * z^i
+    if (indx == 1)
+    {
+      // f_1 * z
+      ctxt_res = ctxt_z;
+      ctxt_res.multByConstant(rep(coef));
+    }
+    else
+    {
+      Ctxt tmp = ctxt_zi;
+      tmp.multByConstant(rep(coef));
+      // res + f_i * z^i
+      ctxt_res += tmp;
+    }
+
+    // z^i * z^2
+    if (indx != p - 2)
+      ctxt_zi.multiplyBy(ctxt_z2);
+  }
+
+  coef = ((p+1) >> 1);
+  if(verbose)
+    {
+      cout << "Coef " << p - 1 << ": " << coef << endl;
+    }
+  cout << "Comparison polynomial" << endl;
+  ctxt_zi.multiplyBy(ctxt_z);
+  ctxt_zi.multByConstant(rep(coef));
+  ctxt_res += ctxt_zi;
+
+  if(verbose)
+  {
+    print_decrypted(ctxt_res, ord_p, ea, sk);
+    cout << endl;
+  } 
+
+  FHE_NTIMER_STOP(ComparisonCircuit);
+}
+
+/*
 void basic_less(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y, unsigned long p, unsigned long d, unsigned long ord_p, const EncryptedArray& ea, const SecKey& sk, bool verbose)
 {
   FHE_NTIMER_START(ComparisonCircuit);
@@ -708,6 +806,7 @@ void basic_less(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y, unsigned
       print_decrypted(ctxt_res, ord_p, ea, sk);
   FHE_NTIMER_STOP(ComparisonCircuit);
 }
+*/
 
 //randomized equality circuit
 void random_equality(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y, long expansion_len, unsigned long ord_p, const EncryptedArray& ea, const SecKey& sk, bool verbose)
@@ -1121,12 +1220,17 @@ int main(int argc, char *argv[]) {
   unsigned long numbers_size = nslots / expansion_len;
   unsigned long occupied_slots = numbers_size * expansion_len;
 
+  //encoding base, (p+1)/2
+  unsigned long enc_base = (p + 1) >> 1;
+
   //check that field_size^expansion_len fits into 64-bits
-  int space_bit_size = static_cast<int>(ceil(expansion_len * log2(field_size)));
+  //int space_bit_size = static_cast<int>(ceil(expansion_len * log2(field_size)));
+  int space_bit_size = static_cast<int>(ceil(expansion_len * log2(enc_base)));
   unsigned long input_range = LONG_MAX;
   if(space_bit_size < 64)
   {
-    input_range = power_long(field_size, expansion_len);
+    //input_range = power_long(field_size, expansion_len);
+    input_range = power_long(enc_base, expansion_len);
   }
   cout << "Maximal input: " << input_range << endl; 
 
@@ -1185,8 +1289,8 @@ int main(int argc, char *argv[]) {
       vector<long> decomp_char;
 
       //decomposition of input integers
-      digit_decomp(decomp_int_x, input_x, field_size, expansion_len);
-      digit_decomp(decomp_int_y, input_y, field_size, expansion_len);
+      digit_decomp(decomp_int_x, input_x, enc_base, expansion_len);
+      digit_decomp(decomp_int_y, input_y, enc_base, expansion_len);
 
       //encoding of slots
       for (int j = 0; j < expansion_len; j++)
@@ -1223,10 +1327,11 @@ int main(int argc, char *argv[]) {
     Ctxt ctxt_res(public_key);
 
     FHE_NTIMER_START(Comparison);
-    basic_less(ctxt_less, ctxt_x, ctxt_y, p, d, ord_p, ea, secret_key, verbose);
-    if(strcmp(circuit_type, "r"))
+    basic_less(ctxt_less, ctxt_x, ctxt_y, ea, secret_key, verbose);
+    //basic_less(ctxt_less, ctxt_x, ctxt_y, p, d, ord_p, ea, secret_key, verbose);
+    if(!strcmp(circuit_type, "r"))
       random_equality(ctxt_res, ctxt_x, ctxt_y, expansion_len, ord_p, ea, secret_key, verbose);
-    if(strcmp(circuit_type, "e"))
+    if(!strcmp(circuit_type, "e"))
       exact_equality(ctxt_res, ctxt_x, ctxt_y, expansion_len, ord_p, d, ea, secret_key, verbose);
 
     ctxt_res.multiplyBy(ctxt_less);
@@ -1248,6 +1353,8 @@ int main(int argc, char *argv[]) {
     }
     FHE_NTIMER_STOP(Comparison);
     printNamedTimer(cout, "ComparisonCircuit");
+    printNamedTimer(cout, "RandomEqualityCircuit");
+    printNamedTimer(cout, "ShiftMul");
     printNamedTimer(cout, "Comparison");
 
     // remove the line below if it gives bizarre results 
@@ -1273,6 +1380,7 @@ int main(int argc, char *argv[]) {
     }
     cout << endl;
   }
+ //printAllTimers(cout);
 
   return 0;
 }
