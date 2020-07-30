@@ -173,11 +173,11 @@
 \newcommand{\duallat}[1]{{#1^*}}
 
 %number theory
-\newcommand{\numfield}{K} %the number field 
+\newcommand{\numfield}{\mathcal{K}} %the number field 
 \newcommand{\numfieldDim}{n} %the dimension of the number field over the field of rational numbers
 \newcommand{\defpoly}{f} %the definining polynomial of the number field
-\newcommand{\intring}{R} %the ring of integers of a number field
-\newcommand{\expfactor}{\delta} %expansion factor 
+\newcommand{\intring}{\mathcal{R}} %the ring of integers of a number field
+\newcommand{\expfactor}{\delta_{\mathcal{R}}} %expansion factor 
 \newcommand{\dual}[1]{\ensuremath{#1^\vee}} %the dual of an ideal
 \newcommand{\codif}{\dual{\intring}}
 \newcommand{\canemb}{\sigma} %canonical embedding
@@ -241,6 +241,13 @@
 %\newcommand{\HEAAN}{\mathtt{HEAAN}}
 %\newcommand{\TFHE}{\mathtt{TFHE}}
 
+%FHE/SHE names
+\newcommand{\BGV}{\mathtt{BGV}}
+\newcommand{\HEAAN}{\mathtt{HEAAN}}
+\newcommand{\FV}{\mathtt{FV}}
+\newcommand{\BCIV}{\mathtt{BCIV}}
+\newcommand{\TFHE}{\mathtt{TFHE}}
+
 %FV parameters
 \newcommand{\FVringDim}{n}
 \newcommand{\FVctxtMod}{\LWEmod}
@@ -250,6 +257,7 @@
 \newcommand{\FVrlkNum}{\ell}
 \newcommand{\FVctxtSpace}{\RLWEbasicRing_\FVctxtMod^2}
 \newcommand{\FVptxtSpace}{\RLWEbasicRing_\FVptxtMod}
+\newcommand{\slots}{\ell}
 
 %BGV parameters
 \newcommand{\BGVptxtMod}{t}
@@ -268,6 +276,9 @@
 \newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
 \newcommand{\canorm}[1]{\left\lVert #1 \right\rVert^{\textup{can}}}
 \newcommand{\infnorm}[1]{\left\lvert#1\right\rvert_\infty}
+
+% various functions
+\newcommand{\wt}{\texttt{wt}}
 
 %modular operation
 \newcommand{\modq}[1]{\left[ #1 \right]_\RLWEmod} %modulo (R)LWE modulus in the symmetric interval
@@ -350,6 +361,8 @@
 \acrodef{APU}{Accelerated Processing Unit}
 \acrodef{FPGA}{Field-Programmable Gate Array}
 
+
+
 \newcommand\blankfootnote[1]{%
   \begingroup
   \renewcommand\thefootnote{}\footnote{#1}%
@@ -359,3 +372,8 @@
 \newcommand*{\skipnumber}[2][1]{%
 {\renewcommand*{\alglinenumber}[1]{}\State #2}%
 \addtocounter{ALG@line}{-#1}}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:

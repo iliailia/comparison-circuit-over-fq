@@ -3,21 +3,21 @@ Here are potential cyclotomic polynomials to use for a failure probability small
 \begin{table}
   \setlength{\tabcolsep}{1em}
   \centering
-  \begin{tabular}{||ccc||ccc|cc|c||}
+  \begin{tabular}{||ccc||cccccc||}
     \hline
-    $~m~$ & $~n~$ & $~\delta_\mathcal{R}~$ & $~t~$ & $~d~$ & depth & $~\ell~$ & $~s~$ & $~\varepsilon~$ \\
+    $~m~$ & $~n~$ & $~\delta_\mathcal{R}~$ & $~p~$ & $~d~$ & depth & $~\ell~$ & $~s~$ & $~\varepsilon~$ \\
     \hline
-    $22,383$ & $14,904$ & $7n$ & $5$  & $18$ & $8$ & $828$  & $1$ &  $2^{-41.7}$ \\
-    $25,623$ & $15,552$ & $175n$ & $2$ & $36$ & $7$ & $432$ & $2$ & $2^{-36.0}$ \\
-    $31,132$ & $15,120$ & $87n$ & $7$ & $12$ & $8$ & $1,260$ & $2$ & $2^{-33.6}$ \\
-    $31,726$ & $15,288$ & $59n$ & $3$ & $28$ & $7$ & $546$ & $1$ & $2^{-44.3}$ \\
-    $35,552$ & $16,000$ & $23n$ & $17$ & $10$ & $9$ & $1,600$ & $3$ & $2^{-40.8}$ \\
+    $22,383$ & $14,904$ & $5n$ & $5$  & $18$ & $8$ & $828$  & $1$ &  $2^{-41.7}$ \\
+    $25,623$ & $15,552$ & $118n$ & $2$ & $36$ & $7$ & $432$ & $2$ & $2^{-36.0}$ \\
+    $31,132$ & $15,120$ & $85n$ & $7$ & $12$ & $8$ & $1,260$ & $2$ & $2^{-33.6}$ \\
+    $31,726$ & $15,288$ & $57n$ & $3$ & $28$ & $7$ & $546$ & $1$ & $2^{-44.3}$ \\
+    $35,552$ & $16,000$ & $21n$ & $17$ & $10$ & $9$ & $1,600$ & $3$ & $2^{-40.8}$ \\
     \hline
-    $31,697$ & $30,576$ & $59n$ & $3$ & $28$ & $7$ & $1,092$ & $1$ & $2^{-44.3}$ \\
-    $48,771$ & $32,508$ & $7n$ & $2$ & $42$ & $7$ & $774$ & $1$ & $2^{-42.0}$ \\
-    $57,368$ & $28,000$ & $143n$ & $17$ & $10$ & $9$ & $2,800$ & $3$ & $2^{-40.8}$ \\
-    $72,400$ & $28,800$ & $11n$ & $7$ & $12$ & $8$ & $2,400$ & $3$ & $2^{-33.6}$ \\
-    $93,006$ & $30,996$ & $7n$ & $5$ & $18$ & $8$ & $1,722$ & $1$ & $2^{-41.7}$ \\
+    $31,697$ & $30,576$ & $57n$ & $3$ & $28$ & $7$ & $1,092$ & $1$ & $2^{-44.3}$ \\
+    $48,771$ & $32,508$ & $5n$ & $2$ & $42$ & $7$ & $774$ & $1$ & $2^{-42.0}$ \\
+    $57,368$ & $28,000$ & $141n$ & $17$ & $10$ & $9$ & $2,800$ & $3$ & $2^{-40.8}$ \\
+    $72,400$ & $28,800$ & $9n$ & $7$ & $12$ & $8$ & $2,400$ & $3$ & $2^{-33.6}$ \\
+    $93,006$ & $30,996$ & $5n$ & $5$ & $18$ & $8$ & $1,722$ & $1$ & $2^{-41.7}$ \\
     \hline
                                                    
   \end{tabular}
@@ -29,11 +29,11 @@ Here are potential cyclotomic polynomials to use for a failure probability small
 \item $m$: cyclotomic order;
 \item $n$: degree of the cyclotomic;
 \item $\delta_\mathcal{R}$: expansion factor (upper-bound);
-\item $t$: plaintext modulus;
-\item $d$: degree of the factors of $\phi_m$ modulo $t$;
-\item depth: $\lceil \log_2(t-1) \rceil + \lceil \log_2(d)\rceil + 1$;
-\item $\ell$: number of factors of of $\phi_m$ modulo $t$;
-\item $s$: number of generators for $(\Z/m\Z)^\times/<t>$;
+\item $p$: plaintext modulus;
+\item $d$: degree of the factors of $\phi_m$ modulo $p$;
+\item depth: $\lceil \log_2(p-1) \rceil + \lceil \log_2(d)\rceil + 1$;
+\item $\ell$: number of factors of of $\phi_m$ modulo $p$;
+\item $s$: number of generators for $(\Z/m\Z)^\times/<p>$;
 \item $\varepsilon$: approximative probability of failure for one equality check.
 \end{itemize}
 

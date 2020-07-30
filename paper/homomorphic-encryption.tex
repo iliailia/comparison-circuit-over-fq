@@ -1,0 +1,127 @@
+We are interested in leveled HE schemes that support SIMD operations on their plaintexts.
+Such schemes include $\FV$~\cite{FV12} and $\BGV$~\cite{BGV12}, whose plaintext space is the ring $\intring_p$ for some $p \geq 2$.
+We refer to such schemes as \emph{SIMD-schemes}.
+The general framework of such schemes is outlined below.
+
+\subsection{Basic setup}
+
+Let $\lambda$ be the security level of an HE scheme.
+Let $L$ be the maximal multiplicative depth of homomorphic circuits we want to evaluate.
+Let $d$ be the order of the plaintext modulus $p$ modulo the order $m$ of $\intring$.
+Assume that the plaintext space $\intring_p$ has $\slots$ SIMD slots, i.e. $\intring_p \cong \F^\ell_{p^d}$.
+% For a vector $\va \in \F^k_{p^d}$, we denote the plaintext encoding of $\va$ by $\pt(\va)$. 
+The basic part of a SIMD-scheme consists of key generation, encryption and decryption algorithms.
+
+$\KeyGen(1^\lambda, 1^L) \rightarrow (\sk, \pk)$. Given $\lambda$ and $L$, this function generates the secret key $\sk$ and the public key $\pk$.
+Note that the public key contains special key-switching keys that help to transform ciphertexts encrypted under other secret keys back to ciphertexts encrypted under $\sk$. 
+
+$\Encrypt(\pt \in \intring_t, \pk) \rightarrow \ct$. The encryption algorithm takes a plaintext $\pt$ and the public key $\pk$ and outputs a ciphertext $\ct$.
+
+$\Decrypt(\ct, \sk) \rightarrow \pt$. The decryption algorithm takes a ciphertext $\ct$ and the secret key $\sk$ and returns a plaintext $\pt$.
+For freshly encrypted ciphertexts, the decryption correctness means that $\Decrypt(\Encrypt(\pt, \pk), \sk) = \pt$. 
+
+\subsection{Arithmetic operations}
+
+Homomorphic arithmetic operations are addition and multiplication.
+
+$\Add(\ct_1, \ct_2) \rightarrow \ct$. The addition algorithm takes two input ciphertexts $\ct_1$ and $\ct_2$ encrypting plaintexts $\pt_1$ and $\pt_2$ respectively.
+It outputs a ciphertext $\ct$ that encrypts the sum of these plaintexts in the ring $\intring_p$.
+%It implies that homomorphic addition sums respective SIMD slots of $\pt_1$ and $\pt_2$.
+
+$\AddPlain(\ct_1, \pt_2) \rightarrow \ct$. This algorithm takes a ciphertext $\ct_1$ encrypting a plaintext $\pt_1$ and a plaintext $\pt_2$.
+It outputs a ciphertext $\ct$ that encrypts $\pt_1 + \pt_2$.
+%As for the $\Add$ algorithm, $\AddPlain$ sums respective SIMD slots of $\pt_1$ and $\pt_2$.
+
+$\Mul(\ct_1, \ct_2) \rightarrow \ct$. Given two input ciphertext $\ct_1$ and $\ct_2$ encrypting plaintext $\pt_1$ and $\pt_2$ respectively, the multiplication algorithm outputs a ciphertext $\ct$ that encrypts the plaintext product $\pt_1 \cdot \pt_2$.
+%As a result, homomorphic multiplication multiplies respective SIMD slots of $\pt_1$ and $\pt_2$.
+
+$\MulPlain(\ct_1, \pt_2) \rightarrow \ct$. Given a ciphertext $\ct_1$ encrypting plaintext $\pt_1$ and a plaintext $\pt_2$, this algorithm outputs a ciphertext $\ct$ that encrypts the plaintext product $\pt_1 \cdot \pt_2$.
+%As a result, homomorphic multiplication multiplies respective SIMD slots of $\pt_1$ and $\pt_2$.
+
+Using the above operations as building blocks, one can design homomorphic subtraction algorithms.
+
+$\Sub(\ct_1, \ct_2) = \Add(\ct_1, \MulPlain(\ct_2, \pt(-\1))) \rightarrow \ct$. The subtraction algorithm returns a ciphertext $\ct$ that encrypts the difference of two plaintext messages $\pt_1 - \pt_2$ encrypted by $\ct_1$ and $\ct_2$, respectively.
+
+$\SubPlain(\ct_1, \pt_2) = \AddPlain(\ct_1, \pt_2 \cdot \pt(-\1)) \rightarrow \ct$. This algorithm returns a ciphertext $\ct$ that encrypts $\pt_1 - \pt_2$ where $\pt_1$ is encrypted by $\ct_1$.
+We can also change the order of arguments such that $\SubPlain(\pt_1, \ct_2)$ returns a ciphertext $\ct$ encrypting $\pt_1 - \pt_2$. 
+
+As shown in Section~\ref{subsec:crt}, the projection map $\proj_I$ can select the SIMD slots indexed by a set $I \subseteq \{0,\dots,\slots-1\}$ and set the rest to zero.
+This functionality is homomorphically realized by the $\Select$ function.
+
+$\Select(\ct, I) = \MulPlain(\ct, \pt(\1_I)) \rightarrow \ct'$ where $\1_I$ is a vector having $1$'s in the coordinates indexed by a set $I$ and zeros everywhere else.
+Given a ciphertext $\ct$ encrypting SIMD slots $\vm = (m_0,m_1,\dots,m_{\slots-1})$ and a set $I$, this function returns a ciphertext $\ct'$ that encrypts $\vm' = (m'_0,\dots,m'_{\slots-1})$ such that $m'_i = m_i$ if $i \in I$ and $m'_i = 0$ otherwise.
+
+\subsection{Special operations}\label{subsec:special_operations}
+
+One can also homomorphically permute the SIMD slots of a given ciphertext and act on them with the Frobenius automorphism. 
+
+$\Rotate(\ct, i) \rightarrow \ct'$ with $i \in [0, \slots-1]$. Given a ciphertext $\ct$ encrypting SIMD slots 
+$$\vm = (m_0,m_1,\dots,m_{\slots-1}),$$
+the rotation algorithm returns a ciphertext $\ct'$ that encrypts the cyclic shift of $\vm$ by $i$ positions, namely $(m_i,m_{(i+1) \mod \slots},\dots,m_{(i-1) \mod \slots})$.
+
+$\Frob(\ct, i) \rightarrow \ct'$ with $i\in[0,d-1]$. Given a ciphertext $\ct$ encrypting SIMD slots $\vm$ as above, the Frobenius algorithm returns a ciphertext $\ct'$ that encrypts a Frobenius map action on $\vm$, namely $(m^{p^i}_0,m^{p^i}_1,\dots,m^{p^i}_{\slots-1})$.
+
+As discussed in Section~\ref{subsec:crt}, the $\Frob$ and $\Mul$ operations can be combined to compute the principal character $\princhar$, which turns non-zero values of SIMD slots into $1$ and leaves slots with zeros unchanged.
+
+$\IsNonZero(\ct) \rightarrow \ct'$. Given a ciphertext $\ct$ encrypting SIMD slots $\vm = (m_0,m_1,\dots,m_{\slots-1})$, this function returns a ciphertext $\ct'$ that encrypts:
+\[
+  (\princhar(m_0), \princhar(m_1), \dots, \princhar(m_{\slots-1})).
+\]
+% Kim et al.~\cite{TDSC:KLLW16} showed that one can employ the Frobenius map to decrease the multiplicative depth of $\IsNonZero$.
+Recall that $\princhar(m) = m^{p^d-1} = \prod_{i=0}^{d-1} (m^{p-1})^{p^i}$ as shown in~(\ref{eq:exp_frob}).
+The multiplicative depth of $x^{p-1}$ is equal to $\ceil{\log_2 (p-1)}$.
+The multiplicative depth of $x^{p^i}$ is zero as it can be done by the $\Frob$ operation.
+In total, $d-1$ $\Frob$ operations are needed to compute $\princhar(m)$.
+As a result, the total multiplicative depth of $\IsNonZero$ is
+\begin{align}\label{eq:nonzero_depth}
+  \ceil{\log_2 (p-1)} + \ceil{\log_2 d}.
+\end{align}
+Using general exponentiation by squaring, $x^{p-1}$ requires $\floor{\log_2 (p-1)} + \wt(p-1) - 1$ field multiplications.
+Since $d-1$ field multiplications are needed to compute $\prod_{i=0}^{d-1} (x^{p-1})^{p^i}$, the total number of multiplications to compute $\princhar(m)$ is:
+\begin{align}\label{eq:nonzero_width}
+  \floor{\log_2 (p-1)} + \wt(p-1) + d - 2.
+\end{align} 
+
+\subsection{Cost of homomorphic operations}\label{subsec:cost}
+Note that every homomorphic ciphertext contains a special component called \emph{noise} that is removed during decryption.
+However, the decryption function can deal only with noise of small enough magnitude; otherwise, this function fails.
+This noise bound is defined by encryption parameters in a way that larger parameters result in a larger bound.
+The ciphertext noise increases after every homomorphic operation and, therefore, approaches its maximal possible bound.
+It implies that to reduce encryption parameters one needs to avoid homomorphic operations that significantly increase the noise.
+Therefore, while designing homomorphic circuits, we need to take into account not only the running time of homomorphic operations but also their effect on the noise.  
+
+Table~\ref{table:he_operations} summarizes the running time and the noise cost of the aforementioned homomorphic operations.
+Similar to~\cite{C:HalSho14}, we divide the operations into expensive, moderate and cheap.
+The expensive operations dominate the cost of a homomorphic circuit.
+The moderate operations are less important, but if there are many of them in a circuit, their total cost can dominate the total cost.
+The cheap operations are the least important and can be omitted in the cost analysis.
+
+It is worth to note that there are two multiplication functions $\Mul$ (ciphertext-ciphertext multiplication) and $\MulPlain$ (ciphertext-plaintext multiplication).
+Since $\Mul$ is much more expensive than $\MulPlain$, the multiplicative depth of a homomorphic circuit is usually calculated with relation to the number of $\Mul$'s.
+
+\begin{table}[t!]
+  \centering
+  \begin{tabular*}{.5\textwidth}{@{\extracolsep{\fill} } c c c }
+    \toprule
+    Operation	& Time			& Noise \\
+    \cmidrule(lr){1-1}\cmidrule(lr){2-3}
+    $\Add$		& cheap			& cheap 	\\
+    $\AddPlain$	& cheap			& cheap \\
+    $\Mul$		& expensive		& expensive 	\\
+    $\MulPlain$	& cheap			& moderate 	\\
+    $\Sub$		& cheap			& cheap  \\
+    $\SubPlain$	& cheap			& cheap  \\
+    $\Select$	& cheap			& moderate \\
+    $\Rotate$ 	 & expensive	& moderate \\
+    $\Frob$		 & expensive	& cheap \\
+    $\IsNonZero$ & expensive    & expensive \\
+    \bottomrule
+  \end{tabular*}
+  \caption{The cost of homomorphic operations with relation to running time and noise growth.}
+  \label{table:he_operations}
+\end{table}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
