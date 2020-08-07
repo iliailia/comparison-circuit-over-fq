@@ -16,38 +16,13 @@
 #include <helib/helib.h>
 #include <helib/debugging.h>
 #include <helib/Context.h>
+#include <helib/polyEval.h>
+#include "tools.h"
+#include "comparator.h"
 
 using namespace std;
 using namespace NTL;
 using namespace helib;
-
-double intlog(unsigned long base, unsigned long input)
-{
-  return floor(log2(input)/log2(base));
-}
-
-void digit_decomp(vector<long>& decomp, unsigned long input, unsigned long base, int nslots)
-{
-  decomp.clear();
-  decomp.resize(nslots,0);
-  int power = static_cast<int>(intlog(base, input)) + 1;
-  if (power > nslots)
-  {
-    cout << "Input character is too big to be converted" << endl;
-    exit(1);
-  }
-  unsigned long rest = input;
-  unsigned long coeff;
-
-  int i = 0;
-  while(i < power)
-    {
-      coeff = rest % base;
-      decomp[i] = coeff;
-      rest = (rest - coeff) / base;
-      i++;
-    }
-}
 
 ZZX getG(const EncryptedArray& ea)
 {
@@ -128,89 +103,7 @@ ZZX get_subfield_gen(const EncryptedArray& ea)
   return gen;
 }
 
-void int_to_slot(ZZX& poly, unsigned long input, unsigned long p, unsigned long d, unsigned long ord_p, const EncryptedArray& ea)
-{
-    if (ord_p%d != 0)
-    {
-      cout << "Extension degree must divide the order" << endl;
-      exit(1);
-    }
-    unsigned long p_d = power_long(p, d);
-    unsigned long field_index = ord_p / d;
-    unsigned long gen_exp = 1;
-    for (unsigned long i = 1; i < field_index; i++)
-    {
-      gen_exp += power_long(p_d, i);
-    }
-    //cout << "Exponent of X: " << gen_exp << endl;
-    //ZZX G = getG(ea);
-    //printZZX(cout, G, ord_p+1);
-    //cout << endl;
-
-    vector<long> decomp;
-
-    //decomposition of a digit
-    digit_decomp(decomp, input, p, d);
-    PolyMod poly_mod(ea.getContext().slotRing);
-    poly_mod = ZZX(INIT_MONO, 0, 0);
-    //TODO: this loop works correctly only when d = 1
-    for (int k = 0; k < d; k++)
-    {
-        //TODO: wrong assumption that X is the generator of the finite field
-        poly_mod+=ZZX(INIT_MONO, k * gen_exp, decomp[k]);
-        //SetCoeff(poly, k * field_index, decomp[k]);
-    }
-    poly = poly_mod.getData();
-    //ZZX def_poly = getG(ea);
-    //NTL:rem(poly, poly, def_poly);
-}
-
-void batch_shift(Ctxt& ctxt, long start, long shift, long range_len, const EncryptedArray& ea)
-{
-  if(shift == 0)
-    return;
-
-  long nSlots = ea.size();
-  long batch_size = nSlots / range_len;
-
-  // left cyclic rotation
-  ea.rotate(ctxt, shift);
-
-  // create a mask
-  vector<long> mask_vec(nSlots,1);
-  // set zeros in the unused slots
-  long nEndZeros = nSlots - batch_size * range_len;
-  for (int i = 1; i <= nEndZeros; i++)
-  {
-    long indx = (start + nSlots - i)%nSlots;
-    mask_vec[indx] = 0;
-  }
-
-  // masking values rotated outside their batches
-  for (long i = 0; i < batch_size; i++)
-  {
-    if (shift < 0)
-    {
-      for (long j = 0;  j < -shift; j++)
-      {
-        long indx = (start + (i + 1) * range_len - j - 1)%nSlots;
-        mask_vec[indx] = 0;
-      }
-    }
-    else if (shift > 0)
-    {
-      for (long j = 0;  j < shift; j++)
-      {
-        long indx = (start + i * range_len + j)%nSlots;
-        mask_vec[indx] = 0;
-      }
-    }
-  }
-  ZZX mask_ptxt;
-  ea.encode(mask_ptxt, mask_vec);
-  ctxt.multByConstant(mask_ptxt);
-}
-
+/*
 void batch_shift(Ctxt& ctxt, const vector<long>& batch_borders, long shift, long range_len, const EncryptedArray& ea)
 {
   if(shift == 0)
@@ -247,62 +140,6 @@ void batch_shift(Ctxt& ctxt, const vector<long>& batch_borders, long shift, long
   ZZX mask_ptxt;
   ea.encode(mask_ptxt, mask_vec);
   ctxt.multByConstant(mask_ptxt);
-}
-
-void batch_shift_for_mul(Ctxt& ctxt, long start, long shift, long range_len, const EncryptedArray& ea)
-{
-  FHE_NTIMER_START(BatchShiftForMul);
-  if(shift == 0)
-    return;
-
-  long nSlots = ea.size();
-  long batch_size = nSlots / range_len;
-
-  // left cyclic rotation
-  ea.rotate(ctxt, shift);
-
-  // create a mask
-  vector<long> mask_vec(nSlots,1);
-  // set zeros in the unused slots
-  long nEndZeros = nSlots - batch_size * range_len;
-  for (int i = 1; i <= nEndZeros; i++)
-  {
-    long indx = (start + nSlots - i)%nSlots;
-    mask_vec[indx] = 0;
-  }
-
-  // masking values rotated outside their batches
-  for (long i = 0; i < batch_size; i++)
-  {
-    if (shift < 0)
-    {
-      for (long j = 0;  j < -shift; j++)
-      {
-        long indx = (start + (i + 1) * range_len - j - 1)%nSlots;
-        mask_vec[indx] = 0;
-      }
-    }
-    else if (shift > 0)
-    {
-      for (long j = 0;  j < shift; j++)
-      {
-        long indx = (start + i * range_len + j)%nSlots;
-        mask_vec[indx] = 0;
-      }
-    }
-  }
-  ZZX mask_ptxt;
-  ea.encode(mask_ptxt, mask_vec);
-  ctxt.multByConstant(mask_ptxt);
-
-  //binary inversion of a mask to put ones in zero slots
-  //for (size_t i = 0; i < mask_vec.size(); i++)
-  //  mask_vec[i] = 1 - mask_vec[i];
-  mask_ptxt = 1 - mask_ptxt;
-
-  //ea.encode(mask_ptxt, mask_vec);
-  ctxt.addConstant(mask_ptxt);
-  FHE_NTIMER_STOP(BatchShiftForMul);
 }
 
 void batch_shift_for_mul(Ctxt& ctxt, const vector<long>& batch_borders, long shift, long range_len, const EncryptedArray& ea)
@@ -343,15 +180,11 @@ void batch_shift_for_mul(Ctxt& ctxt, const vector<long>& batch_borders, long shi
   ea.encode(mask_ptxt, mask_vec);
   ctxt.multByConstant(mask_ptxt);
 
-  //binary inversion of a mask to put ones in zero slots
-  for (size_t i = 0; i < mask_vec.size(); i++)
-    mask_vec[i] = 1 - mask_vec[i];
+  mask_ptxt = 1 - mask_ptxt;
 
-  ea.encode(mask_ptxt, mask_vec);
   ctxt.addConstant(mask_ptxt);
   FHE_NTIMER_STOP(BatchShiftForMul);
 }
-
 // shift_direction is false for the left shift and true for the right shift
 void shift_and_add(Ctxt& x, const vector<long>& batch_borders, long range_len, const EncryptedArray& ea, const long shift_direction = false)
 {
@@ -365,23 +198,6 @@ void shift_and_add(Ctxt& x, const vector<long>& batch_borders, long range_len, c
   while (e < range_len){
     Ctxt tmp = x;
     batch_shift(tmp, batch_borders, e * shift_sign, range_len, ea);
-    x += tmp;
-    e <<=1;
-  }
-}
-
-void shift_and_add(Ctxt& x, long start, long range_len, const EncryptedArray& ea, const long shift_direction = false)
-{
-  long shift_sign = -1;
-  if(shift_direction)
-    shift_sign = 1;
-
-  long e = 1;
-
-  // shift and add
-  while (e < range_len){
-    Ctxt tmp = x;
-    batch_shift(tmp, start, e * shift_sign, range_len, ea);
     x += tmp;
     e <<=1;
   }
@@ -405,24 +221,6 @@ void shift_and_mul(Ctxt& x, const vector<long>& batch_borders, long range_len, c
   }
 }
 
-void shift_and_mul(Ctxt& x, long start, long range_len, const EncryptedArray& ea, const long shift_direction = false)
-{
-  FHE_NTIMER_START(ShiftMul);
-  long shift_sign = -1;
-  if(shift_direction)
-    shift_sign = 1;
-
-  long e = 1;
-
-  // shift and add
-  while (e < range_len){
-    Ctxt tmp = x;
-    batch_shift_for_mul(tmp, start, e * shift_sign, range_len, ea);
-    x.multiplyBy(tmp);
-    e <<=1;
-  }
-  FHE_NTIMER_STOP(ShiftMul);
-}
 
 void rotate_and_add(Ctxt& x, long range_len, const EncryptedArray& ea)
 {
@@ -492,128 +290,7 @@ void replicate_n_times(Ctxt& ctxt, long slots, const EncryptedArray& ea)
     }
   }
 }
-
-//send non-zero elements of a field F_{p^d} to 1 and zero to 0
-//if d = 1, this map operates on elements of the basic field F_p
-void mapTo01_subfield(const EncryptedArray& ea, Ctxt& ctxt, unsigned long d)
-{
-  long p = ctxt.getPtxtSpace();
-  if (p != ea.getPAlgebra().getP()) // ptxt space is p^r for r>1
-    throw helib::LogicError("mapTo01 not implemented for r>1");
-
-  if (p>2)
-    ctxt.power(p-1); // set y = x^{p-1}
-
-  if (d>1) { // compute the product of the d automorphisms
-    std::vector<Ctxt> v(d, ctxt);
-    for (long i=1; i<d; i++)
-      v[i].frobeniusAutomorph(i);
-    totalProduct(ctxt, v);
-  }
-}
-
-void print_decrypted(Ctxt& ctxt, long ord_p, const EncryptedArray& ea, const SecKey& sk)
-{
-    long nSlots = ea.size();
-    vector<ZZX> decrypted(nSlots);
-    ea.decrypt(ctxt, sk, decrypted);
-
-    for(int i = 0; i < nSlots; i++)
-    {
-      printZZX(cout, decrypted[i], ord_p);
-      cout << endl;
-    }
-}
-
-void basic_less(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y, const EncryptedArray& ea, const SecKey& sk, bool verbose)
-{
-  FHE_NTIMER_START(ComparisonCircuit);
-
-  long p = ea.getPAlgebra().getP();
-  long ord_p = ea.getPAlgebra().getOrdP();
-
-  // Subtraction z = x - y
-  cout << "Subtraction" << endl;
-  Ctxt ctxt_z = ctxt_x;
-  ctxt_z -= ctxt_y;
-
-  if(verbose)
-  {
-    print_decrypted(ctxt_z, ord_p, ea, sk);
-    cout << endl;
-  }
-
-  // z^2
-  cout << "Squaring" << endl;
-  Ctxt ctxt_z2 = ctxt_z;
-  ctxt_z2.square();
-
-  if(verbose)
-  {
-    print_decrypted(ctxt_z2, ord_p, ea, sk);
-    cout << endl;
-  }
-
-  // sum of odd monomials of f(z) = 'z < 0'
-  // z
-  Ctxt ctxt_zi = ctxt_z;
-  ZZ_p coef;
-  coef.init(ZZ(p));
-  ZZ_p field_elem;
-  field_elem.init(ZZ(p));
-  for (long indx = 1; indx < p - 1; indx+=2)
-  { 
-    // coefficient f_i
-    coef = 1;
-    for(long a = 2; a <= ((p-1) >> 1); a++)
-    {
-      field_elem = a;
-      coef += power(field_elem, p - 1 - indx);
-    }
-
-    if(verbose)
-    {
-      cout << "Coef " << indx << ": " << coef << endl;
-    }
-
-    // f_i * z^i
-    if (indx == 1)
-    {
-      // f_1 * z
-      ctxt_res = ctxt_z;
-      ctxt_res.multByConstant(rep(coef));
-    }
-    else
-    {
-      Ctxt tmp = ctxt_zi;
-      tmp.multByConstant(rep(coef));
-      // res + f_i * z^i
-      ctxt_res += tmp;
-    }
-
-    // z^i * z^2
-    if (indx != p - 2)
-      ctxt_zi.multiplyBy(ctxt_z2);
-  }
-
-  coef = ((p+1) >> 1);
-  if(verbose)
-    {
-      cout << "Coef " << p - 1 << ": " << coef << endl;
-    }
-  cout << "Comparison polynomial" << endl;
-  ctxt_zi.multiplyBy(ctxt_z);
-  ctxt_zi.multByConstant(rep(coef));
-  ctxt_res += ctxt_zi;
-
-  if(verbose)
-  {
-    print_decrypted(ctxt_res, ord_p, ea, sk);
-    cout << endl;
-  } 
-
-  FHE_NTIMER_STOP(ComparisonCircuit);
-}
+*/
 
 /*
 void basic_less(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y, unsigned long p, unsigned long d, unsigned long ord_p, const EncryptedArray& ea, const SecKey& sk, bool verbose)
@@ -808,178 +485,7 @@ void basic_less(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y, unsigned
 }
 */
 
-//randomized equality circuit
-void random_equality(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y, long expansion_len, unsigned long ord_p, const EncryptedArray& ea, const SecKey& sk, bool verbose)
-{
-  FHE_NTIMER_START(RandomEqualityCircuit);
-  long nSlots = ea.size();
-  long numbers_size = nSlots / expansion_len; 
-
-  Ctxt ctxt_tmp_x = ctxt_x;
-  Ctxt ctxt_tmp_y = ctxt_y;
-
-  //Remove the least significant digit and shift to the left
-  cout << "Remove the least significant digit" << endl;
-  batch_shift(ctxt_tmp_x, 0, -1, expansion_len, ea);
-  batch_shift(ctxt_tmp_y, 0, -1, expansion_len, ea);
-
-  if(verbose)
-  {
-    print_decrypted(ctxt_tmp_x, ord_p, ea, sk);
-    cout << endl;
-    print_decrypted(ctxt_tmp_y, ord_p, ea, sk);
-    cout << endl;
-  }
-
-  // Subtraction (x_i - y_i)
-  cout << "Subtraction" << endl;
-  ctxt_res = ctxt_tmp_x;
-  ctxt_res -= ctxt_tmp_y;
-
-  if(verbose)
-  {
-    print_decrypted(ctxt_res, ord_p, ea, sk);
-    cout << endl;
-  }
-
-  //compute the multiplication with the random polynomial: r_i*(x_i - y_i)
-  cout << "Multiplication by a random element" << endl;
-  Ptxt<BGV> poly_r(ea.getContext());
-  poly_r.random();
-  ctxt_res.multByConstant(poly_r);
-
-  if(verbose)
-  {
-    print_decrypted(ctxt_res, ord_p, ea, sk);
-    cout << endl;
-  }
-
-  //compute running sums: sum_i r_i*(x_i - y_i)
-  cout << "Rotating and adding slots" << endl;
-  shift_and_add(ctxt_res, 0, expansion_len, ea);
-
-  if(verbose)
-  {
-    print_decrypted(ctxt_res, ord_p, ea, sk);
-    cout << endl;
-  }
-
-  //compute mapTo01
-  cout << "Mapping to 0 and 1" << endl;
-  mapTo01_subfield(ea, ctxt_res, ord_p);
-
-  if(verbose)
-  {
-    print_decrypted(ctxt_res, ord_p, ea, sk);
-    cout << endl;
-  }
-  
-  cout << "Computing NOT" << endl;
-  //generate a plaintext with 1 in all the data slots
-  vector<long> vec_ones(nSlots,0);
-  for (long i = 0; i < numbers_size; i++)
-  {
-    for (long j = 0; j < expansion_len; j++)
-    {
-      vec_ones[i * (expansion_len) + j] = 1;
-    }
-  }
-  ZZX ptxt_ones;
-  ea.encode(ptxt_ones, vec_ones);
-
-  //compute 1 - mapTo01(r_i*(x_i - y_i))
-  ctxt_res.negate();
-  ctxt_res.addConstant(ptxt_ones);
-
-  if(verbose)
-  {
-    print_decrypted(ctxt_res, ord_p, ea, sk);
-    cout << endl;
-  }
-
-  FHE_NTIMER_STOP(RandomEqualityCircuit);
-}
-
-//exact equality circuit
-void exact_equality(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y, long expansion_len, unsigned long ord_p, unsigned long d, const EncryptedArray& ea, const SecKey& sk, bool verbose)
-{
-  FHE_NTIMER_START(RandomEqualityCircuit);
-  long nSlots = ea.size();
-  long numbers_size = nSlots / expansion_len; 
-
-  Ctxt ctxt_tmp_x = ctxt_x;
-  Ctxt ctxt_tmp_y = ctxt_y;
-
-  //Remove the least significant digit and shift to the left
-  cout << "Remove the least significant digit" << endl;
-  batch_shift(ctxt_tmp_x, 0, -1, expansion_len, ea);
-  batch_shift(ctxt_tmp_y, 0, -1, expansion_len, ea);
-
-  if(verbose)
-  {
-    print_decrypted(ctxt_tmp_x, ord_p, ea, sk);
-    cout << endl;
-    print_decrypted(ctxt_tmp_y, ord_p, ea, sk);
-    cout << endl;
-  }
-
-  // Subtraction (x_i - y_i)
-  cout << "Subtraction" << endl;
-  ctxt_res = ctxt_tmp_x;
-  ctxt_res -= ctxt_tmp_y;
-
-  if(verbose)
-  {
-    print_decrypted(ctxt_res, ord_p, ea, sk);
-    cout << endl;
-  }
-
-  //compute mapTo01: (x_i - y_i)^{p^d-1}
-  cout << "Mapping to 0 and 1" << endl;
-  mapTo01_subfield(ea, ctxt_res, d);
-
-  if(verbose)
-  {
-    print_decrypted(ctxt_res, ord_p, ea, sk);
-    cout << endl;
-  }
-
-  //compute 1 - (x_i - y_i)^{p^d-1}
-  cout << "Computing NOT" << endl;
-  //generate a plaintext with 1 in all the data slots
-  vector<long> vec_ones(nSlots,0);
-  for (long i = 0; i < numbers_size; i++)
-  {
-    for (long j = 0; j < expansion_len; j++)
-    {
-      vec_ones[i * (expansion_len) + j] = 1;
-    }
-  }
-  ZZX ptxt_ones;
-  ea.encode(ptxt_ones, vec_ones);
-
-  ctxt_res.negate();
-  ctxt_res.addConstant(ptxt_ones);
-
-  if(verbose)
-  {
-    print_decrypted(ctxt_res, ord_p, ea, sk);
-    cout << endl;
-  }
-
-  //compute running products: prod_i 1 - (x_i - y_i)^{p^d-1}
-  cout << "Rotating and multiplying slots" << endl;
-  shift_and_mul(ctxt_res, 0, expansion_len, ea);
-
-  if(verbose)
-  {
-    print_decrypted(ctxt_res, ord_p, ea, sk);
-    cout << endl;
-  }
-
-  FHE_NTIMER_STOP(RandomEqualityCircuit);
-}
-
+/*
 bool test_equality(const PubKey& public_key, const EncryptedArray& ea, const SecKey& sk, long p, long ord_p, long field_size, long expansion_len, long nslots, long numbers_size, bool verbose)
 {
     long min_capacity = 1000;
@@ -1111,6 +617,9 @@ bool test_equality(const PubKey& public_key, const EncryptedArray& ea, const Sec
     cout << "Random equality test passed" << endl;
     return true;
 }
+*/
+
+
 // the main function that takes 5 arguments (type in Terminal: ./comparison_circuit argv[1] argv[2] argv[3] argv[4] argv[5] argv[6] argv[7])
 // argv[1] - the plaintext modulus
 // argv[2] - the extension degree of a finite field
@@ -1139,13 +648,9 @@ int main(int argc, char *argv[]) {
   {
     throw invalid_argument("The last parameter must be 'e' (exact) or 'r' (randomized)\n");
   }
-  char* circuit_type = argv[8];
-
-  // initialize the random generator
-  random_device rd;
-  mt19937 eng(rd());
-  uniform_int_distribution<unsigned long> distr_u;
-  uniform_int_distribution<long> distr_i;
+  bool is_randomized = false;
+  if(!strcmp(argv[8],"r"))
+    is_randomized = true;
 
   //////////PARAMETER SET UP////////////////
   // Plaintext prime modulus
@@ -1154,40 +659,29 @@ int main(int argc, char *argv[]) {
   unsigned long d = atol(argv[2]);
   // Cyclotomic polynomial - defines phi(m)
   unsigned long m = atol(argv[3]);
-  // Hensel lifting (default = 1)
-  unsigned long r = 1;
-  // Number of ciphertext prime bits in the modulus chain = depth of the computation
+  // Number of ciphertext prime bits in the modulus chain
   unsigned long nb_primes = atol(argv[4]);
   // Number of columns of Key-Switching matix (default = 2 or 3)
   unsigned long c = 3;
-  std::cout << "Initialising context object..." << std::endl;
+  cout << "Initialising context object..." << endl;
   // Intialise context
-  Context context(m, p, r);
+  Context context(m, p, 1);
   context.scale = 6;
   // Modify the context, adding primes to the modulus chain
   cout  << "Building modulus chain..." << endl;
   buildModChain(context, nb_primes, c);
 
-  // Print the context
-  context.zMStar.printout();
-  cout << endl;
-
-  //determine the order of p in (Z/mZ)*
-  unsigned long ord_p = context.zMStar.getOrdP();
-  if (ord_p%d != 0)
-  {
-    cout << "Field extension must divide the order of the plaintext modulus" << endl;
-    return 0;
-  }
-  //index of the finite field of digits in the finite field of a slot
-  unsigned long field_index = ord_p / d;
-  //size of a subfield
-  unsigned long subfield_size = power_long(p,d);
-
   // Print the security level
   cout << "Q size: " << context.logOfProduct(context.ctxtPrimes)/log(2.0) << endl;
   cout << "Q*P size: " << context.logOfProduct(context.fullPrimes())/log(2.0) << endl;
   cout << "Security: " << context.securityLevel() << endl;
+
+  // Print the context
+  context.zMStar.printout();
+  cout << endl;
+
+  //maximal number of digits in a number
+  unsigned long expansion_len = atol(argv[5]);
 
   // Secret key management
   cout << "Creating secret key..." << endl;
@@ -1197,190 +691,19 @@ int main(int argc, char *argv[]) {
   secret_key.GenSecKey();
   cout << "Generating key-switching matrices..." << endl;
   // Compute key-switching matrices that we need
-  add1DMatrices(secret_key);
-  addFrbMatrices(secret_key);
+  addSome1DMatrices(secret_key);
+  if (d > 1)
+    addFrbMatrices(secret_key); //might be useful only when d > 1
 
-  // Public key management
-  // Set the secret key (upcast: SecKey is a subclass of PubKey)
-  const PubKey& public_key = secret_key;
-
-  // Get the EncryptedArray of the context
-  const EncryptedArray& ea = *(context.ea);
-
-  // Get the number of slot (phi(m))
-  unsigned long nslots = ea.size();
-  cout << "Number of slots: " << nslots << endl;
-  cout << "Extension degree of a slot:  " << ord_p << endl;
-
-  //size of the finite field used to keep digits
-  unsigned long field_size = power_long(p,d);
-  //maximal number of digits in a number
-  unsigned long expansion_len = atol(argv[5]);
-  //amount of numbers in one ciphertext
-  unsigned long numbers_size = nslots / expansion_len;
-  unsigned long occupied_slots = numbers_size * expansion_len;
-
-  //encoding base, (p+1)/2
-  unsigned long enc_base = (p + 1) >> 1;
-
-  //check that field_size^expansion_len fits into 64-bits
-  //int space_bit_size = static_cast<int>(ceil(expansion_len * log2(field_size)));
-  int space_bit_size = static_cast<int>(ceil(expansion_len * log2(enc_base)));
-  unsigned long input_range = LONG_MAX;
-  if(space_bit_size < 64)
-  {
-    //input_range = power_long(field_size, expansion_len);
-    input_range = power_long(enc_base, expansion_len);
-  }
-  cout << "Maximal input: " << input_range << endl; 
-
-  //timers
-  setTimersOn();
+  // create Comparator (initialize after buildModChain)
+  Comparator comparator(context, d, expansion_len, secret_key, verbose); 
 
   //repeat experiments several times
   int runs = atoi(argv[6]);
-  long min_capacity = 1000;
-  long capacity;
-  for (int run = 0; run < runs; run++)
-  {
-    printf("Run %d started\n", run);
+  
+  comparator.test(runs, is_randomized);
 
-    /*
-    if (!test_equality(public_key, ea, secret_key, p, ord_p, field_size, expansion_len, nslots, numbers_size, verbose))
-      return 1;
-
-    continue;
-    */
-
-    vector<ZZX> expected_result(occupied_slots);
-    vector<ZZX> decrypted(occupied_slots);
-
-    // Create the plaintext polynomials for the text and for the pattern
-    vector<ZZX> pol_x(nslots);
-    vector<ZZX> pol_y(nslots);
-    
-    unsigned long input_x;
-    unsigned long input_y;
-    ZZX pol_slot;
-
-    for (int i = 0; i < numbers_size; i++)
-    {
-      input_x = distr_u(eng) % input_range;
-      input_y = distr_u(eng) % input_range;
-
-      if(verbose)
-      {
-        cout << "Input" << endl;
-        cout << input_x << endl;
-        cout << input_y << endl;
-      }
-
-      if (input_x < input_y)
-      {
-        expected_result[i * expansion_len] = ZZX(INIT_MONO, 0, 1);
-      }
-      else
-      {
-        expected_result[i * expansion_len] = ZZX(INIT_MONO, 0, 0);
-      }
-
-      vector<long> decomp_int_x;
-      vector<long> decomp_int_y;
-      vector<long> decomp_char;
-
-      //decomposition of input integers
-      digit_decomp(decomp_int_x, input_x, enc_base, expansion_len);
-      digit_decomp(decomp_int_y, input_y, enc_base, expansion_len);
-
-      //encoding of slots
-      for (int j = 0; j < expansion_len; j++)
-      {
-          //decomposition of a digit
-          int_to_slot(pol_slot, decomp_int_x[j], p, d, ord_p, ea);
-          pol_x[i * expansion_len + j] = pol_slot;
-      }
-
-      for (int j = 0; j < expansion_len; j++)
-      {
-          //decomposition of a digit
-          int_to_slot(pol_slot, decomp_int_y[j], p, d, ord_p, ea);
-          pol_y[i * expansion_len + j] = pol_slot;
-      }
-    }
-
-    if(verbose)
-    {
-      cout << "Input" << endl;
-      for(int i = 0; i < nslots; i++)
-      {
-          printZZX(cout, pol_x[i], ord_p);
-          printZZX(cout, pol_y[i], ord_p);
-          cout << endl;
-      }
-    }
-
-    Ctxt ctxt_x(public_key);
-    Ctxt ctxt_y(public_key);
-    ea.encrypt(ctxt_x, public_key, pol_x);
-    ea.encrypt(ctxt_y, public_key, pol_y);
-    Ctxt ctxt_less(public_key);
-    Ctxt ctxt_res(public_key);
-
-    FHE_NTIMER_START(Comparison);
-    basic_less(ctxt_less, ctxt_x, ctxt_y, ea, secret_key, verbose);
-    //basic_less(ctxt_less, ctxt_x, ctxt_y, p, d, ord_p, ea, secret_key, verbose);
-    if(!strcmp(circuit_type, "r"))
-      random_equality(ctxt_res, ctxt_x, ctxt_y, expansion_len, ord_p, ea, secret_key, verbose);
-    if(!strcmp(circuit_type, "e"))
-      exact_equality(ctxt_res, ctxt_x, ctxt_y, expansion_len, ord_p, d, ea, secret_key, verbose);
-
-    ctxt_res.multiplyBy(ctxt_less);
-    shift_and_add(ctxt_res, 0, expansion_len, ea);
-
-    if(verbose)
-    {
-      cout << "Input" << endl;
-      for(int i = 0; i < nslots; i++)
-      {
-          printZZX(cout, pol_x[i], ord_p);
-          printZZX(cout, pol_y[i], ord_p);
-          cout << endl;
-      }
-
-      cout << "Output" << endl;
-      print_decrypted(ctxt_res, ord_p, ea, secret_key);
-      cout << endl;
-    }
-    FHE_NTIMER_STOP(Comparison);
-    printNamedTimer(cout, "ComparisonCircuit");
-    printNamedTimer(cout, "RandomEqualityCircuit");
-    printNamedTimer(cout, "ShiftMul");
-    printNamedTimer(cout, "Comparison");
-
-    // remove the line below if it gives bizarre results 
-    ctxt_res.cleanUp();
-    capacity = ctxt_res.bitCapacity();
-    cout << "Final capacity: " << capacity << endl;
-    if (capacity < min_capacity)
-      min_capacity = capacity;
-    cout << "Min. capacity: " << min_capacity << endl;
-    cout << "Final size: " << ctxt_res.logOfPrimeSet()/log(2.0) << endl;
-    ea.decrypt(ctxt_res, secret_key, decrypted);
-
-    for(int i = 0; i < numbers_size; i++)
-    { 
-      if (decrypted[i * expansion_len] != expected_result[i * expansion_len])
-      {
-        printf("Slot %ld: ", i * expansion_len);
-        printZZX(cout, decrypted[i * expansion_len], ord_p);
-        cout << endl;
-        cout << "Failure" << endl;
-        return 1;
-      }
-    }
-    cout << endl;
-  }
- //printAllTimers(cout);
+  printAllTimers(cout);
 
   return 0;
 }
