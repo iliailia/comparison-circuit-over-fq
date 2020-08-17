@@ -3,6 +3,7 @@
 #include <helib/debugging.h>
 #include <helib/polyEval.h>
 #include <random>
+#include <map> 
 
 void Comparator::create_shift_mask(ZZX& mask_ptxt, long shift)
 {
@@ -257,6 +258,8 @@ void Comparator::less_than(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_
 {
   FHE_NTIMER_START(ComparisonCircuit);
 
+  unsigned long p = m_context.zMStar.getP();
+
   // Subtraction z = x - y
   cout << "Subtraction" << endl;
   Ctxt ctxt_z = ctxt_x;
@@ -268,9 +271,23 @@ void Comparator::less_than(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_
     cout << endl;
   }
 
+  map<unsigned long, unsigned long> pat_stock_ks{
+  	{13, 4}, //4 (15), 2..5
+  	{47, 7}, //7 (26), 3..8
+  	{61, 6}, //6 (26), 3..6
+  	{67, 6}, //6 (26), 4..8
+  	{131, 14}, //10 (33), 10..13
+  	{167, 10}, //10 (38), 8..12
+  	{173, 12} //11 (39), 7..12
+  };
+
+  long k = -1;
+  if(pat_stock_ks.count(p) > 0)
+  	k = pat_stock_ks[p];
+
   // compute polynomial function for 'z < 0'
   cout << "Compute comparison polynomial" << endl;
-  polyEval(ctxt_res, m_poly, ctxt_z);
+  polyEval(ctxt_res, m_poly, ctxt_z, k);
 
   if(m_verbose)
   {
