@@ -21,177 +21,175 @@ Since this function is independent of the choice of $\S$, we can write
 
 \subsection{$2$-variate interpolation of $\LT_\S$.}
 
-The less-than function can be interpolated using Lemma~\ref{lem:interpolation} and the following truth table
-\begin{align*}
-  \begin{array}{c|ccccc}
-    < & a_0 & a_1 & a_2 & \cdots & a_{\fieldcard-1} \\
-    \hline
-    a_0 & 0 & 1 & 1 & \cdots & 1 \\
-    a_1 & 0 & 0 & 1 & \cdots & 1 \\
-    a_2 & 0 & 0 & 0 & \cdots & 1 \\
-    \vdots & \vdots & \vdots & \vdots & \ddots & \vdots \\
-    a_{\fieldcard-1} & 0 & 0 & 0 & \cdots & 0 \\
-  \end{array}
-\end{align*}
-where $a_i \in \S$ for any $i \in [0,\fieldcard-1]$ and $a_i < a_j$ if $i < j$.
-In particular,
-\begin{align}\label{eq:less_than_function}
-  \LT_\S(x,y) &= \sum_{a,b \in \S} \LT_\S(a,b) (1-\princhar_\fieldcard(x - a)) (1-\princhar_\fieldcard(y - b)) \nonumber\\
-  &= \sum_{a \in \S} (1-\princhar_\fieldcard(x - a)) \sum_{b \in \S} \LT_\S(a,b)  (1-\princhar_\fieldcard(y - b)) \nonumber\\
-  &= \sum_{a \in \S} (1-\princhar_\fieldcard(x - a)) \sum_{b \in \S, a < b} (1-\princhar_\fieldcard(y - b)).
-\end{align}
-In contrast to equality, this function depends on the choice of $\S$.
-Nevertheless, we can fix a certain $\S$ as the default complete set of representatives of $\F_{\fieldcard}$ and denote $\LT_\S(x,y)$ as $\LT_{\F_\fieldcard}(x,y)$.
-For example, $\S$ can be $\{0,1,2,\dots,q-1\}$ if $q$ is a prime number.
-
-Let $p$ be a prime number ans $\S = \{0,1,\dots,p-1\}$.
-Then $\LT_\S$ has total degree $p$ as proven in Theorem~\ref{lem:less_than_total_degree}.
-To prove this statement we need the following lemmata.
-
-\begin{lemma}\label{lem:difference_to_p-1}
-  \[
-    (a - b)^{p-1} = \sum_{i=0}^{p-1} a^i b^{p-1-i} \mod p.
-  \]
-\end{lemma}
-\begin{proof}
-  Using the binomial theorem we obtain
-  \[
-    (a - b)^{p-1} = \sum_{i=0}^{p-1} \binom{p-1}{i} a^i (-b)^{p-1-i}.
-  \]
-  Computing the binomial coefficient modulo $p$
+  The less-than function can be interpolated using Lemma~\ref{lem:interpolation} and the following truth table
   \begin{align*}
-    \binom{p-1}{i} & = \frac{(p-1)!}{i! (p-1-i)!} \\
-    & = \frac{(p-1)(p-2)\dots(i+1)}{1 \cdot 2 \dots (p-(1+i))} = (-1)^{p-1-i} \mod p\,,
+    \begin{array}{c|ccccc}
+      < & a_0 & a_1 & a_2 & \cdots & a_{\fieldcard-1} \\
+      \hline
+      a_0 & 0 & 1 & 1 & \cdots & 1 \\
+      a_1 & 0 & 0 & 1 & \cdots & 1 \\
+      a_2 & 0 & 0 & 0 & \cdots & 1 \\
+      \vdots & \vdots & \vdots & \vdots & \ddots & \vdots \\
+      a_{\fieldcard-1} & 0 & 0 & 0 & \cdots & 0 \\
+    \end{array}
   \end{align*}
-  we prove the lemma.
-\end{proof}
-
-\begin{lemma}\label{lem:sum_poly}
-  Let $P(x)$ be a polynomial of degree $d$ less than $p-1$.
-  For any prime number $p > 2$, it holds
-  \[
-    \sum_{a=0}^{p-1} P(a) = 0 \mod p.
-  \]
-\end{lemma}
-\begin{proof}
-  It is enough to prove that the sum $\sum_{a=0}^{p-1} a^n = 0 \mod p$ for any $n < p-2$.
-  Let $g$ be a primitive element of $\F_p$.
-  Since $p > 2$, we have $g \ne 1$.
-  Thus, we can rewrite the above sum as follows.
-  \begin{align}
-    \sum_{i=1}^{p-1} g^{in} = \frac{g^{pn} - g^n}{g^n - 1}.
+  where $a_i \in \S$ for any $i \in [0,\fieldcard-1]$ and $a_i < a_j$ if $i < j$.
+  In particular,
+  \begin{align}\label{eq:less_than_function}
+    \LT_\S(x,y) &= \sum_{a,b \in \S} \LT_\S(a,b) (1-\princhar_\fieldcard(x - a)) (1-\princhar_\fieldcard(y - b)) \nonumber\\
+    &= \sum_{a \in \S} (1-\princhar_\fieldcard(x - a)) \sum_{b \in \S} \LT_\S(a,b)  (1-\princhar_\fieldcard(y - b)) \nonumber\\
+    &= \sum_{a \in \S} (1-\princhar_\fieldcard(x - a)) \sum_{b \in \S, a < b} (1-\princhar_\fieldcard(y - b)).
   \end{align}
-  Since $g^{pn} \equiv g^n \mod p$, the sum turns into zero modulo $p$.
-\end{proof}
+  In contrast to equality, this function depends on the choice of $\S$.
+  Nevertheless, we can fix a certain $\S$ as the default complete set of representatives of $\F_{\fieldcard}$ and denote $\LT_\S(x,y)$ as $\LT_{\F_\fieldcard}(x,y)$.
+  For example, $\S$ can be $[0,q-1]$ if $q$ is a prime number.
 
-\begin{theorem} \label{lem:less_than_total_degree}
-  Let $p$ be a prime number bigger than $2$ and $\S = [0,p-1]$, then $\LT_\S$ is a polynomial over $\F_p$ of the following form
-  \begin{align*}
-    \LT_\S(x,y) = y^{p-1} - \frac{p-1}{2} (xy)^{\frac{p-1}{2}} + \sum_{i,j>0, i+j \le p} a_{ij} x^i y^j 
-  \end{align*}
-  for some $a_{ij} \in \F_p$.
-\end{theorem}
-\begin{proof}
-  Assume that all computations are done modulo $p$.
-  Using Lemma~\ref{lem:difference_to_p-1}, we obtain
-  \begin{align*}
-    \LT_\S(x,y) &=  \sum_{a = 0}^{p-2} \left(1-\sum_{i=0}^{p-1} x^i a^{p-1-i}\right) \sum_{b=a+1}^{p-1} \left(1-\sum_{j=0}^{p-1} y^j b^{p-1-j}\right)\\
-  \end{align*}
-  Let us expand this expression distributively.
-  \begin{align*}
-    \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} 1 - \sum_{i=0}^{p-1} x^i a^{p-1-i} - \sum_{i=0}^{p-1} y^i b^{p-1-i} + \sum_{i=0}^{p-1} \sum_{j=0}^{p-1} x^i y^j a^{p-1-i} b^{p-1-j}.
-  \end{align*}
-  Let us separately compute polynomial coefficients.
-  The constant term is equal to
-  \begin{align*}
-    \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} 1 - a^{p-1} - b^{p-1} + a^{p-1} b^{p-1} = \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} 1 - a^{p-1} - 1 + a^{p-1} = 0 
-  \end{align*}
-  The coefficients by $x^i$ with $i > 0$ can be computed as follows
-  \begin{align*}
-    \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} \left(-a^{p-1-i}\right) + a^{p-1-i} = 0.
-  \end{align*}
-  Next, we compute the coefficients by $y^i$ with $i > 0$.
-  \begin{align*}
-    -\sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} b^{p-1-i} - a^{p-1} b^{p-1-i} &= -\sum_{b=1}^{p-1} b^{p-1-i} - \sum_{a = 1}^{p-2} \sum_{b=a+1}^{p-1} b^{p-1-i} - b^{p-1-i} \\
-    &= -\sum_{b=1}^{p-1} b^{p-1-i}.
-  \end{align*}
-  If $i = p-1$, this sum is equal to $1$.
-  According to Lemma~\ref{lem:sum_poly}, it is $0$ if $i \ne 0 \mod (p-1)$.
-  
-  To compute coefficients by $x^i y^j$ with $i, j > 0$, we will use Faulhaber's formula below
-  \begin{align*}
-    \sum_{k=1}^n k^e = \frac{1}{e+1} \sum_{i=1}^{e+1} (-1)^{\delta_{ie}} \binom{e+1}{i} B_{e+1-i} \cdot n^i\,,
-  \end{align*}
-  where $\delta_{ie}$ is the Kronecker delta and $B_{i}$ is the $i$th Bernoulli number.
-  This implies that there exist a polynomial $P(x) \in \F_p[X]$ of degree $e+1$ such that
-  \begin{align}\label{eq:faulhaber}
-    \sum_{k=1}^n k^e = P(n).
-  \end{align}
-  Note that $P(0) = 0$.
-  The coefficient by $x^i y^j$ for some positive $i$ and $j$ is equal to
-  \begin{align*}
-    \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} a^{p-1-i} b^{p-1-j} = \sum_{b = 1}^{p-1} b^{p-1-j} \sum_{a=0}^{b-1} a^{p-1-i}.
-  \end{align*}
-  According to~(\ref{eq:faulhaber}), it follows that there exist a polynomial $P(x)$ of degree $p-i$ such that $\sum_{a=0}^{b-1} a^{p-1-i} = P(b)$.
-  Since $Q(x) = x^{p-1-j} P(x)$ has degree $2p-1-i-j$, Lemma~\ref{lem:sum_poly} implies that if $i+j > p$, then
-  \begin{align*}
-    \sum_{b = 1}^{p-1} b^{p-1-j} \sum_{a=0}^{b-1} a^{p-1-i} = \sum_{b=1}^{p-1} Q(b) = 0.
-  \end{align*}
-  Thus, the total degree of $\LT_\S$ is at most $p$.
+  Let $p$ be a prime number ans $\S = [0,p-1]$.
+  Then $\LT_\S$ has total degree $p$ as proven in Theorem~\ref{lem:less_than_total_degree}.
+  To prove this statement we need the following lemmata.
 
-  In addition, we consider the case when $i = j$.
-  Let us consider the following sum
-  \begin{align*}
-    \sum_{a=0}^{p-1} a^{p-1-i} \sum_{b=0}^{p-1} b^{p-1-i} = 0.
-  \end{align*}
-  We can rewrite it as follows
-  \begin{align*}
-    \sum_{a=0}^{p-1} a^{p-1-i} \sum_{b=0}^{p-1} b^{p-1-i} = 2\sum_{a=0}^{p-2} a^{p-1-i} \sum_{b=a+1}^{p-1} b^{p-1-i} + \sum_{a=0}^{p-1} a^{2(p-1-i)}.
-  \end{align*}
-  If $i \ne (p-1)/2$, then the last sum is zero.
-  Thus, the coefficient by $x^i y^i$ is equal to $\sum_{a=0}^{p-2} a^{p-1-i} \sum_{b=a+1}^{p-1} b^{p-1-i} = 0$.
-  If $i = (p-1)/2$, then following the above argument, this coefficient is equal to $-(p-1)/2$.
-\end{proof}
+  \begin{lemma}\label{lem:difference_to_p-1}
+    \[
+      (a - b)^{p-1} = \sum_{i=0}^{p-1} a^i b^{p-1-i} \mod p.
+    \]
+  \end{lemma}
+  \begin{proof}
+    Using the binomial theorem we obtain
+    \[
+      (a - b)^{p-1} = \sum_{i=0}^{p-1} \binom{p-1}{i} a^i (-b)^{p-1-i}.
+    \]
+    Computing the binomial coefficient modulo $p$
+    \begin{align*}
+      \binom{p-1}{i} & = \frac{(p-1)!}{i! (p-1-i)!} \\
+      & = \frac{(p-1)(p-2)\dots(i+1)}{1 \cdot 2 \dots (p-(1+i))} = (-1)^{p-1-i} \mod p\,,
+    \end{align*}
+    we prove the lemma.
+  \end{proof}
 
-\todo{the paragraph below as well as Algorithm~\ref{alg:basic_less_than_circuit} might be obsolete}
-The homomorphic circuit for $\LT_{\F_\fieldcard}(x,y)$ is presented in Algorithm~\ref{alg:basic_less_than_circuit}.
-Unlike the prior works (\todo{cite}) that evaluate this circuit as a multivariate polynomial, we exploit its representation in~(\ref{eq:less_than_function}) to parallelize computations in the SIMD manner. 
-\begin{algorithm}[t]
-  \KwIn{
-  $\ct_x$ -- a ciphertext encrypting $x \in \F_\fieldcard$ in the first SIMD slot and $0$ in other slots,
-  $\ct_y$ -- a ciphertext encrypting $y \in \F_\fieldcard$ in the first SIMD slot and $0$ in other slots,
-  $\S = \{a_0,a_1,\dots,a_{\fieldcard-1}\}$ -- a complete set of representatives of $\F_\fieldcard$.
-  }
-  \KwOut{$\ct$ -- a ciphertext encrypting $1$ in the first SIMD slot if $x < y$, otherwise $0$. Other slots contain $0$.}
-  $\ct_1 \leftarrow \Replicate(\ct_x, \fieldcard - 1)$//\todo{Define replicate}\\
-  $\ct_2 \leftarrow \Replicate(\ct_y, \fieldcard - 1)$\\
-  $\pt_1 \leftarrow \pt(a_0, a_1, \dots, a_{\fieldcard-2})$//\todo{define this operation}\\
-  $\pt_2 \leftarrow \pt(a_1, a_2, \dots, a_{\fieldcard-1})$\\
-  $\ct_1 \leftarrow \ct_1 - \pt_1$//\todo{define operations between ciphertexts and plaintexts}\\
-  $\ct_2 \leftarrow \ct_2 - \pt_2$\\
-  $\ct_1 \leftarrow \ct_1^{\fieldcard-1}$//$\princhar_\fieldcard(x-a)$, \todo{define this operation}\\
-  $\ct_2 \leftarrow \ct_2^{\fieldcard-1}$//$\princhar_\fieldcard(y-b)$\\
-  $\ct_1 \leftarrow 1 - \ct_1$// define operations between constants and ciphertexts\\
-  $\ct_2 \leftarrow 1 - \ct_2$\\
-  $k \leftarrow 1$// compute all running sums $\sum_{b \in \S, a < b} (1-\princhar_\fieldcard(x - b))$ \\
-  \While{$k < \fieldcard-1$}{
-    $\ct_{tmp} \leftarrow \Shift(\ct_2, k)$//\todo{define shift}\\
-    $\ct_2 \leftarrow \ct_2 + \ct_{tmp}$\\
-    $k \leftarrow 2k$\\
-  }
-  $\ct \leftarrow \ct_1 \cdot \ct_2$\\
-  $k \leftarrow 1$\\
-  \While{$k < \fieldcard-1$}{
-    $\ct_{tmp} \leftarrow \Shift(\ct, k)$\\
-    $\ct \leftarrow \ct + \ct_{tmp}$\\
-    $k \leftarrow 2k$\\
-  }
-  $\ct \leftarrow \Select(\ct, \{1\})$//\todo{define select}\\
-  \textbf{Return} $\ct$.
-  \caption{Homomorphic circuit of $\LT_{\F_\fieldcard}$.}\label{alg:basic_less_than_circuit}
-\end{algorithm}
-\todo{Make a separate algorithm for running sums (while circuit above)}
-\todo{Write down the complexity of Algorithm~\ref{alg:basic_less_than_circuit}, compare with prior works}
+  \begin{lemma}\label{lem:sum_poly}
+    Let $P(x)$ be a polynomial of degree $d$ less than $p-1$.
+    For any prime number $p > 2$, it holds
+    \[
+      \sum_{a=0}^{p-1} P(a) = 0 \mod p.
+    \]
+  \end{lemma}
+  \begin{proof}
+    It is enough to prove that the sum $\sum_{a=0}^{p-1} a^n = 0 \mod p$ for any $n < p-1$.
+    Let $g$ be a primitive element of $\F_p$.
+    Since $p > 2$, we have $g \ne 1$.
+    Thus, we can rewrite the above sum as follows.
+    \begin{align}
+      \sum_{i=1}^{p-1} g^{in} = \frac{g^{pn} - g^n}{g^n - 1}.
+    \end{align}
+    Since $g^{pn} \equiv g^n \mod p$, the sum turns into zero modulo $p$.
+  \end{proof}
+
+  \begin{theorem} \label{lem:less_than_total_degree}
+    Let $p$ be a prime number bigger than $2$ and $\S = [0,p-1]$, then $\LT_\S$ is a polynomial over $\F_p$ of the following form
+    \begin{align*}
+      \LT_\S(x,y) = y^{p-1} - \frac{p-1}{2} (xy)^{\frac{p-1}{2}} + \sum_{i,j>0, i+j \le p} a_{ij} x^i y^j 
+    \end{align*}
+    for some $a_{ij} \in \F_p$.
+  \end{theorem}
+  \begin{proof}
+    Assume that all computations are done modulo $p$.
+    Using Lemma~\ref{lem:difference_to_p-1}, we obtain
+    \begin{align*}
+      \LT_\S(x,y) &=  \sum_{a = 0}^{p-2} \left(1-\sum_{i=0}^{p-1} x^i a^{p-1-i}\right) \sum_{b=a+1}^{p-1} \left(1-\sum_{j=0}^{p-1} y^j b^{p-1-j}\right)\\
+    \end{align*}
+    Let us expand this expression distributively.
+    \begin{align*}
+      \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} 1 - \sum_{i=0}^{p-1} x^i a^{p-1-i} - \sum_{i=0}^{p-1} y^i b^{p-1-i} + \sum_{i=0}^{p-1} \sum_{j=0}^{p-1} x^i y^j a^{p-1-i} b^{p-1-j}.
+    \end{align*}
+    Let us separately compute polynomial coefficients.
+    The constant term is equal to
+    \begin{align*}
+      \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} 1 - a^{p-1} - b^{p-1} + a^{p-1} b^{p-1} = \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} 1 - a^{p-1} - 1 + a^{p-1} = 0 
+    \end{align*}
+    The coefficients by $x^i$ with $i > 0$ can be computed as follows
+    \begin{align*}
+      \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} \left(-a^{p-1-i}\right) + a^{p-1-i} = 0.
+    \end{align*}
+    Next, we compute the coefficients by $y^i$ with $i > 0$.
+    \begin{align*}
+      -\sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} b^{p-1-i} - a^{p-1} b^{p-1-i} &= -\sum_{b=1}^{p-1} b^{p-1-i} - \sum_{a = 1}^{p-2} \sum_{b=a+1}^{p-1} b^{p-1-i} - b^{p-1-i} \\
+      &= -\sum_{b=1}^{p-1} b^{p-1-i}.
+    \end{align*}
+    If $i = p-1$, this sum is equal to $1$.
+    According to Lemma~\ref{lem:sum_poly}, it is $0$ if $i \ne 0 \mod (p-1)$.
+    
+    To compute coefficients by $x^i y^j$ with $i, j > 0$, we will use Faulhaber's formula below
+    \begin{align*}
+      \sum_{k=1}^n k^e = \frac{1}{e+1} \sum_{i=1}^{e+1} (-1)^{\delta_{ie}} \binom{e+1}{i} B_{e+1-i} \cdot n^i\,,
+    \end{align*}
+    where $\delta_{ie}$ is the Kronecker delta and $B_{i}$ is the $i$th Bernoulli number.
+    This implies that there exist a polynomial $P(x) \in \F_p[X]$ of degree $e+1$ such that
+    \begin{align}\label{eq:faulhaber}
+      \sum_{k=1}^n k^e = P(n).
+    \end{align}
+    Note that $P(0) = 0$.
+    The coefficient by $x^i y^j$ for some positive $i$ and $j$ is equal to
+    \begin{align*}
+      \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} a^{p-1-i} b^{p-1-j} = \sum_{b = 1}^{p-1} b^{p-1-j} \sum_{a=0}^{b-1} a^{p-1-i}.
+    \end{align*}
+    According to~(\ref{eq:faulhaber}), it follows that there exist a polynomial $P(x)$ of degree $p-i$ such that $\sum_{a=0}^{b-1} a^{p-1-i} = P(b)$.
+    Since $Q(x) = x^{p-1-j} P(x)$ has degree $2p-1-i-j$, Lemma~\ref{lem:sum_poly} implies that if $i+j > p$, then
+    \begin{align*}
+      \sum_{b = 1}^{p-1} b^{p-1-j} \sum_{a=0}^{b-1} a^{p-1-i} = \sum_{b=1}^{p-1} Q(b) = 0.
+    \end{align*}
+    Thus, the total degree of $\LT_\S$ is at most $p$.
+
+    In addition, we consider the case when $i = j$.
+    Let us consider the following sum
+    \begin{align*}
+      \sum_{a=0}^{p-1} a^{p-1-i} \sum_{b=0}^{p-1} b^{p-1-i} = 0.
+    \end{align*}
+    We can rewrite it as follows
+    \begin{align*}
+      \sum_{a=0}^{p-1} a^{p-1-i} \sum_{b=0}^{p-1} b^{p-1-i} = 2\sum_{a=0}^{p-2} a^{p-1-i} \sum_{b=a+1}^{p-1} b^{p-1-i} + \sum_{a=0}^{p-1} a^{2(p-1-i)}.
+    \end{align*}
+    If $i \ne (p-1)/2$, then the last sum is zero.
+    Thus, the coefficient by $x^i y^i$ is equal to $\sum_{a=0}^{p-2} a^{p-1-i} \sum_{b=a+1}^{p-1} b^{p-1-i} = 0$.
+    If $i = (p-1)/2$, then following the above argument, this coefficient is equal to $-(p-1)/2$.
+  \end{proof}
+
+\subsection{$1$-variate interpolation of $\LT_\S$}
+  Another way to compare $x$ and $y$ from $\S$ is to compute the difference $x-y$ and find its sign.
+  To compute the sign function (or $\LT_\S(z,0)$) using finite field arithmetic, we need to split finite field elements into two classes:  negative ($\F_p^-$) and non-negative ($\F_p^+$).
+  In addition, for any $x, y \in \S$ the following property should hold
+  \begin{align*}
+    x - y \in 
+    \begin{cases}
+      \F_p^+ \text{ if } \LT_\S(x,y) = 0 \\
+      \F_p^- \text{ if } \LT_\S(x,y) = 1
+    \end{cases}
+  \end{align*}   
+  Let $\S = [0, (p-1)/2]$.
+  In this case, $\F_p^+ = [0, (p-1)/2]$ and $\F_p^- = [-(p-1)/2, -1]$.
+
+  \todo{finish description of the circuit, prove its polynomial form}
+  \begin{align*}
+    \IsNegative_\S(z) = \sum_{a=-\frac{p-1}{2}}^{-1} 1 - (z - a)^{p-1}
+  \end{align*}
+
+  \begin{align*}
+    \sum_{a=-\frac{p-1}{2}}^{-1} 1 - (z - a)^{p-1} &= \sum_{a=-\frac{p-1}{2}}^{-1} 1 - \sum_{i=0}^{p-1} z^i a^{p-1-i} \\
+    &= \sum_{i=1}^{p-1} z^i \sum_{a=-\frac{p-1}{2}}^{-1} (-a^{p-1-i})
+  \end{align*}
+  If $i$ is even, then the $i$th coefficient is
+  \begin{align*}
+    -\sum_{a=-\frac{p-1}{2}}^{-1} a^{p-1-i} &= -\sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i} = -\frac{\sum_{a=-\frac{p-1}{2}}^{\frac{p-1}{2}} a^{p-1-i}}{2}.
+  \end{align*}
+  Since $\sum_{a=0}^{p-1} a^{p-1-i} = 0$ if $i \ne p-1$, this coefficient is equal to $0$. 
+  If $i = p-1$, then the $i$th coefficient is $-(p-1)/2 = (p+1)/2$.
+  If $i$ is odd, then we can rewrite the $i$th coefficient in the following way
+  \begin{align*}
+    -\sum_{a=-\frac{p-1}{2}}^{-1} a^{p-1-i} &= \sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i}.
+  \end{align*}
+  As a result, we can write the polynomial of $\IsNegative_\S(z)$ is as follows
+  \begin{align*}
+    \IsNegative_\S(z) = \frac{p+1}{2} z^{p-1} + \sum_{i=1, \text{odd}}^{p-2} z^i \sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i}.
+  \end{align*}
 
 \subsection{Lexicographic order}
   Let $\vx=(x_0,x_1,\ldots,x_{\ell-1})$ and $\vy=(y_0,y_1,\ldots,y_{\ell-1}) \in \F_\fieldcard^\ell$ for the lexicographical order $<$ defined by the choice of $\S$:

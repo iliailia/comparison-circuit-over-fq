@@ -642,6 +642,10 @@ void Comparator::test(long runs, bool is_randomized) const
     printNamedTimer(cout, "ShiftAdd");
     printNamedTimer(cout, "Comparison");
 
+    const FHEtimer* comp_timer = getTimerByName("Comparison");
+
+    cout << "Avg. time per 64-bit integer: " << 1000.0 * comp_timer->getTime()/static_cast<double>(run+1)/static_cast<double>(numbers_size) << " ms" << endl;
+
     // remove the line below if it gives bizarre results 
     ctxt_res.cleanUp();
     capacity = ctxt_res.bitCapacity();

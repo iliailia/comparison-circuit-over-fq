@@ -1,0 +1,38 @@
+The homomorphic circuit for $\LT_{\F_\fieldcard}(x,y)$ is presented in Algorithm~\ref{alg:basic_less_than_circuit}.
+Unlike the prior works (\todo{cite}) that evaluate this circuit as a multivariate polynomial, we exploit its representation in~(\ref{eq:less_than_function}) to parallelize computations in the SIMD manner. 
+\begin{algorithm}[t]
+  \KwIn{
+  $\ct_x$ -- a ciphertext encrypting $x \in \F_\fieldcard$ in the first SIMD slot and $0$ in other slots,
+  $\ct_y$ -- a ciphertext encrypting $y \in \F_\fieldcard$ in the first SIMD slot and $0$ in other slots,
+  $\S = \{a_0,a_1,\dots,a_{\fieldcard-1}\}$ -- a complete set of representatives of $\F_\fieldcard$.
+  }
+  \KwOut{$\ct$ -- a ciphertext encrypting $1$ in the first SIMD slot if $x < y$, otherwise $0$. Other slots contain $0$.}
+  $\ct_1 \leftarrow \Replicate(\ct_x, \fieldcard - 1)$//\todo{Define replicate}\\
+  $\ct_2 \leftarrow \Replicate(\ct_y, \fieldcard - 1)$\\
+  $\pt_1 \leftarrow \pt(a_0, a_1, \dots, a_{\fieldcard-2})$//\todo{define this operation}\\
+  $\pt_2 \leftarrow \pt(a_1, a_2, \dots, a_{\fieldcard-1})$\\
+  $\ct_1 \leftarrow \ct_1 - \pt_1$//\todo{define operations between ciphertexts and plaintexts}\\
+  $\ct_2 \leftarrow \ct_2 - \pt_2$\\
+  $\ct_1 \leftarrow \ct_1^{\fieldcard-1}$//$\princhar_\fieldcard(x-a)$, \todo{define this operation}\\
+  $\ct_2 \leftarrow \ct_2^{\fieldcard-1}$//$\princhar_\fieldcard(y-b)$\\
+  $\ct_1 \leftarrow 1 - \ct_1$// define operations between constants and ciphertexts\\
+  $\ct_2 \leftarrow 1 - \ct_2$\\
+  $k \leftarrow 1$// compute all running sums $\sum_{b \in \S, a < b} (1-\princhar_\fieldcard(x - b))$ \\
+  \While{$k < \fieldcard-1$}{
+    $\ct_{tmp} \leftarrow \Shift(\ct_2, k)$//\todo{define shift}\\
+    $\ct_2 \leftarrow \ct_2 + \ct_{tmp}$\\
+    $k \leftarrow 2k$\\
+  }
+  $\ct \leftarrow \ct_1 \cdot \ct_2$\\
+  $k \leftarrow 1$\\
+  \While{$k < \fieldcard-1$}{
+    $\ct_{tmp} \leftarrow \Shift(\ct, k)$\\
+    $\ct \leftarrow \ct + \ct_{tmp}$\\
+    $k \leftarrow 2k$\\
+  }
+  $\ct \leftarrow \Select(\ct, \{1\})$//\todo{define select}\\
+  \textbf{Return} $\ct$.
+  \caption{Homomorphic circuit of $\LT_{\F_\fieldcard}$.}\label{alg:basic_less_than_circuit}
+\end{algorithm}
+\todo{Make a separate algorithm for running sums (while circuit above)}
+\todo{Write down the complexity of Algorithm~\ref{alg:basic_less_than_circuit}, compare with prior works}
