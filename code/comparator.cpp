@@ -66,6 +66,100 @@ void Comparator::create_all_shift_masks()
 	}
 }
 
+void Comparator::compute_poly_params()
+{
+	// get p
+	ZZ p = ZZ(m_context.zMStar.getP());
+	long p_long = conv<long>(p);
+
+	// hardcoded babystep numbers
+	map<unsigned long, unsigned long> bs_nums
+	{
+  		{13, 3}, // 3 (16), 1..5
+  		{47, 5}, // 5 (26), 2..11 
+  		{61, 6}, // 6 (27), 4..8 
+  		{67, 5}, // 5 (27), 4..8
+  		{131, 8}, // 8 (32), 4..11
+  		{167, 10}, // 10 (36), 8..12
+  		{173, 10}  // 10 (36), 8..12
+  	};
+
+  	m_bs_num = -1;
+  	if(bs_nums.count(p_long) > 0)
+  		m_bs_num = bs_nums[p_long];
+
+  	long d = deg(m_poly);
+
+  	// How many baby steps: set sqrt(n/2), rounded up/down to a power of two
+
+	// FIXME: There may be some room for optimization here: it may be possible to choose this number as something other than a power of two and still maintain optimal depth, in principle we can try all possible values of m_babystep_num between two consecutive powers of two and choose the one that gives the least number of multiplies, conditioned on minimum depth.
+
+  	if (m_bs_num <= 0) 
+	{
+		long kk = static_cast<long>(sqrt(d/2.0));
+		m_bs_num = 1L << NextPowerOfTwo(kk);
+
+    	// heuristic: if k>>kk then use a smaler power of two
+    	if ((m_bs_num==16 && d>167) || (m_bs_num>16 && m_bs_num>(1.44*kk)))
+      		m_bs_num /= 2;
+  	}
+
+	if(m_verbose)
+	{
+		cout << "Number of baby steps: " << m_bs_num << endl;
+	}
+
+	// n = ceil(deg(p)/k), deg(p) >= k*n
+	m_gs_num = divc(d,m_bs_num);      
+
+	// If n is not a power of two, ensure that poly is monic and that
+	// its degree is divisible by k, then call the recursive procedure
+
+	// top coefficient is equal to (p^2 - 1)/8 mod p
+	// its inverse is equal to -8 mod p
+	m_top_coef = LeadCoeff(m_poly);
+	ZZ topInv = ZZ(-8) % p; // the inverse mod p of the top coefficient of poly (if any)
+	bool divisible = (m_gs_num * m_bs_num == d); // is the degree divisible by k?
+	//long nonInvertibe = InvModStatus(topInv, top, p);
+	   // 0 if invertible, 1 if not
+
+	// FIXME: There may be some room for optimization below: instead of
+	// adding a term X^{n*k} we can add X^{n'*k} for some n'>n, so long
+	// as n' is smaller than the next power of two. We could save a few
+	// multiplications since giantStep[n'] may be easier to compute than
+	// giantStep[n] when n' has fewer 1's than n in its binary expansion.
+
+	m_extra_coef = ZZ::zero();    // extra!=0 denotes an added term extra*X^{n*k}
+
+	if (m_gs_num != (1L << NextPowerOfTwo(m_gs_num)))
+	{
+		if (!divisible) 
+		{  // need to add a term
+	    	m_top_coef = NTL::to_ZZ(1);  // new top coefficient is one
+	    	topInv = m_top_coef;    // also the new inverse is one
+	    	// set extra = 1 - current-coeff-of-X^{n*k}
+	    	m_extra_coef = SubMod(m_top_coef, coeff(m_poly, m_gs_num * m_bs_num), p);
+	    	SetCoeff(m_poly, m_gs_num * m_bs_num); // set the top coefficient of X^{n*k} to one
+		}
+
+		if (!IsOne(m_top_coef)) 
+		{
+	    	m_poly *= topInv; // Multiply by topInv to make into a monic polynomial
+	    	for (long i = 0; i <= m_gs_num * m_bs_num; i++) rem(m_poly[i], m_poly[i], p);
+	    	m_poly.normalize();
+		}
+	}
+
+	long top_deg = conv<long>(p-1) >> 1;
+	m_baby_index = top_deg % m_bs_num;
+	m_giant_index = top_deg / m_bs_num;
+	if(m_baby_index == 0)
+	{
+		m_baby_index = m_bs_num;
+		m_giant_index -= 1;
+	}
+}
+
 void Comparator::create_poly()
 {
 	// get p
@@ -80,7 +174,7 @@ void Comparator::create_poly()
 	field_elem.init(ZZ(p));
 
 	// initialization of the comparison polynomial with x^{p-1} * (p+1)/2
-	m_poly = ZZX(INIT_MONO, p-1, ZZ((p+1) >> 1));
+	m_poly = ZZX(INIT_MONO, 0, 0);
 
 	// loop over all odd coefficient indices
 	for (long indx = 1; indx < p - 1; indx+=2)
@@ -93,16 +187,45 @@ void Comparator::create_poly()
 		  coef += power(field_elem, p - 1 - indx);
 		}
 
-		m_poly += ZZX(INIT_MONO, indx, rep(coef));
+		m_poly += ZZX(INIT_MONO, (indx-1) >> 1, rep(coef));
 	}
 
 	if (m_verbose)
 	{
 		cout << "Comparison polynomial: " << endl;
-		printZZX(cout, m_poly, p-1);
+		printZZX(cout, m_poly, (p-1)>>1);
 		cout << endl;
 	}
+
+	compute_poly_params();
 }
+
+
+void Comparator::slot_init()
+{
+	/*
+	// get p
+	long p = m_context.zMStar.getP();
+
+	// coefficient vector of a candidate generator
+	vector<ZZ_p> gen_coefs(m_slotDeg);
+
+	// get the generator of the entire slot
+	ZZX full_gen = m_context.slotRing->G;
+
+	//ZZX cand_gen;
+	while(true)
+	{
+		for (int iCoef = 0; iCoef < m_slotDeg; iCoef++)
+		{
+			gen_coefs[iCoef].init(ZZ(p));
+			random(gen_coefs[iCoef]);
+		}
+		//cand_gen = 
+	}
+	*/
+}
+
 
 Comparator::Comparator(const Context& context, unsigned long d, unsigned long expansion_len, const SecKey& sk, bool verbose): m_context(context), m_slotDeg(d), m_expansionLen(expansion_len), m_sk(sk), m_pk(sk), m_verbose(verbose)
 {
@@ -116,7 +239,7 @@ Comparator::Comparator(const Context& context, unsigned long d, unsigned long ex
 
 	create_all_shift_masks();
 	create_poly();
-
+	slot_init();
 }
 
 const ZZX& Comparator::get_mask(long index) const
@@ -254,11 +377,183 @@ void Comparator::mapTo01_subfield(Ctxt& ctxt, long d) const
   FHE_NTIMER_STOP(MapTo01);
 }
 
+void Comparator::less_than_mod_3(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
+{
+	//Comp(x,y) = -y(x-y)(x+1)
+	cout << "Compute comparison polynomial" << endl;
+
+	// x + 1
+	Ctxt x_plus_1 = ctxt_x;
+	x_plus_1.addConstant(ZZ(1));
+
+	// y(x - y)
+	ctxt_res = ctxt_x;
+	ctxt_res -= ctxt_y;
+	ctxt_res.multiplyBy(ctxt_y);
+
+	// -y(x-y)(x+1)
+	ctxt_res.multiplyBy(x_plus_1);
+	ctxt_res.negate();
+
+	if(m_verbose)
+	  {
+	    print_decrypted(ctxt_res);
+	    cout << endl;
+	  }
+}
+
+void Comparator::less_than_mod_5(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
+{
+	//Comp(x,y)=−(x+1) y(x−y) (x (x+1) − y(x−y)).
+	cout << "Compute comparison polynomial" << endl;
+
+	// y(x - y)
+	Ctxt y_x_min_y = ctxt_x;
+	y_x_min_y -= ctxt_y;
+	y_x_min_y.multiplyBy(ctxt_y);
+
+	// x + 1
+	Ctxt x_plus_1 = ctxt_x;
+	x_plus_1.addConstant(ZZ(1));
+
+	// x * (x+1)
+	ctxt_res = ctxt_x;
+	ctxt_res.multiplyBy(x_plus_1);
+
+	// x * (x+1) - y * (x-y)
+	ctxt_res -= y_x_min_y;
+
+	// y * (x-y) * (x * (x+1) - y * (x-y))
+	ctxt_res.multiplyBy(y_x_min_y);
+
+	// -(x+1) * y * (x-y) * (x * (x+1) - y * (x-y))
+	ctxt_res.multiplyBy(x_plus_1);
+	ctxt_res.negate();
+
+	if(m_verbose)
+	  {
+	    print_decrypted(ctxt_res);
+	    cout << endl;
+	  }
+}
+
+void Comparator::less_than_mod_7(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
+{
+	// Comp(x,y) = -y(x-y)(x+1)(x(x+1)(x(x+1)+3) + 5y(x-y)(x(x+1)+2x+3y(x-y)))
+	cout << "Compute comparison polynomial" << endl;
+
+	// x
+	Ctxt y_x_min_y = ctxt_x;
+	// x - y
+	y_x_min_y -= ctxt_y;
+	// y(x-y)
+	y_x_min_y.multiplyBy(ctxt_y);
+
+	// x + 1
+	Ctxt x_plus_1 = ctxt_x;
+	x_plus_1.addConstant(ZZ(1));
+
+	// x(x+1)
+	Ctxt x_x_plus_1 = x_plus_1;
+	x_x_plus_1.multiplyBy(ctxt_x);
+
+	// x(x+1)(x(x+1)+3)
+	Ctxt tmp = x_x_plus_1;
+	tmp.addConstant(ZZ(3));
+	tmp.multiplyBy(x_x_plus_1);
+	ctxt_res = tmp;
+
+	// x(x+1) + 2x + 3y(x-y)
+	tmp = y_x_min_y;
+	tmp.multByConstant(ZZ(3));
+	tmp += x_x_plus_1;
+	tmp += ctxt_x;
+	tmp += ctxt_x;
+
+	// 5y(x-y)(x(x+1) + 2x + 3y(x-y))
+	tmp.multiplyBy(y_x_min_y);
+	tmp.multByConstant(ZZ(5));
+
+	// (x^2+x)(x^2+x+3) + 5y(x-y)(x^2+x+2x+3y(x-y))
+	ctxt_res += tmp;
+
+	// -y(x-y)(x+1)((x^2+x)(x^2+x+3) + 5y(x-y)(x^2+x+2x+3y(x-y)))
+	ctxt_res.multiplyBy(y_x_min_y);
+	ctxt_res.multiplyBy(x_plus_1);
+	ctxt_res.negate();
+
+	if(m_verbose)
+	{
+		print_decrypted(ctxt_res);
+		cout << endl;
+	}
+}
+
+void Comparator::evaluate_poly(Ctxt& ret, const Ctxt& x, const Ctxt& x2) const
+{
+	// get p
+	ZZ p = ZZ(m_context.zMStar.getP());
+
+	DynamicCtxtPowers babyStep(x2, m_bs_num);
+	const Ctxt& x2k = babyStep.getPower(m_bs_num);
+
+	DynamicCtxtPowers giantStep(x2k, m_gs_num);
+
+	// Special case when deg(p)>k*(2^e -1)
+	if (m_gs_num == (1L << NextPowerOfTwo(m_gs_num))) 
+	{ // n is a power of two
+		cout << "I'm computing degPowerOfTwo" << endl;
+    	degPowerOfTwo(ret, m_poly, m_bs_num, babyStep, giantStep);
+    }
+    else
+    {
+	  	recursivePolyEval(ret, m_poly, m_bs_num, babyStep, giantStep);
+
+	  	if (!IsOne(m_top_coef)) 
+	  	{
+	    	ret.multByConstant(m_top_coef);
+		}
+
+		if (!IsZero(m_extra_coef)) 
+		{ // if we added a term, now is the time to subtract back
+	    	Ctxt topTerm = giantStep.getPower(m_gs_num);
+	    	topTerm.multByConstant(m_extra_coef);
+	    	ret -= topTerm;
+		}
+	}
+	ret.multiplyBy(x);
+
+	Ctxt top_term = babyStep.getPower(m_baby_index);
+	top_term.multiplyBy(giantStep.getPower(m_giant_index));
+	top_term.multByConstant(ZZ((p+1)>> 1));
+
+	ret += top_term;
+}
+
+
 void Comparator::less_than(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
 {
   FHE_NTIMER_START(ComparisonCircuit);
 
   unsigned long p = m_context.zMStar.getP();
+
+  if(p == 3)
+  {
+  	less_than_mod_3(ctxt_res, ctxt_x, ctxt_y);
+  	return;
+  }
+
+  if(p == 5)
+  {
+  	less_than_mod_5(ctxt_res, ctxt_x, ctxt_y);
+  	return;
+  }
+
+  if(p == 7)
+  {
+  	less_than_mod_7(ctxt_res, ctxt_x, ctxt_y);
+  	return;
+  }
 
   // Subtraction z = x - y
   cout << "Subtraction" << endl;
@@ -271,23 +566,14 @@ void Comparator::less_than(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_
     cout << endl;
   }
 
-  map<unsigned long, unsigned long> pat_stock_ks{
-  	{13, 4}, //4 (15), 2..5
-  	{47, 7}, //7 (26), 3..8
-  	{61, 6}, //6 (26), 3..6
-  	{67, 6}, //6 (26), 4..8
-  	{131, 14}, //10 (33), 10..13
-  	{167, 10}, //10 (38), 8..12
-  	{173, 12} //11 (39), 7..12
-  };
-
-  long k = -1;
-  if(pat_stock_ks.count(p) > 0)
-  	k = pat_stock_ks[p];
-
   // compute polynomial function for 'z < 0'
   cout << "Compute comparison polynomial" << endl;
-  polyEval(ctxt_res, m_poly, ctxt_z, k);
+
+  // z^2
+  Ctxt ctxt_z2 = ctxt_z;
+  ctxt_z2.square();
+
+  evaluate_poly(ctxt_res, ctxt_z, ctxt_z2);
 
   if(m_verbose)
   {
@@ -527,6 +813,10 @@ void Comparator::test(long runs, bool is_randomized) const
   //encoding base, (p+1)/2
   //if 2-variable comparison polynomial is used, it must be p
   unsigned long enc_base = (p + 1) >> 1;
+  if (p == 3 || p == 5 || p == 7)
+  {
+  	enc_base = p;
+  }
 
   //check that field_size^expansion_len fits into 64-bits
   int space_bit_size = static_cast<int>(ceil(m_expansionLen * log2(enc_base)));

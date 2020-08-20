@@ -87,9 +87,9 @@ Since this function is independent of the choice of $\S$, we can write
   \begin{theorem} \label{lem:less_than_total_degree}
     Let $p$ be a prime number bigger than $2$ and $\S = [0,p-1]$, then $\LT_\S$ is a polynomial over $\F_p$ of the following form
     \begin{align*}
-      \LT_\S(x,y) = y^{p-1} - \frac{p-1}{2} (xy)^{\frac{p-1}{2}} + \sum_{i,j>0, i+j \le p} a_{ij} x^i y^j 
+      \LT_\S(x,y) = y^{p-1} - \frac{p-1}{2} (xy)^{\frac{p-1}{2}} + \sum_{\substack{i,j>0 \\ i+j \le p}} a_{ij} x^i y^j 
     \end{align*}
-    for some $a_{ij} \in \F_p$.
+    where $a_{ij} = \sum_{a=0}^{p-2} \sum_{b=a+1}^{p-1} a^{p-1-i} b^{p-1-j} \in \F_p$.
   \end{theorem}
   \begin{proof}
     Assume that all computations are done modulo $p$.

@@ -24,25 +24,7 @@ using namespace std;
 using namespace NTL;
 using namespace helib;
 
-ZZX getG(const EncryptedArray& ea)
-{
-  NTL::ZZX G;
-  switch (ea.getTag()) {
-  case PA_GF2_tag:
-    G = NTL::conv<NTL::ZZX>(ea.getDerived(PA_GF2()).getG());
-    break;
-  case PA_zz_p_tag:
-    convert(G, ea.getDerived(PA_zz_p()).getG());
-    break;
-  case PA_cx_tag:
-    throw helib::LogicError("Cannot get polynomial modulus G when scheme is CKKS");
-    break;
-  default:
-    throw helib::LogicError("No valid tag found in EncryptedArray");
-  }
-  return G;
-}
-
+/*
 //TODO: finish this function
 ZZX get_subfield_gen(const EncryptedArray& ea)
 {
@@ -102,6 +84,7 @@ ZZX get_subfield_gen(const EncryptedArray& ea)
 
   return gen;
 }
+*/
 
 /*
 void batch_shift(Ctxt& ctxt, const vector<long>& batch_borders, long shift, long range_len, const EncryptedArray& ea)
@@ -696,7 +679,10 @@ int main(int argc, char *argv[]) {
     addFrbMatrices(secret_key); //might be useful only when d > 1
 
   // create Comparator (initialize after buildModChain)
-  Comparator comparator(context, d, expansion_len, secret_key, verbose); 
+  Comparator comparator(context, d, expansion_len, secret_key, verbose);
+
+  // TODO: REMOVE
+  //return 0; 
 
   //repeat experiments several times
   int runs = atoi(argv[6]);
