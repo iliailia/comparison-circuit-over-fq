@@ -88,15 +88,21 @@ class Comparator{
     // less than function comparing slots one by one
     void less_than(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;
 
-    // less than function comparing slots one by one in F_5
+    // less than function comparing slots one by one in F_2
+    void less_than_mod_2(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;
+  
+    // less than function comparing slots one by one in F_3
     void less_than_mod_3(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;
 
-    // less than function comparing slots one by one in F_3
+    // less than function comparing slots one by one in F_5
     void less_than_mod_5(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;
 
-    // less than function comparing slots one by one in F_5
+    // less than function comparing slots one by one in F_7
     void less_than_mod_7(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;  
 
+    // less than function comparing slots one by one in F_11
+    void less_than_mod_11(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;
+  
     // randomized equality
     void random_equality(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;
 

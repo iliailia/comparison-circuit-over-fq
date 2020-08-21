@@ -377,6 +377,26 @@ void Comparator::mapTo01_subfield(Ctxt& ctxt, long d) const
   FHE_NTIMER_STOP(MapTo01);
 }
 
+void Comparator::less_than_mod_2(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
+{
+	//Comp(x,y) = y(x+1)
+	cout << "Compute comparison polynomial" << endl;
+
+	// x + 1
+	Ctxt x_plus_1 = ctxt_x;
+	x_plus_1.addConstant(ZZ(1));
+
+	// y(x+1)
+	ctxt_res = ctxt_y;
+	ctxt_res.multiplyBy(x_plus_1);
+
+	if(m_verbose)
+	  {
+	    print_decrypted(ctxt_res);
+	    cout << endl;
+	  }
+}
+
 void Comparator::less_than_mod_3(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
 {
 	//Comp(x,y) = -y(x-y)(x+1)
@@ -489,6 +509,132 @@ void Comparator::less_than_mod_7(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt&
 	}
 }
 
+void Comparator::less_than_mod_11(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
+{
+        // Y = y(x-y)
+        // X = x(x+1)
+	// Comp(x,y) = Y(x+1)[(7X + 8X^2 + 8X^3 - X^4) + (3 + (7x+4)(X+1)^2 + 4(X+1)^3)Y + (x^2+6x + 4(X +5x)^2)Y^2 + 5(x^2+7x)Y^3 - Y^4]
+	cout << "Compute comparison polynomial" << endl;
+
+	Ctxt Y = ctxt_x, x_plus_1 = ctxt_x;
+
+	// x - y
+	Y -= ctxt_y;
+	// Y = y(x-y)
+	Y.multiplyBy(ctxt_y);
+	// Y(x+1)
+	x_plus_1.addConstant(ZZ(1));
+	x_plus_1.multiplyBy(Y);
+
+	// X = x^2 + x
+	Ctxt X = ctxt_x;
+	X.multiplyBy(ctxt_x);
+	X += ctxt_x;
+	
+	
+	// f0 = 7X + 8X^2 + 8X^3 - X^4
+	Ctxt f0 = X, tmp = X, X_2 = X, X_3 = X;
+	// 7X
+	f0.multByConstant(ZZ(7));
+	
+	// 8(X^2 + X^3)
+	X_2.multiplyBy(X);
+	X_3.multiplyBy(X_2);
+	
+	tmp = X_2;
+	tmp += X_3;
+	tmp += tmp;
+	tmp +=tmp;
+	tmp += tmp;
+	f0 += tmp;
+
+	//X^4
+	Ctxt X_4 = X_2;
+	X_4.multiplyBy(X_2);
+	f0 -= X_4;
+
+	// X' = X + 1
+	//f1 = Y(3 + (7x+4)X'^2 + 4X'^3)
+	Ctxt f1 = X_2;
+	f1 += X;
+	f1 += X;
+	f1.addConstant(ZZ(1));
+
+	Ctxt X1_2 = f1;
+        
+	// 7x + 4 = 4(1-x) mod 11 
+	tmp = ctxt_x;
+	tmp.negate();
+	tmp.addConstant(ZZ(1));
+	tmp += tmp;
+	tmp+=tmp;
+
+	tmp.multiplyBy(Y);
+	f1.multiplyBy(tmp);
+
+	// 4X'^3*Y
+	tmp = X;
+	tmp.addConstant(ZZ(1));
+	tmp += tmp;
+	tmp+= tmp;
+	tmp.multiplyBy(Y);
+	tmp.multiplyBy(X1_2);
+
+	f1 += tmp;
+	f1 += Y;
+	f1 += Y;
+	f1 += Y;
+
+	//X' = x^2 + 6x = X + 5x
+	//f2 = 3X' + 4X'^2
+	X1_2 = ctxt_x;
+	X1_2 += X1_2;
+	X1_2 += X1_2;
+	X1_2 += ctxt_x;
+	X1_2 += X;
+
+	tmp = X1_2;
+	tmp += tmp;
+	tmp += tmp;
+	tmp.addConstant(ZZ(3));
+	tmp.multiplyBy(X1_2);
+
+	Ctxt Y2 = Y;
+	Y2.multiplyBy(Y);
+	Ctxt f2 = Y2;
+	
+	f2.multiplyBy(tmp);
+
+	// X' = x^2 + 7x = X1_2 + x
+	// f3 = 5X
+	X1_2 += ctxt_x;
+	Ctxt f3 = X1_2;
+	f3 += f3;
+	f3 += f3;
+	f3 += X1_2;
+	f3.multiplyBy(Y);
+	f3.multiplyBy(Y2);
+
+	f0 += f1;
+	f2 += f3;
+	f0 += f2;
+
+	Y2.multiplyBy(Y2);
+
+	f0 -= Y2;
+
+	ctxt_res = f0;
+	ctxt_res.multiplyBy(x_plus_1);
+	
+	if(m_verbose)
+	{
+		print_decrypted(ctxt_res);
+		cout << endl;
+	}
+}
+
+
+
 void Comparator::evaluate_poly(Ctxt& ret, const Ctxt& x, const Ctxt& x2) const
 {
 	// get p
@@ -537,6 +683,13 @@ void Comparator::less_than(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_
 
   unsigned long p = m_context.zMStar.getP();
 
+  if(p == 2)
+    {
+      less_than_mod_2(ctxt_res, ctxt_x, ctxt_y);
+      return;
+    }
+
+  
   if(p == 3)
   {
   	less_than_mod_3(ctxt_res, ctxt_x, ctxt_y);
@@ -555,6 +708,12 @@ void Comparator::less_than(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_
   	return;
   }
 
+  if(p == 11)
+    {
+      less_than_mod_11(ctxt_res, ctxt_x, ctxt_y);
+      return;
+    }
+  
   // Subtraction z = x - y
   cout << "Subtraction" << endl;
   Ctxt ctxt_z = ctxt_x;
