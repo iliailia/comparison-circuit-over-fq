@@ -4,8 +4,11 @@
 #include <helib/polyEval.h>
 #include <random>
 #include <map> 
+#include <NTL/ZZ_pE.h>
+#include <NTL/mat_ZZ_pE.h>
+#include <helib/Ptxt.h>
 
-void Comparator::create_shift_mask(ZZX& mask_ptxt, long shift)
+DoubleCRT Comparator::create_shift_mask(double& size, long shift)
 {
 	cout << "Mask for shift " << shift << " is being created" << endl;
 	// get EncryptedArray
@@ -51,7 +54,13 @@ void Comparator::create_shift_mask(ZZX& mask_ptxt, long shift)
 	  }
 	}
 	}
-	ea.encode(mask_ptxt, mask_vec);
+	ZZX mask_zzx;
+	ea.encode(mask_zzx, mask_vec);
+
+	size = conv<double>(embeddingLargestCoeff(mask_zzx, m_context.zMStar));
+
+	DoubleCRT mask_crt = DoubleCRT(mask_zzx, m_context, m_context.allPrimes());
+	return mask_crt;
 }
 
 void Comparator::create_all_shift_masks()
@@ -59,9 +68,11 @@ void Comparator::create_all_shift_masks()
 	long shift = 1;
 	while (shift < m_expansionLen)
 	{
-	    ZZX mask_ptxt;
-	    create_shift_mask(mask_ptxt, -shift);
-	    m_mulMasks.push_back(mask_ptxt); 
+		double size;
+	    DoubleCRT mask_ptxt = create_shift_mask(size, -shift);
+	    m_mulMasks.push_back(mask_ptxt);
+	    m_mulMasksSize.push_back(size);
+
 	    shift <<=1;
 	}
 }
@@ -75,13 +86,18 @@ void Comparator::compute_poly_params()
 	// hardcoded babystep numbers
 	map<unsigned long, unsigned long> bs_nums
 	{
+		{11, 3}, // 3 (19), 1..4
   		{13, 3}, // 3 (16), 1..5
   		{47, 5}, // 5 (26), 2..11 
   		{61, 6}, // 6 (27), 4..8 
   		{67, 5}, // 5 (27), 4..8
+  		{71, 4}, // 4 (20), 3..7
+  		{101, 7}, // 7 (21), 4..8
   		{131, 8}, // 8 (32), 4..11
   		{167, 10}, // 10 (36), 8..12
-  		{173, 10}  // 10 (36), 8..12
+  		{173, 10},  // 10 (36), 8..12
+  		{271, 9},  // 9 (31), 9..10
+  		{401, 12}  // 12 (33), 9..14
   	};
 
   	m_bs_num = -1;
@@ -201,49 +217,151 @@ void Comparator::create_poly()
 }
 
 
-void Comparator::slot_init()
+void Comparator::extraction_init()
 {
-	/*
+	// get the total number of slots
+	const EncryptedArray& ea = *(m_context.ea);
+	long nslots = ea.size();
+
 	// get p
 	long p = m_context.zMStar.getP();
 
-	// coefficient vector of a candidate generator
-	vector<ZZ_p> gen_coefs(m_slotDeg);
+	// get the order of p
+	long d = m_context.zMStar.getOrdP();
 
-	// get the generator of the entire slot
-	ZZX full_gen = m_context.slotRing->G;
+	// get the defining polynomial of a slot mod p
+	ZZX def_poly = m_context.slotRing->G;
 
-	//ZZX cand_gen;
-	while(true)
+	//cout << "Def. poly" << def_poly << endl;
+
+	ZZ_pX def_poly_p;
+	for (long iCoef = 0; iCoef <= deg(def_poly); iCoef++)
 	{
-		for (int iCoef = 0; iCoef < m_slotDeg; iCoef++)
-		{
-			gen_coefs[iCoef].init(ZZ(p));
-			random(gen_coefs[iCoef]);
-		}
-		//cand_gen = 
+		ZZ_p coef;
+		coef.init(ZZ(p));
+		coef = conv<long>(def_poly[iCoef]);
+		SetCoeff(def_poly_p, iCoef, coef);
 	}
-	*/
+	//cout << "Def. poly mod p " << def_poly_p << endl;
+	
+	// build the trace matrix
+	mat_ZZ_pE trace_matrix;
+	trace_matrix.SetDims(d, d);
+	
+	ZZ_pE prim_elem;
+	prim_elem.init(def_poly_p);
+	prim_elem = conv<ZZ_pE>(ZZ_pX(INIT_MONO, 1, ZZ_p(1)));
+
+	//cout << "Primitive element " << prim_elem << endl;
+
+	ZZ_pE coef;
+	coef.init(def_poly_p);
+
+	for (long iRow = 0; iRow < d; iRow++)
+	{
+		for (long iCol = 0; iCol < d; iCol++)
+		{
+			// x^(iRow * p^iCol)
+			coef = power(prim_elem, iRow * power_long(p, iCol));
+			trace_matrix[iRow][iCol] = coef;
+		}
+	}
+	//cout << "Trace matrix" << trace_matrix << endl;
+
+	mat_ZZ_pE inv_trace_matrix = inv(trace_matrix);
+	//cout << "Inverse of trace matrix" << inv_trace_matrix << endl;
+
+	//cout << "Extraction consts: " << endl;
+	for (long iCoef = 0; iCoef < d; iCoef++)
+	{
+		vector<DoubleCRT> tmp_crt_vec;
+		vector<double> size_vec;
+
+		for (long iFrob = 0; iFrob < d; iFrob++)
+		{
+			ZZX tmp = conv<ZZX>(rep(inv_trace_matrix[iFrob][iCoef]));
+
+			//cout << tmp << endl;
+
+			vector<ZZX> vec_const(nslots, tmp);
+			ea.encode(tmp, vec_const);
+
+			DoubleCRT tmp_crt(tmp, m_context, m_context.allPrimes());
+
+			double const_size = conv<double>(embeddingLargestCoeff(tmp, m_context.zMStar));
+			size_vec.push_back(const_size);
+
+			tmp_crt_vec.push_back(tmp_crt);
+		}
+		m_extraction_const.push_back(tmp_crt_vec);
+		m_extraction_const_size.push_back(size_vec);
+	}
 }
 
+void Comparator::extract_mod_p(vector<Ctxt>& mod_p_coefs, const Ctxt& ctxt_x) const
+{
+	FHE_NTIMER_START(Extraction);
+	mod_p_coefs.clear();
+
+	if (m_slotDeg == 1)
+	{
+		mod_p_coefs.push_back(ctxt_x);
+		return;
+	}
+
+	const EncryptedArray& ea = *(m_context.ea);
+	long nslots = ea.size();
+
+	// get max slot degree
+	long d = m_context.zMStar.getOrdP();
+
+	// TODO: how to use key switching hoisting from CRYPTO'18?
+	vector<Ctxt> ctxt_frob(d-1, ctxt_x);
+	for(long iFrob = 1; iFrob < d; iFrob++)
+	{
+		ctxt_frob[iFrob-1].frobeniusAutomorph(iFrob);
+	} 
+
+	for(long iCoef = 0; iCoef < m_slotDeg; iCoef++)
+	{
+		cout << "Extract coefficient " << iCoef << endl;
+		Ctxt mod_p_ctxt = ctxt_x;
+
+		mod_p_ctxt.multByConstant(m_extraction_const[iCoef][0], m_extraction_const_size[iCoef][0]);
+
+		for(long iFrob = 1; iFrob < d; iFrob++)
+		{
+			Ctxt tmp = ctxt_frob[iFrob-1];
+			tmp.multByConstant(m_extraction_const[iCoef][iFrob], m_extraction_const_size[iCoef][iFrob]);
+			mod_p_ctxt += tmp; 
+		}
+		mod_p_coefs.push_back(mod_p_ctxt);
+	}
+	FHE_NTIMER_STOP(Extraction);
+}
 
 Comparator::Comparator(const Context& context, unsigned long d, unsigned long expansion_len, const SecKey& sk, bool verbose): m_context(context), m_slotDeg(d), m_expansionLen(expansion_len), m_sk(sk), m_pk(sk), m_verbose(verbose)
 {
 	//determine the order of p in (Z/mZ)*
+	m_isUnivar = true;
+	unsigned long p = context.zMStar.getP();
+	if (p == 3 || p == 5 || p == 7)
+		m_isUnivar = false;
 	unsigned long ord_p = context.zMStar.getOrdP();
 	//check that the extension degree divides the order of p
-	if (ord_p % d != 0)
+	if (ord_p < d != 0)
 	{
-		throw invalid_argument("Field extension must divide the order of the plaintext modulus\n");
+		throw invalid_argument("Field extension must be larger than the order of the plaintext modulus\n");
 	}
 
 	create_all_shift_masks();
 	create_poly();
-	slot_init();
+	extraction_init();
 }
 
-const ZZX& Comparator::get_mask(long index) const
+const DoubleCRT& Comparator::get_mask(double& size, long index) const
 {
+	size = m_mulMasksSize[index];
 	return m_mulMasks[index];
 }
 
@@ -287,8 +405,9 @@ void Comparator::batch_shift(Ctxt& ctxt, long start, long shift) const
 	// masking elements shifted out of batch
 	long index = static_cast<long>(intlog(2, -shift));
 	//cout << "Mask index: " << index << endl;
-	ZZX mask = get_mask(index);
-	ctxt.multByConstant(mask);
+	double size;
+	DoubleCRT mask = get_mask(size, index);
+	ctxt.multByConstant(mask, size);
 	FHE_NTIMER_STOP(BatchShift);
 }
 
@@ -307,11 +426,14 @@ void Comparator::batch_shift_for_mul(Ctxt& ctxt, long start, long shift) const
 
 	long index = static_cast<long>(intlog(2, -shift));
 	//cout << "Mask index: " << index << endl;
-	ZZX mask = get_mask(index);
-	ctxt.multByConstant(mask);
+	double mask_size;
+	DoubleCRT mask = get_mask(mask_size, index);
+	ctxt.multByConstant(mask, mask_size);
 
 	// add 1 to masked slots
-	ctxt.addConstant(1-mask);
+	ctxt.addConstant(ZZ(1));
+	mask.Negate();
+	ctxt.addConstant(mask, mask_size);
 
 	FHE_NTIMER_STOP(BatchShiftForMul);
 }
@@ -354,7 +476,7 @@ void Comparator::shift_and_mul(Ctxt& x, long start, long shift_direction) const
   FHE_NTIMER_STOP(ShiftMul);
 }
 
-void Comparator::mapTo01_subfield(Ctxt& ctxt, long d) const
+void Comparator::mapTo01_subfield(Ctxt& ctxt, long pow) const
 {
   FHE_NTIMER_START(MapTo01);	
   // get EncryptedArray
@@ -365,15 +487,12 @@ void Comparator::mapTo01_subfield(Ctxt& ctxt, long d) const
   if (p != ea.getPAlgebra().getP()) // ptxt space is p^r for r>1
     throw helib::LogicError("mapTo01 not implemented for r>1");
 
-  if (p > 2)
-    ctxt.power(p - 1); // set y = x^{p-1}
+  if (p % pow != 0)
+  	throw helib::LogicError("Exponent must divide p");
 
-  if (d > 1) { // compute the product of the d automorphisms
-    vector<Ctxt> v(d, ctxt);
-    for (long i = 1; i < d; i++)
-      v[i].frobeniusAutomorph(i);
-    totalProduct(ctxt, v);
-  }
+  if (p > 2)
+    ctxt.power((p - 1) / pow); // set y = x^{p-1}
+
   FHE_NTIMER_STOP(MapTo01);
 }
 
@@ -489,10 +608,15 @@ void Comparator::less_than_mod_7(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt&
 	}
 }
 
-void Comparator::evaluate_poly(Ctxt& ret, const Ctxt& x, const Ctxt& x2) const
+void Comparator::evaluate_poly(Ctxt& ret, Ctxt& ctxt_p_1, const Ctxt& x) const
 {
+	FHE_NTIMER_START(ComparisonCircuitUnivar);
 	// get p
 	ZZ p = ZZ(m_context.zMStar.getP());
+
+	  // z^2
+  	Ctxt x2 = x;
+  	x2.square();
 
 	DynamicCtxtPowers babyStep(x2, m_bs_num);
 	const Ctxt& x2k = babyStep.getPower(m_bs_num);
@@ -523,57 +647,39 @@ void Comparator::evaluate_poly(Ctxt& ret, const Ctxt& x, const Ctxt& x2) const
 	}
 	ret.multiplyBy(x);
 
+	// TODO: depth here is not optimal
 	Ctxt top_term = babyStep.getPower(m_baby_index);
 	top_term.multiplyBy(giantStep.getPower(m_giant_index));
+
+	ctxt_p_1 = top_term; 
+
 	top_term.multByConstant(ZZ((p+1)>> 1));
 
 	ret += top_term;
+	FHE_NTIMER_STOP(ComparisonCircuitUnivar);
 }
 
 
-void Comparator::less_than(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
+void Comparator::less_than_bivar(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
 {
-  FHE_NTIMER_START(ComparisonCircuit);
+  FHE_NTIMER_START(ComparisonCircuitBivar);
 
   unsigned long p = m_context.zMStar.getP();
 
   if(p == 3)
   {
   	less_than_mod_3(ctxt_res, ctxt_x, ctxt_y);
-  	return;
   }
 
   if(p == 5)
   {
   	less_than_mod_5(ctxt_res, ctxt_x, ctxt_y);
-  	return;
   }
 
   if(p == 7)
   {
   	less_than_mod_7(ctxt_res, ctxt_x, ctxt_y);
-  	return;
   }
-
-  // Subtraction z = x - y
-  cout << "Subtraction" << endl;
-  Ctxt ctxt_z = ctxt_x;
-  ctxt_z -= ctxt_y;
-
-  if(m_verbose)
-  {
-    print_decrypted(ctxt_z);
-    cout << endl;
-  }
-
-  // compute polynomial function for 'z < 0'
-  cout << "Compute comparison polynomial" << endl;
-
-  // z^2
-  Ctxt ctxt_z2 = ctxt_z;
-  ctxt_z2.square();
-
-  evaluate_poly(ctxt_res, ctxt_z, ctxt_z2);
 
   if(m_verbose)
   {
@@ -581,90 +687,14 @@ void Comparator::less_than(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_
     cout << endl;
   }
 
-  FHE_NTIMER_STOP(ComparisonCircuit);
+  FHE_NTIMER_STOP(ComparisonCircuitBivar);
 }
 
-void Comparator::random_equality(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
-{
-  FHE_NTIMER_START(RandomEqualityCircuit);
-
-  // get order of p
-  unsigned long ord_p = m_context.zMStar.getOrdP(); 
-
-  // Subtraction (x_i - y_i)
-  cout << "Subtraction" << endl;
-  ctxt_res = ctxt_x;
-  ctxt_res -= ctxt_y;
-
-  if(m_verbose)
-  {
-    print_decrypted(ctxt_res);
-    cout << endl;
-  }
-
-  //compute the multiplication with the random polynomial: r_i*(x_i - y_i)
-  cout << "Multiplication by a random element" << endl;
-  Ptxt<BGV> poly_r(ctxt_res.getContext());
-  poly_r.random();
-  ctxt_res.multByConstant(poly_r);
-
-  if(m_verbose)
-  {
-    print_decrypted(ctxt_res);
-    cout << endl;
-  }
-
-  //compute running sums: sum_i r_i*(x_i - y_i)
-  cout << "Rotating and adding slots" << endl;
-  shift_and_add(ctxt_res, 0);
-
-  if(m_verbose)
-  {
-    print_decrypted(ctxt_res);
-    cout << endl;
-  }
-
-  //compute mapTo01
-  cout << "Mapping to 0 and 1" << endl;
-  mapTo01_subfield(ctxt_res, ord_p);
-
-  if(m_verbose)
-  {
-    print_decrypted(ctxt_res);
-    cout << endl;
-  }
-  
-  cout << "Computing NOT" << endl;
-  //generate a plaintext with 1 in all the data slots
-  ZZX ptxt_ones(INIT_MONO, 0, 1);
-
-  //compute 1 - mapTo01(r_i*(x_i - y_i))
-  ctxt_res.negate();
-  ctxt_res.addConstant(ptxt_ones);
-
-  if(m_verbose)
-  {
-    print_decrypted(ctxt_res);
-    cout << endl;
-  }
-
-  //Remove the least significant digit and shift to the left
-  cout << "Remove the least significant digit" << endl;
-  batch_shift_for_mul(ctxt_res, 0, -1);
-
-  if(m_verbose)
-  {
-    print_decrypted(ctxt_res);
-    cout << endl;
-  }
-
-  FHE_NTIMER_STOP(RandomEqualityCircuit);
-}
-
-void Comparator::exact_equality(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
+void Comparator::is_zero(Ctxt& ctxt_res, const Ctxt& ctxt_z, long pow) const
 {
   FHE_NTIMER_START(EqualityCircuit);
 
+  /*
   // Subtraction (x_i - y_i)
   cout << "Subtraction" << endl;
   ctxt_res = ctxt_x;
@@ -675,10 +705,13 @@ void Comparator::exact_equality(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& 
     print_decrypted(ctxt_res);
     cout << endl;
   }
+  */
+
+  ctxt_res = ctxt_z;
 
   //compute mapTo01: (x_i - y_i)^{p^d-1}
   cout << "Mapping to 0 and 1" << endl;
-  mapTo01_subfield(ctxt_res, m_slotDeg);
+  mapTo01_subfield(ctxt_res, pow);
 
   if(m_verbose)
   {
@@ -687,12 +720,9 @@ void Comparator::exact_equality(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& 
   }
 
   cout << "Computing NOT" << endl;
-  //generate a plaintext with 1 in all the data slots
-  ZZX ptxt_ones(INIT_MONO, 0, 1);
-
   //compute 1 - mapTo01(r_i*(x_i - y_i))
   ctxt_res.negate();
-  ctxt_res.addConstant(ptxt_ones);
+  ctxt_res.addConstant(ZZ(1));
 
   if(m_verbose)
   {
@@ -700,6 +730,7 @@ void Comparator::exact_equality(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& 
     cout << endl;
   }
 
+  /*
   //compute running products: prod_i 1 - (x_i - y_i)^{p^d-1}
   cout << "Rotating and multiplying slots" << endl;
   shift_and_mul(ctxt_res, 0);
@@ -719,69 +750,222 @@ void Comparator::exact_equality(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& 
     print_decrypted(ctxt_res);
     cout << endl;
   }
+  */
 
   FHE_NTIMER_STOP(EqualityCircuit);
 }
 
-void Comparator::compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y, bool is_randomized) const
+void Comparator::compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
 {
 	FHE_NTIMER_START(Comparison);
 
-    if(m_expansionLen == 1) // if you compare slots one by one, use only less_than function
+	vector<Ctxt> ctxt_less_p;
+	vector<Ctxt> ctxt_eq_p;
+
+	// bivariate circuit
+	if (!m_isUnivar)
+	{
+		cout << "Extraction" << endl;
+		// extract mod p coefficients
+		vector<Ctxt> ctxt_x_p;
+		extract_mod_p(ctxt_x_p, ctxt_x);
+
+		if(m_verbose)
+	    {
+	    	for (long iCoef = 0; iCoef < m_slotDeg; iCoef++)
+	    	{
+	    		cout << "Ctxt x with coefficient " << iCoef << endl;
+		    	print_decrypted(ctxt_x_p[iCoef]);
+		    	cout << endl;
+		    }
+		}
+
+		vector<Ctxt> ctxt_y_p;
+		extract_mod_p(ctxt_y_p, ctxt_y);
+
+		if(m_verbose)
+	    {
+	    	for (long iCoef = 0; iCoef < m_slotDeg; iCoef++)
+	    	{
+	    		cout << "Ctxt y with coefficient " << iCoef << endl;
+		    	print_decrypted(ctxt_y_p[iCoef]);
+		    	cout << endl;
+		    }
+		}
+
+		cout << "Compute the less-than function modulo p" << endl;
+		for (long iCoef = 0; iCoef < m_slotDeg; iCoef++)
+		{
+			Ctxt ctxt_tmp = Ctxt(ctxt_x.getPubKey());
+			less_than_bivar(ctxt_tmp, ctxt_x_p[iCoef], ctxt_y_p[iCoef]);
+			ctxt_less_p.push_back(ctxt_tmp);
+		}
+
+		cout << "Compute the equality function modulo p" << endl;
+		for (long iCoef = 0; iCoef < m_slotDeg; iCoef++)
+		{
+			// Subtraction z = x - y
+			cout << "Subtraction" << endl;
+			Ctxt ctxt_z = ctxt_x_p[iCoef];
+			ctxt_z -= ctxt_y_p[iCoef];
+			Ctxt ctxt_tmp = Ctxt(ctxt_z.getPubKey());
+			is_zero(ctxt_tmp, ctxt_z);
+			ctxt_eq_p.push_back(ctxt_tmp);
+		}
+	}
+	else // univariate circuit
+	{
+		// Subtraction z = x - y
+		cout << "Subtraction" << endl;
+		Ctxt ctxt_z = ctxt_x;
+		ctxt_z -= ctxt_y;
+
+		if(m_verbose)
+		{
+			print_decrypted(ctxt_z);
+			cout << endl;
+		}
+
+		// extract mod p coefficients
+		cout << "Extraction" << endl;
+		vector<Ctxt> ctxt_z_p;
+		extract_mod_p(ctxt_z_p, ctxt_z);
+
+		if(m_verbose)
+	    {
+	    	for (long iCoef = 0; iCoef < m_slotDeg; iCoef++)
+	    	{
+	    		cout << "Ctxt x with coefficient " << iCoef << endl;
+		    	print_decrypted(ctxt_z_p[iCoef]);
+		    	cout << endl;
+		    }
+		}
+
+		cout << "Compute the less-than and equality functions modulo p" << endl;
+		for (long iCoef = 0; iCoef < m_slotDeg; iCoef++)
+		{
+			Ctxt ctxt_tmp = Ctxt(ctxt_z.getPubKey());
+			Ctxt ctxt_tmp_eq = Ctxt(ctxt_z.getPubKey());
+
+			// compute polynomial function for 'z < 0'
+			cout << "Compute univariate comparison polynomial" << endl;
+			evaluate_poly(ctxt_tmp, ctxt_tmp_eq, ctxt_z_p[iCoef]);
+
+			if(m_verbose)
+			{
+			  cout << "Result of the less-than function" << endl;
+			  print_decrypted(ctxt_tmp);
+			  cout << endl;
+			}
+
+			ctxt_less_p.push_back(ctxt_tmp);
+
+			cout << "Computing NOT" << endl;
+			//compute 1 - mapTo01(r_i*(x_i - y_i))
+			ctxt_tmp_eq.negate();
+			ctxt_tmp_eq.addConstant(ZZ(1));
+
+			if(m_verbose)
+			{
+			  cout << "Result of the equality function" << endl;
+			  print_decrypted(ctxt_tmp_eq);
+			  cout << endl;
+			}
+
+			ctxt_eq_p.push_back(ctxt_tmp_eq);
+		}	
+	}
+
+	cout << "Compare digits" << endl;
+	Ctxt ctxt_less = ctxt_less_p[m_slotDeg-1];
+	Ctxt ctxt_eq = ctxt_eq_p[m_slotDeg-1];
+
+	for (long iCoef = m_slotDeg-2; iCoef >= 0; iCoef--)
+	{
+		Ctxt tmp = ctxt_eq;
+		tmp.multiplyBy(ctxt_less_p[iCoef]);
+		ctxt_less += tmp;
+
+		ctxt_eq.multiplyBy(ctxt_eq_p[iCoef]);
+	}
+
+	if(m_verbose)
+	{
+		cout << "Comparison results" << endl;
+		print_decrypted(ctxt_less);
+		cout << endl;
+
+		cout << "Equality results" << endl;
+		print_decrypted(ctxt_eq);
+		cout << endl;
+	}
+
+	if(m_expansionLen == 1)
+	{
+		ctxt_res = ctxt_less;
+		return;
+	}
+
+
+	//compute running products: prod_i 1 - (x_i - y_i)^{p^d-1}
+	cout << "Rotating and multiplying slots with equalities" << endl;
+	shift_and_mul(ctxt_eq, 0);
+
+	if(m_verbose)
+	{
+		print_decrypted(ctxt_eq);
+		cout << endl;
+	}
+
+	//Remove the least significant digit and shift to the left
+	cout << "Remove the least significant digit" << endl;
+	batch_shift_for_mul(ctxt_eq, 0, -1);
+
+	if(m_verbose)
+	{
+		print_decrypted(ctxt_eq);
+		cout << endl;
+	}
+
+	cout << "Final result" << endl;
+
+	ctxt_res = ctxt_eq;
+	ctxt_res.multiplyBy(ctxt_less);
+	shift_and_add(ctxt_res, 0);
+
+	if(m_verbose)
+	{
+		print_decrypted(ctxt_res);
+		cout << endl;
+	}
+
+	if(m_verbose)
     {
-      less_than(ctxt_res, ctxt_x, ctxt_y);
-    }
-    else // if you compare vectors of slots lexicographically, use equality function
-    {
-      Ctxt ctxt_less(ctxt_x.getPubKey());
-
-      // compare all digits by less_than
-      less_than(ctxt_less, ctxt_x, ctxt_y);
-
-      // compute equality function on consecutive leading digits
-      if(is_randomized)
-        random_equality(ctxt_res, ctxt_x, ctxt_y);
-      else
-        exact_equality(ctxt_res, ctxt_x, ctxt_y);
-
-      // combine above results
-      ctxt_res.multiplyBy(ctxt_less);
-      shift_and_add(ctxt_res, 0);
-    }
+      cout << "Input x: " << endl;
+      print_decrypted(ctxt_x);
+      cout << endl;
+      cout << "Input y: " << endl;
+      print_decrypted(ctxt_y);
+      cout << endl;
+    }	
 
     FHE_NTIMER_STOP(Comparison);
 }
 
-//TODO: finish this function
-void Comparator::int_to_slot(ZZX& poly, unsigned long input) const
+void Comparator::int_to_slot(ZZX& poly, unsigned long input, unsigned long enc_base) const
 { 
-	unsigned long p = m_context.zMStar.getP();
-	unsigned long ord_p = m_context.zMStar.getOrdP();
-
-    unsigned long p_d = power_long(p, m_slotDeg);
-    unsigned long field_index = ord_p / m_slotDeg;
-    unsigned long gen_exp = 1;
-    for (unsigned long i = 1; i < field_index; i++)
-    {
-      gen_exp += power_long(p_d, i);
-    }
-
     vector<long> decomp;
 
     //decomposition of a digit
-    digit_decomp(decomp, input, p, m_slotDeg);
-    PolyMod poly_mod(m_context.slotRing);
-    poly_mod = ZZX(INIT_MONO, 0, 0);
-    //TODO: this loop works correctly only when d = 1
-    for (int k = 0; k < m_slotDeg; k++)
+    digit_decomp(decomp, input, enc_base, m_slotDeg);
+    poly = ZZX(INIT_MONO, 0, 0);
+    for (int iCoef = 0; iCoef < m_slotDeg; iCoef++)
     {
-        //TODO: wrong assumption that X is the generator of the finite field
-        poly_mod+=ZZX(INIT_MONO, k * gen_exp, decomp[k]);
+        poly+=ZZX(INIT_MONO, iCoef, decomp[iCoef]);
     }
-    poly = poly_mod.getData();
 }
 
-void Comparator::test(long runs, bool is_randomized) const
+void Comparator::test(long runs) const
 {
   //reset timers
   setTimersOn();
@@ -810,21 +994,23 @@ void Comparator::test(long runs, bool is_randomized) const
   // number of slots occupied by encoded numbers
   unsigned long occupied_slots = numbers_size * m_expansionLen;
 
-  //encoding base, (p+1)/2
-  //if 2-variable comparison polynomial is used, it must be p
+  //encoding base, ((p+1)/2)^d
+  //if 2-variable comparison polynomial is used, it must be p^d
   unsigned long enc_base = (p + 1) >> 1;
   if (p == 3 || p == 5 || p == 7)
   {
   	enc_base = p;
   }
 
+  unsigned long digit_base = power_long(enc_base, m_slotDeg);
+
   //check that field_size^expansion_len fits into 64-bits
-  int space_bit_size = static_cast<int>(ceil(m_expansionLen * log2(enc_base)));
+  int space_bit_size = static_cast<int>(ceil(m_expansionLen * log2(digit_base)));
   unsigned long input_range = LONG_MAX;
   if(space_bit_size < 64)
   {
     //input_range = power_long(field_size, expansion_len);
-    input_range = power_long(enc_base, m_expansionLen);
+    input_range = power_long(digit_base, m_expansionLen);
   }
   cout << "Maximal input: " << input_range << endl;
 
@@ -871,21 +1057,21 @@ void Comparator::test(long runs, bool is_randomized) const
       vector<long> decomp_char;
 
       //decomposition of input integers
-      digit_decomp(decomp_int_x, input_x, enc_base, m_expansionLen);
-      digit_decomp(decomp_int_y, input_y, enc_base, m_expansionLen);
+      digit_decomp(decomp_int_x, input_x, digit_base, m_expansionLen);
+      digit_decomp(decomp_int_y, input_y, digit_base, m_expansionLen);
 
       //encoding of slots
       for (int j = 0; j < m_expansionLen; j++)
       {
           //decomposition of a digit
-          int_to_slot(pol_slot, decomp_int_x[j]);
+          int_to_slot(pol_slot, decomp_int_x[j], enc_base);
           pol_x[i * m_expansionLen + j] = pol_slot;
       }
 
       for (int j = 0; j < m_expansionLen; j++)
       {
           //decomposition of a digit
-          int_to_slot(pol_slot, decomp_int_y[j]);
+          int_to_slot(pol_slot, decomp_int_y[j], enc_base);
           pol_y[i * m_expansionLen + j] = pol_slot;
       }
     }
@@ -909,7 +1095,8 @@ void Comparator::test(long runs, bool is_randomized) const
     Ctxt ctxt_res(m_pk);
 
     // comparison function
-    compare(ctxt_res, ctxt_x, ctxt_y, is_randomized);
+    cout << "Start of comparison" << endl;
+    compare(ctxt_res, ctxt_x, ctxt_y);
 
     if(m_verbose)
     {
@@ -925,8 +1112,9 @@ void Comparator::test(long runs, bool is_randomized) const
       print_decrypted(ctxt_res);
       cout << endl;
     }
-    printNamedTimer(cout, "ComparisonCircuit");
-    printNamedTimer(cout, "RandomEqualityCircuit");
+    printNamedTimer(cout, "Extraction");
+    printNamedTimer(cout, "ComparisonCircuitBivar");
+    printNamedTimer(cout, "ComparisonCircuitUnivar");
     printNamedTimer(cout, "EqualityCircuit");
     printNamedTimer(cout, "ShiftMul");
     printNamedTimer(cout, "ShiftAdd");
@@ -935,6 +1123,7 @@ void Comparator::test(long runs, bool is_randomized) const
     const FHEtimer* comp_timer = getTimerByName("Comparison");
 
     cout << "Avg. time per 64-bit integer: " << 1000.0 * comp_timer->getTime()/static_cast<double>(run+1)/static_cast<double>(numbers_size) << " ms" << endl;
+    cout << "Number of 64-bit integers in one ciphertext "<< numbers_size << endl;
 
     // remove the line below if it gives bizarre results 
     ctxt_res.cleanUp();

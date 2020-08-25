@@ -618,7 +618,7 @@ bool test_equality(const PubKey& public_key, const EncryptedArray& ea, const Sec
 // 7 300 90 1 10 y
 // 17 145 120 1 10 y
 int main(int argc, char *argv[]) {
-  if(argc < 9)
+  if(argc < 8)
   {
    throw invalid_argument("There should be exactly 7 arguments\n");
   }
@@ -626,14 +626,6 @@ int main(int argc, char *argv[]) {
   bool verbose = false;
   if (!strcmp(argv[7], "y"))
     verbose = true;
-
-  if(!strcmp(argv[8], "e") && !strcmp(argv[8], "r"))
-  {
-    throw invalid_argument("The last parameter must be 'e' (exact) or 'r' (randomized)\n");
-  }
-  bool is_randomized = false;
-  if(!strcmp(argv[8],"r"))
-    is_randomized = true;
 
   //////////PARAMETER SET UP////////////////
   // Plaintext prime modulus
@@ -687,9 +679,9 @@ int main(int argc, char *argv[]) {
   //repeat experiments several times
   int runs = atoi(argv[6]);
   
-  comparator.test(runs, is_randomized);
+  comparator.test(runs);
 
-  printAllTimers(cout);
+  //printAllTimers(cout);
 
   return 0;
 }
