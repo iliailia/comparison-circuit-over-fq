@@ -104,7 +104,7 @@ void Comparator::compute_poly_params()
   	if(bs_nums.count(p_long) > 0)
   		m_bs_num = bs_nums[p_long];
 
-  	long d = deg(m_poly);
+  	long d = deg(m_univar_poly);
 
   	// How many baby steps: set sqrt(n/2), rounded up/down to a power of two
 
@@ -133,7 +133,7 @@ void Comparator::compute_poly_params()
 
 	// top coefficient is equal to (p^2 - 1)/8 mod p
 	// its inverse is equal to -8 mod p
-	m_top_coef = LeadCoeff(m_poly);
+	m_top_coef = LeadCoeff(m_univar_poly);
 	ZZ topInv = ZZ(-8) % p; // the inverse mod p of the top coefficient of poly (if any)
 	bool divisible = (m_gs_num * m_bs_num == d); // is the degree divisible by k?
 	//long nonInvertibe = InvModStatus(topInv, top, p);
@@ -154,15 +154,15 @@ void Comparator::compute_poly_params()
 	    	m_top_coef = NTL::to_ZZ(1);  // new top coefficient is one
 	    	topInv = m_top_coef;    // also the new inverse is one
 	    	// set extra = 1 - current-coeff-of-X^{n*k}
-	    	m_extra_coef = SubMod(m_top_coef, coeff(m_poly, m_gs_num * m_bs_num), p);
-	    	SetCoeff(m_poly, m_gs_num * m_bs_num); // set the top coefficient of X^{n*k} to one
+	    	m_extra_coef = SubMod(m_top_coef, coeff(m_univar_poly, m_gs_num * m_bs_num), p);
+	    	SetCoeff(m_univar_poly, m_gs_num * m_bs_num); // set the top coefficient of X^{n*k} to one
 		}
 
 		if (!IsOne(m_top_coef)) 
 		{
-	    	m_poly *= topInv; // Multiply by topInv to make into a monic polynomial
-	    	for (long i = 0; i <= m_gs_num * m_bs_num; i++) rem(m_poly[i], m_poly[i], p);
-	    	m_poly.normalize();
+	    	m_univar_poly *= topInv; // Multiply by topInv to make into a monic polynomial
+	    	for (long i = 0; i <= m_gs_num * m_bs_num; i++) rem(m_univar_poly[i], m_univar_poly[i], p);
+	    	m_univar_poly.normalize();
 		}
 	}
 
@@ -181,39 +181,100 @@ void Comparator::create_poly()
 	// get p
 	unsigned long p = m_context.zMStar.getP();;
 
-	// polynomial coefficient
-	ZZ_p coef;
-	coef.init(ZZ(p));
+	if(m_isUnivar)
+	{
+		// polynomial coefficient
+		ZZ_p coef;
+		coef.init(ZZ(p));
 
-	// field element
-	ZZ_p field_elem;
-	field_elem.init(ZZ(p));
+		// field element
+		ZZ_p field_elem;
+		field_elem.init(ZZ(p));
 
-	// initialization of the comparison polynomial with x^{p-1} * (p+1)/2
-	m_poly = ZZX(INIT_MONO, 0, 0);
+		// initialization of the univariate comparison polynomial
+		m_univar_poly = ZZX(INIT_MONO, 0, 0);
 
-	// loop over all odd coefficient indices
-	for (long indx = 1; indx < p - 1; indx+=2)
-	{ 
-		// coefficient f_i = sum_a a^{p-1-indx} where a runs over [1,...,(p-1)/2]
-		coef = 1;
-		for(long a = 2; a <= ((p-1) >> 1); a++)
-		{
-		  field_elem = a;
-		  coef += power(field_elem, p - 1 - indx);
+		// loop over all odd coefficient indices
+		for (long indx = 1; indx < p - 1; indx+=2)
+		{ 
+			// coefficient f_i = sum_a a^{p-1-indx} where a runs over [1,...,(p-1)/2]
+			coef = 1;
+			for(long a = 2; a <= ((p-1) >> 1); a++)
+			{
+			  field_elem = a;
+			  coef += power(field_elem, p - 1 - indx);
+			}
+
+			m_univar_poly += ZZX(INIT_MONO, (indx-1) >> 1, rep(coef));
 		}
 
-		m_poly += ZZX(INIT_MONO, (indx-1) >> 1, rep(coef));
+		compute_poly_params();
 	}
-
-	if (m_verbose)
+	else
 	{
-		cout << "Comparison polynomial: " << endl;
-		printZZX(cout, m_poly, (p-1)>>1);
-		cout << endl;
-	}
+		// computing the coefficients of the bivariate polynomial
+		m_bivar_coefs.SetDims(p,p);
 
-	compute_poly_params();
+		// y^{p-1}
+		m_bivar_coefs[0][p-1] = ZZ(1);
+
+		// (p+1)/2 * x^{(p-1)/2} * y^{(p-1)/2}
+		m_bivar_coefs[(p-1) >> 1][(p-1) >> 1] = ZZ((p+1) >> 1);
+
+		// iterator
+		ZZ_p field_elem;
+		field_elem.init(ZZ(p));
+
+		// inner sum
+		ZZ_p inner_sum;
+		inner_sum.init(ZZ(p));
+		
+		// outer sum
+		ZZ_p outer_sum;
+		outer_sum.init(ZZ(p));
+
+		for (long i = 1; i < p; i++)
+		{
+			for (long j = 1; j < p; j++)
+			{
+				// x^i * y^i have the zero coefficient except for i = (p-1)/2
+				if (i == j)
+					continue;
+
+				outer_sum = 0;
+				// sum_{a=1}^{p-1} a^{p-1-i} sum_{b = a+1}^{p-1} b^{p-1-j} 
+				for (long a = 1; a < p; a++)
+				{
+					inner_sum = 0;
+					// sum_{b = a+1}^{p-1} b^{p-1-j} 
+					for (long b = a+1; b < p; b++)
+					{
+						// b^{p-1-j}
+						field_elem = b;
+						field_elem = power(field_elem, p - 1 - j);
+
+						inner_sum += field_elem;
+					}
+					// a^{p-1-i}
+					field_elem = a;
+					field_elem = power(field_elem, p - 1 - i);
+
+					inner_sum *= field_elem;
+					outer_sum += inner_sum;
+				}
+				m_bivar_coefs[i][j] = rep(outer_sum);
+			}
+		}
+
+		cout << "Bivariate coefficients" << endl << m_bivar_coefs << endl;
+
+		if (m_verbose)
+		{
+			cout << "Comparison polynomial: " << endl;
+			printZZX(cout, m_univar_poly, (p-1)>>1);
+			cout << endl;
+		}
+	}
 }
 
 
@@ -345,7 +406,7 @@ Comparator::Comparator(const Context& context, unsigned long d, unsigned long ex
 	//determine the order of p in (Z/mZ)*
 	m_isUnivar = true;
 	unsigned long p = context.zMStar.getP();
-	if (p == 3 || p == 5 || p == 7 || p == 11)
+	if (p == 2 || p == 3 || p == 5 || p == 7 || p == 11)
 		m_isUnivar = false;
 	unsigned long ord_p = context.zMStar.getOrdP();
 	//check that the extension degree divides the order of p
@@ -367,7 +428,7 @@ const DoubleCRT& Comparator::get_mask(double& size, long index) const
 
 const ZZX& Comparator::get_poly() const
 {
-	return m_poly;
+	return m_univar_poly;
 }
 
 void Comparator::print_decrypted(const Ctxt& ctxt) const
@@ -771,11 +832,11 @@ void Comparator::evaluate_poly(Ctxt& ret, Ctxt& ctxt_p_1, const Ctxt& x) const
 	if (m_gs_num == (1L << NextPowerOfTwo(m_gs_num))) 
 	{ // n is a power of two
 		cout << "I'm computing degPowerOfTwo" << endl;
-    	degPowerOfTwo(ret, m_poly, m_bs_num, babyStep, giantStep);
+    	degPowerOfTwo(ret, m_univar_poly, m_bs_num, babyStep, giantStep);
     }
     else
     {
-	  	recursivePolyEval(ret, m_poly, m_bs_num, babyStep, giantStep);
+	  	recursivePolyEval(ret, m_univar_poly, m_bs_num, babyStep, giantStep);
 
 	  	if (!IsOne(m_top_coef)) 
 	  	{
@@ -808,13 +869,16 @@ void Comparator::less_than_bivar(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt&
 {
   FHE_NTIMER_START(ComparisonCircuitBivar);
 
+  // uncomment if you want to compare with Tan et al.
+  //less_than_bivar_tan(ctxt_res, ctxt_x, ctxt_y);
+  //return;
+
   unsigned long p = m_context.zMStar.getP();
 
   if(p == 2)
-    {
-      less_than_mod_2(ctxt_res, ctxt_x, ctxt_y);
-      return;
-    }
+  {
+    less_than_mod_2(ctxt_res, ctxt_x, ctxt_y);
+  }
   
   if(p == 3)
   {
@@ -829,13 +893,11 @@ void Comparator::less_than_bivar(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt&
   if(p == 7)
   {
   	less_than_mod_7(ctxt_res, ctxt_x, ctxt_y);
-  	return;
   }
 
   if(p == 11)
   {
     less_than_mod_11(ctxt_res, ctxt_x, ctxt_y);
-    return;
   }
 
   if(m_verbose)
@@ -845,6 +907,29 @@ void Comparator::less_than_bivar(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt&
   }
 
   FHE_NTIMER_STOP(ComparisonCircuitBivar);
+}
+
+void Comparator::less_than_bivar_tan(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
+{
+	long p = m_context.zMStar.getP();
+
+	DynamicCtxtPowers x_powers(ctxt_x, p-1);
+	DynamicCtxtPowers y_powers(ctxt_y, p-1);
+
+	ctxt_res = y_powers.getPower(p-1);
+
+	for (long i = 1; i < p; i++)
+	{
+		for (long j = 1; j < p; j++)
+		{
+			if (m_bivar_coefs[i][j] == ZZ(0))
+				continue;
+			Ctxt tmp = x_powers.getPower(i);
+			tmp.multiplyBy(y_powers.getPower(j));
+			tmp.multByConstant(m_bivar_coefs[i][j]);
+			ctxt_res += tmp;
+		}
+	}
 }
 
 void Comparator::is_zero(Ctxt& ctxt_res, const Ctxt& ctxt_z, long pow) const

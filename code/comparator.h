@@ -8,6 +8,7 @@ Comparator class: creates all auxiliary information necessary to compare integer
 #include <helib/helib.h>
 #include <helib/Ptxt.h>
 #include <helib/norms.h>
+#include <NTL/mat_ZZ.h>
 
 using namespace std;
 using namespace NTL;
@@ -31,8 +32,11 @@ class Comparator{
     // univariate or bivariate circuit
     bool m_isUnivar;
 
-    // comparison polynomial
-    ZZX m_poly;
+    // univariate comparison polynomial
+    ZZX m_univar_poly;
+
+    // bivariate comparison polynomial coefficients
+    mat_ZZ m_bivar_coefs; 
 
     // polynomial evaluation parameters of the Patterson-Stockmeyer algorithm
     // number of baby steps
@@ -101,6 +105,9 @@ class Comparator{
 
     // bivariate less than function comparing slots one by one
     void less_than_bivar(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;
+
+    // bivariate less than function comparing slots one by one as in Tan et al.
+    void less_than_bivar_tan(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;
 
     // less than function comparing slots one by one in F_2
     void less_than_mod_2(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;
