@@ -681,7 +681,7 @@ int main(int argc, char *argv[]) {
   
   comparator.test(runs);
 
-  //printAllTimers(cout);
+  printAllTimers(cout);
 
   return 0;
 }

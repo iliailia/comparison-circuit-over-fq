@@ -88,6 +88,10 @@ void Comparator::compute_poly_params()
 	{
 		{11, 3}, // 3 (19), 1..4
   		{13, 3}, // 3 (16), 1..5
+  		{17, 4}, // 4 (13), 1..5
+  		{19, 3}, // 3 (14), 1..2
+  		{29, 5}, // 5 (16), 1..6
+  		{31, 5}, // 5 (15), 4..6
   		{47, 5}, // 5 (26), 2..11 
   		{61, 6}, // 6 (27), 4..8 
   		{67, 5}, // 5 (27), 4..8
@@ -819,48 +823,63 @@ void Comparator::evaluate_poly(Ctxt& ret, Ctxt& ctxt_p_1, const Ctxt& x) const
 	// get p
 	ZZ p = ZZ(m_context.zMStar.getP());
 
+	if (p > ZZ(3))
+	{
 	  // z^2
-  	Ctxt x2 = x;
-  	x2.square();
+	  	Ctxt x2 = x;
+	  	x2.square();
 
-	DynamicCtxtPowers babyStep(x2, m_bs_num);
-	const Ctxt& x2k = babyStep.getPower(m_bs_num);
+		DynamicCtxtPowers babyStep(x2, m_bs_num);
+		const Ctxt& x2k = babyStep.getPower(m_bs_num);
 
-	DynamicCtxtPowers giantStep(x2k, m_gs_num);
+		DynamicCtxtPowers giantStep(x2k, m_gs_num);
 
-	// Special case when deg(p)>k*(2^e -1)
-	if (m_gs_num == (1L << NextPowerOfTwo(m_gs_num))) 
-	{ // n is a power of two
-		cout << "I'm computing degPowerOfTwo" << endl;
-    	degPowerOfTwo(ret, m_univar_poly, m_bs_num, babyStep, giantStep);
-    }
-    else
-    {
-	  	recursivePolyEval(ret, m_univar_poly, m_bs_num, babyStep, giantStep);
+		// Special case when deg(p)>k*(2^e -1)
+		if (m_gs_num == (1L << NextPowerOfTwo(m_gs_num))) 
+		{ // n is a power of two
+			cout << "I'm computing degPowerOfTwo" << endl;
+	    	degPowerOfTwo(ret, m_univar_poly, m_bs_num, babyStep, giantStep);
+	    }
+	    else
+	    {
+		  	recursivePolyEval(ret, m_univar_poly, m_bs_num, babyStep, giantStep);
 
-	  	if (!IsOne(m_top_coef)) 
-	  	{
-	    	ret.multByConstant(m_top_coef);
+		  	if (!IsOne(m_top_coef)) 
+		  	{
+		    	ret.multByConstant(m_top_coef);
+			}
+
+			if (!IsZero(m_extra_coef)) 
+			{ // if we added a term, now is the time to subtract back
+		    	Ctxt topTerm = giantStep.getPower(m_gs_num);
+		    	topTerm.multByConstant(m_extra_coef);
+		    	ret -= topTerm;
+			}
 		}
+		ret.multiplyBy(x);
 
-		if (!IsZero(m_extra_coef)) 
-		{ // if we added a term, now is the time to subtract back
-	    	Ctxt topTerm = giantStep.getPower(m_gs_num);
-	    	topTerm.multByConstant(m_extra_coef);
-	    	ret -= topTerm;
-		}
+		// TODO: depth here is not optimal
+		Ctxt top_term = babyStep.getPower(m_baby_index);
+		top_term.multiplyBy(giantStep.getPower(m_giant_index));
+
+		ctxt_p_1 = top_term; 
+
+		top_term.multByConstant(ZZ((p+1)>> 1));
+
+		ret += top_term;
 	}
-	ret.multiplyBy(x);
+	else
+	{
+		ret = x;
 
-	// TODO: depth here is not optimal
-	Ctxt top_term = babyStep.getPower(m_baby_index);
-	top_term.multiplyBy(giantStep.getPower(m_giant_index));
+		ctxt_p_1 = x;
+		ctxt_p_1.square();
 
-	ctxt_p_1 = top_term; 
+		Ctxt top_term = ctxt_p_1;
+		top_term.multByConstant(ZZ(2));
 
-	top_term.multByConstant(ZZ((p+1)>> 1));
-
-	ret += top_term;
+		ret += top_term;
+	}
 	FHE_NTIMER_STOP(ComparisonCircuitUnivar);
 }
 
