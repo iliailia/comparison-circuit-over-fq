@@ -695,8 +695,8 @@ void Comparator::less_than_mod_7(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt&
 
 void Comparator::less_than_mod_11(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
 {
-        // Y = y(x-y)
-        // X = x(x+1)
+    // Y = y(x-y)
+    // X = x(x+1)
 	// Comp(x,y) = Y(x+1)[(7X + 8X^2 + 8X^3 - X^4) + (3 + (7x+4)(X+1)^2 + 4(X+1)^3)Y + (x^2+6x + 4(X +5x)^2)Y^2 + 5(x^2+7x)Y^3 - Y^4]
 	cout << "Compute comparison polynomial" << endl;
 
@@ -889,8 +889,8 @@ void Comparator::less_than_bivar(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt&
   FHE_NTIMER_START(ComparisonCircuitBivar);
 
   // uncomment if you want to compare with Tan et al.
-  //less_than_bivar_tan(ctxt_res, ctxt_x, ctxt_y);
-  //return;
+  less_than_bivar_tan(ctxt_res, ctxt_x, ctxt_y);
+  return;
 
   unsigned long p = m_context.zMStar.getP();
 
@@ -939,15 +939,18 @@ void Comparator::less_than_bivar_tan(Ctxt& ctxt_res, const Ctxt& ctxt_x, const C
 
 	for (long i = 1; i < p; i++)
 	{
+		// zero ciphertext
+		Ctxt sum = Ctxt(ctxt_x.getPubKey());
 		for (long j = 1; j < p; j++)
 		{
 			if (m_bivar_coefs[i][j] == ZZ(0))
 				continue;
-			Ctxt tmp = x_powers.getPower(i);
-			tmp.multiplyBy(y_powers.getPower(j));
+			Ctxt tmp = y_powers.getPower(j);
 			tmp.multByConstant(m_bivar_coefs[i][j]);
-			ctxt_res += tmp;
+			sum += tmp;
 		}
+		sum.multiplyBy(x_powers.getPower(i));
+		ctxt_res += sum;
 	}
 }
 
@@ -955,22 +958,9 @@ void Comparator::is_zero(Ctxt& ctxt_res, const Ctxt& ctxt_z, long pow) const
 {
   FHE_NTIMER_START(EqualityCircuit);
 
-  /*
-  // Subtraction (x_i - y_i)
-  cout << "Subtraction" << endl;
-  ctxt_res = ctxt_x;
-  ctxt_res -= ctxt_y;
-
-  if(m_verbose)
-  {
-    print_decrypted(ctxt_res);
-    cout << endl;
-  }
-  */
-
   ctxt_res = ctxt_z;
 
-  //compute mapTo01: (x_i - y_i)^{p^d-1}
+  //compute mapTo01: (z_i)^{p^d-1}
   cout << "Mapping to 0 and 1" << endl;
   mapTo01_subfield(ctxt_res, pow);
 
@@ -981,7 +971,7 @@ void Comparator::is_zero(Ctxt& ctxt_res, const Ctxt& ctxt_z, long pow) const
   }
 
   cout << "Computing NOT" << endl;
-  //compute 1 - mapTo01(r_i*(x_i - y_i))
+  //compute 1 - mapTo01(z_i)
   ctxt_res.negate();
   ctxt_res.addConstant(ZZ(1));
 
@@ -990,28 +980,6 @@ void Comparator::is_zero(Ctxt& ctxt_res, const Ctxt& ctxt_z, long pow) const
     print_decrypted(ctxt_res);
     cout << endl;
   }
-
-  /*
-  //compute running products: prod_i 1 - (x_i - y_i)^{p^d-1}
-  cout << "Rotating and multiplying slots" << endl;
-  shift_and_mul(ctxt_res, 0);
-
-  if(m_verbose)
-  {
-    print_decrypted(ctxt_res);
-    cout << endl;
-  }
-
-  //Remove the least significant digit and shift to the left
-  cout << "Remove the least significant digit" << endl;
-  batch_shift_for_mul(ctxt_res, 0, -1);
-
-  if(m_verbose)
-  {
-    print_decrypted(ctxt_res);
-    cout << endl;
-  }
-  */
 
   FHE_NTIMER_STOP(EqualityCircuit);
 }
