@@ -19,7 +19,7 @@ Since this function is independent of the choice of $\S$, we can write
   \EQ_{\F_{\fieldcard}}(x,y) = 1 - \princhar_\fieldcard(x-y).
 \end{align*}
 
-\subsection{$2$-variate interpolation of $\LT_\S$.}
+\subsection{Bivariate interpolation of $\LT_\S$.}
 
   The less-than function can be interpolated using Lemma~\ref{lem:interpolation} and the following truth table
   \begin{align*}
@@ -153,43 +153,60 @@ Since this function is independent of the choice of $\S$, we can write
     If $i = (p-1)/2$, then following the above argument, this coefficient is equal to $-(p-1)/2$.
   \end{proof}
 
-\subsection{$1$-variate interpolation of $\LT_\S$}
+\subsection{Univariate interpolation of $\LT_\S$}
   Another way to compare $x$ and $y$ from $\S$ is to compute the difference $x-y$ and find its sign.
-  To compute the sign function (or $\LT_\S(z,0)$) using finite field arithmetic, we need to split finite field elements into two classes:  negative ($\F_p^-$) and non-negative ($\F_p^+$).
+  To compute the sign function (or $\LT_\S(x-y,0)$) using finite field arithmetic, we need to split finite field elements into two classes:  negative ($\F_p^-$) and non-negative ($\F_p^+$).
   In addition, for any $x, y \in \S$ the following property should hold
   \begin{align*}
     x - y \in 
     \begin{cases}
-      \F_p^+ \text{ if } \LT_\S(x,y) = 0 \\
-      \F_p^- \text{ if } \LT_\S(x,y) = 1
+      \F_p^+ \text{ if } \LT_\S(x,y) = 0, \\
+      \F_p^- \text{ if } \LT_\S(x,y) = 1.
     \end{cases}
   \end{align*}   
-  Let $\S = [0, (p-1)/2]$.
-  In this case, $\F_p^+ = [0, (p-1)/2]$ and $\F_p^- = [-(p-1)/2, -1]$.
-
-  \todo{finish description of the circuit, prove its polynomial form}
+  Let $\S = [0, (p-1)/2]$ for a prime odd integer $p$.
+  Let us split $\F_p$ into $\F_p^+ = [0, (p-1)/2]$ and $\F_p^- = [-(p-1)/2, -1]$.
+  Notice that for any $x, y \in \S$, their difference $x - y$ belongs to $\F_p^-$ if and only if $x < y$.
+  According to Lemma~\ref{lem:interpolation}, the indicator function of $\F_p^-$ is equal to
   \begin{align*}
-    \IsNegative_\S(z) = \sum_{a=-\frac{p-1}{2}}^{-1} 1 - (z - a)^{p-1}
+    \chi_{\F_p^-}(z) = \sum_{a=-\frac{p-1}{2}}^{-1} 1 - (z - a)^{p-1}.
   \end{align*}
-
+  In other words, this function outputs $1$ if $z$ is negative and $0$ otherwise.
+  Combining the above facts, we obtain the following $\LT_\S$ function.
   \begin{align*}
-    \sum_{a=-\frac{p-1}{2}}^{-1} 1 - (z - a)^{p-1} &= \sum_{a=-\frac{p-1}{2}}^{-1} 1 - \sum_{i=0}^{p-1} z^i a^{p-1-i} \\
-    &= \sum_{i=1}^{p-1} z^i \sum_{a=-\frac{p-1}{2}}^{-1} (-a^{p-1-i})
+    \LT_\S(x,y) = \sum_{a=-\frac{p-1}{2}}^{-1} 1 - (x - y - a)^{p-1}.
   \end{align*}
-  If $i$ is even, then the $i$th coefficient is
-  \begin{align*}
-    -\sum_{a=-\frac{p-1}{2}}^{-1} a^{p-1-i} &= -\sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i} = -\frac{\sum_{a=-\frac{p-1}{2}}^{\frac{p-1}{2}} a^{p-1-i}}{2}.
-  \end{align*}
-  Since $\sum_{a=0}^{p-1} a^{p-1-i} = 0$ if $i \ne p-1$, this coefficient is equal to $0$. 
-  If $i = p-1$, then the $i$th coefficient is $-(p-1)/2 = (p+1)/2$.
-  If $i$ is odd, then we can rewrite the $i$th coefficient in the following way
-  \begin{align*}
-    -\sum_{a=-\frac{p-1}{2}}^{-1} a^{p-1-i} &= \sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i}.
-  \end{align*}
-  As a result, we can write the polynomial of $\IsNegative_\S(z)$ is as follows
-  \begin{align*}
-    \IsNegative_\S(z) = \frac{p+1}{2} z^{p-1} + \sum_{i=1, \text{odd}}^{p-2} z^i \sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i}.
-  \end{align*}
+  The following lemma describes all the coefficients of $\LT_\S$.
+  \begin{lemma}
+    For an odd prime $p$ and $\S = [0, (p-1)/2]$, the $\LT_\S$ function is equal to the following polynomial over $\F_p$
+    \begin{align}\label{eq:univariate_circuit}
+      \LT_\S(x,y) = \frac{p+1}{2} (x-y)^{p-1} + \sum_{i=1, \text{odd}}^{p-2} (x-y)^i \sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i}.
+    \end{align}
+  \end{lemma}
+  \begin{proof}
+    Let $z = x-y$.
+    Thus we can rewrite $\LT_\S$ as the univariate indicator function $\chi_{\F_p^-}$, namely
+    \begin{align*}
+      \LT_\S(x,y) = \chi_{\F_p^-}(z) = \sum_{a=-\frac{p-1}{2}}^{-1} 1 - (z - a)^{p-1}.
+    \end{align*}
+    Thanks to Lemma~\ref{lem:difference_to_p-1}, we can expand $(z-a)^{p-1}$ and obtain
+    \begin{align*}
+      \sum_{a=-\frac{p-1}{2}}^{-1} 1 - \sum_{i=0}^{p-1} z^i a^{p-1-i}
+      = \sum_{i=1}^{p-1} z^i \sum_{a=-\frac{p-1}{2}}^{-1} (-a^{p-1-i}).
+    \end{align*}
+    If $i$ is even, then the $i$th coefficient is equal to
+    \begin{align*}
+      -\sum_{a=-\frac{p-1}{2}}^{-1} a^{p-1-i} &= -\sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i} = -\frac{\sum_{a=-\frac{p-1}{2}}^{\frac{p-1}{2}} a^{p-1-i}}{2}.
+    \end{align*}
+    This coefficient is equal to $0$ for any positive even $i$ not equal to $p-1$ as $\sum_{a=0}^{p-1} a^{p-1-i} = 0$ in this case.
+    The $(p-1)$-th coefficient is equal to $-(p-1)/2 = (p+1)/2$.
+    If $i$ is odd, then we can rewrite the $i$th coefficient in the following way
+    \begin{align*}
+      -\sum_{a=-\frac{p-1}{2}}^{-1} a^{p-1-i} &= \sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i},
+    \end{align*}
+    which finishes the proof.
+  \end{proof}
+  \todo{Complexity, Paterson-Stockmeyer}
 
 \subsection{Lexicographic order}
   Let $\vx=(x_0,x_1,\ldots,x_{\ell-1})$ and $\vy=(y_0,y_1,\ldots,y_{\ell-1}) \in \F_\fieldcard^\ell$ for the lexicographical order $<$ defined by the choice of $\S$:
