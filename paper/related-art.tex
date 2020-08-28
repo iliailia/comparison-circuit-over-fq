@@ -14,7 +14,11 @@
 \item \cite{LKN19}: modified shell sort. Make shell sort more efficient for HE from $\mathcal{O}(n^2)$ to $\mathcal{O}(n^{3/2}\sqrt{\alpha+\log\log n})$ with failure probability of $2^{-\alpha}$. Complexity worst than for Batcher even-odd merge sort network.
 
 \item \cite{TLWRK20}: Digit-wise comparison using SIMD. Reduce complexity of digit-wise comparison withfrom $\mathcal{O}(t^{d})$ to $\mathcal{O}(t^{r})$ for $r < d$ by decomposing each element in several digits. Compare numbers up to $64$ bits. Depth smaller than $\log(t-1) + \log(d) + 1$ (same algo than us, probably the work to compare with).
+
+\item \cite{AINA:NGEG17}: the univariate circuit is used in the context of sorting. There is no formal description of the circuit properties and complexity. Neither the decomposition method of~\cite{TLWRK20} or the lexicographic circuit is used.
 \end{itemize}
+
+
   
 %%% Local Variables:
 %%% mode: latex
