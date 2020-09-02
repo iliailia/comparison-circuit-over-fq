@@ -1,42 +1,82 @@
-Here are potential cyclotomic polynomials to use for a failure probability smaller $\varepsilon < 2^{-32}$.
+We implemented the lexicographic order algorithm described in Section~\ref{subsec:lexicographic_order} using the implementation of the BGV scheme~\cite{BGV12} in the HElib library~\cite{HElib}.
+For a fair comparison with the prior work, we also implemented the algorithm of Tan et al.~\cite{TLWRK20}.
+The code will be publicly available.
+For experiments, we used an ordinary commodity laptop equipped with an Intel Dual-Core i5-7267U CPU (running at 3.1 GHz) and 8 GB of RAM without multi-threading.
 
-\begin{table}
-  \setlength{\tabcolsep}{1em}
+To compare our algorithms with the state of the art, we ran the lexicographic order algorithm to compute the less-than function on 64-bit integers.
+The results of these experiments are presented in Table~\ref{table:comparison_circuit_results}.
+
+\begin{table}[h]
   \centering
-  \begin{tabular}{||ccc||cccccc||}
-    \hline
-    $~m~$ & $~n~$ & $~\delta_\mathcal{R}~$ & $~p~$ & $~d~$ & depth & $~\ell~$ & $~s~$ & $~\varepsilon~$ \\
-    \hline
-    $22,383$ & $14,904$ & $5n$ & $5$  & $18$ & $8$ & $828$  & $1$ &  $2^{-41.7}$ \\
-    $25,623$ & $15,552$ & $118n$ & $2$ & $36$ & $7$ & $432$ & $2$ & $2^{-36.0}$ \\
-    $31,132$ & $15,120$ & $85n$ & $7$ & $12$ & $8$ & $1,260$ & $2$ & $2^{-33.6}$ \\
-    $31,726$ & $15,288$ & $57n$ & $3$ & $28$ & $7$ & $546$ & $1$ & $2^{-44.3}$ \\
-    $35,552$ & $16,000$ & $21n$ & $17$ & $10$ & $9$ & $1,600$ & $3$ & $2^{-40.8}$ \\
-    \hline
-    $31,697$ & $30,576$ & $57n$ & $3$ & $28$ & $7$ & $1,092$ & $1$ & $2^{-44.3}$ \\
-    $48,771$ & $32,508$ & $5n$ & $2$ & $42$ & $7$ & $774$ & $1$ & $2^{-42.0}$ \\
-    $57,368$ & $28,000$ & $141n$ & $17$ & $10$ & $9$ & $2,800$ & $3$ & $2^{-40.8}$ \\
-    $72,400$ & $28,800$ & $9n$ & $7$ & $12$ & $8$ & $2,400$ & $3$ & $2^{-33.6}$ \\
-    $93,006$ & $30,996$ & $5n$ & $5$ & $18$ & $8$ & $1,722$ & $1$ & $2^{-41.7}$ \\
-    \hline
-                                                   
-  \end{tabular}
-  \caption{Potential parameters}
-  \label{tab:params}
+  \begin{tabular*}{.9\textwidth}{@{\extracolsep{\fill} } c c c c c c c}
+    \toprule
+    $(p,m,n)$ & Type & $(d,\ell)$   &  $\log q$    & $k$ & Total time, s & Amortized time, ms \\
+    \cmidrule(lr){1-1}\cmidrule(lr){2-7}
+    %$(3,34511,34510)$  & U               & $(1,64)$  & $>320$ & $31$   & 7.20   & 232 \\
+    %$(3,34511,34510)$  & U               & $(2,32)$  & $>320$ & $63$   & 10.09  & 160 \\
+    %$(3,34511,34510)$  & U               & $(4,16)$  & $>320$ & $126$  & 11.33  & 90 \\
+    %$(3,34511,34510)$  & U               & $(8,8)$   & $>350$ & $253$  & 16.01  & 63 \\
+    $(3,34511,34510)$  & U               & $(16,4)$  & $>350$ & $507$  & 30.64  & 60 \\
+    %$(3,34511,34510)$  & B               & $(1,41)$  & $>320$ & $49$   & 8.95   & 173 \\
+    %$(3,34511,34510)$  & B               & $(2,21)$  & $>320$ & $96$   & 14.66  & 153 \\
+    %$(3,34511,34510)$  & B               & $(4,11)$  & $>320$ & $184$  & 17.89  & 97 \\
+    $(3,34511,34510)$  & B               & $(5,9)$   & $>320$ & $225$  & 19.53  & 87 \\
+    %$(5,19531,19530)$  & U               & $(1,41)$  & $>330$ & $68$   & 3.99   & 59 \\
+    %$(5,19531,19530)$  & U               & $(2,21)$  & $>330$ & $132$  & 5.18   & 39 \\
+    %$(5,19531,19530)$  & U               & $(3,14)$  & $>330$ & $199$  & 5.89   & 30 \\
+    %$(5,19531,19530)$  & U               & $(4,11)$  & $>330$ & $253$  & 6.94   & 27 \\
+    %$(5,19531,19530)$  & U               & $(6,7)$   & $>340$ & $398$  & 9.37   & 24 \\
+    $(5,19531,19530)$  & U               & $(7,6)$   & $>340$ & $465$  & 10.64  & 23 \\
+    %$(5,19531,19530)$  & B               & $(1,28)$  & $>290$ & $99$   & 3.90   & 39 \\
+    %$(5,19531,19530)$  & B               & $(2,14)$  & $>290$ & $199$  & 6.35   & 32 \\
+    %$(5,19531,19530)$  & B               & $(4,7)$   & $>295$ & $398$  & 9.45   & 24 \\
+    $(5,19531,19530)$  & B               & $(7,4)$   & $>300$ & $697$  & 14.95  & 21 \\ 
+    %$(5,19531,19530)$  & \cite{TLWRK20}  & $(1,28)$  & $>290$ & $99$   & 5.58   & 56 \\
+    %$(5,19531,19530)$  & \cite{TLWRK20}  & $(4,7)$   & $>295$ & $398$  & 19.58  & 38 \\
+    $(5,19531,19530)$  & \cite{TLWRK20}  & $(7,4)$   & $>300$ & $697$  & 25.83  & 37 \\
+    %$(7,14009,14008)$  & B               & $(1,23)$  & $>330$ & $35$   & 3.30   & 94 \\
+    %$(7,14009,14008)$  & B               & $(2,12)$  & $>330$ & $68$   & 6.97   & 102 \\
+    %$(7,14009,14008)$  & B               & $(4,6)$   & $>330$ & $137$  & 10.35  & 76 \\
+    %$(7,14009,14008)$  & B               & $(6,4)$   & $>330$ & $206$  & 13.39  & 65 \\
+   % $(7,14009,14008)$  & B               & $(8,3)$   & $>350$ & $274$  & 18.34  & 67 \\
+    %$(7,20197,19116)$  & U               & $(1,28)$  & $>350$ & $75$   & 5.58   & 74 \\
+    %$(7,20197,19116)$  & U               & $(2,14)$  & $>350$ & $151$  & 7.48   & 50 \\
+    %$(7,20197,19116)$  & U               & $(4,7)$   & $>350$ & $303$  & 10.56  & 35 \\
+    $(7,20197,19116)$  & U               & $(7,4)$   & $>350$ & $531$  & 15.22  & 29 \\
+    %$(7,20197,19116)$  & B               & $(1,23)$  & $>350$ & $92$   & 6.55   & 71 \\
+    %$(7,20197,19116)$  & B               & $(2,12)$  & $>320$ & $177$  & 10.11  & 57 \\
+    %$(7,20197,19116)$  & B               & $(3,8)$   & $>320$ & $265$  & 12.33  & 47 \\
+    %$(7,20197,19116)$  & B               & $(4,6)$   & $>320$ & $354$  & 15.37  & 43 \\
+    $(7,20197,19116)$  & B               & $(6,4)$   & $>340$ & $531$  & 21.45  & 40 \\
+    %$(7,20197,19116)$  & B               & $(8,3)$   & $>380$ & $708$  & 29.67  & 42 \\
+    %$(11,15797,15796)$ & U               & $(1,25)$  & $>360$ & $57$   & 3.63   & 64 \\
+    %$(11,15797,15796)$ & U               & $(2,13)$  & $>360$ & $110$  & 5.38   & 49 \\
+    %$(11,15797,15796)$ & U               & $(3,9)$   & $>370$ & $159$  & 7.12   & 45 \\
+    %$(11,15797,15796)$ & U               & $(4,7)$   & $>350$ & $205$  & 7.89   & 39 \\
+    %$(11,15797,15796)$ & U               & $(5,5)$   & $>360$ & $287$  & 10.13  & 35 \\
+    %$(11,15797,15796)$ & U               & $(7,4)$   & $>360$ & $359$  & 12.81  & 36 \\
+    %$(11,15797,15796)$ & U               & $(9,3)$   & $>410$ & $478$  & 17.37  & 36 \\
+    %$(11,21963,14640)$ & U               & $(1,25)$  & $>360$ & $73$   & 4.59   & 63 \\
+    %$(11,21963,14640)$ & U               & $(2,13)$  & $>360$ & $140$  & 6.64   & 47 \\
+    %$(11,21963,14640)$ & U               & $(3,9)$   & $>360$ & $203$  & 8.70   & 43 \\
+    %$(11,21963,14640)$ & U               & $(4,7)$   & $>350$ & $261$  & 9.67   & 37 \\
+    %$(11,21963,14640)$ & U               & $(5,5)$   & $>360$ & $366$  & 12.43  & 34 \\
+    $(131,17293,17292)$ & U               & $(3,4)$   & $>430$ & $1441$ & 16.25  & 11 \\
+    $(173,30103,30102)$ & U               & $(2,5)$   & $>520$ & $2006$ & 24.69  & 12 \\
+    \bottomrule
+  \end{tabular*}
+  \caption{The running time of our algorithms and the algorithm of Tan et al.~\cite{TLWRK20} to compare 64-bit integers. The second column (Type) indicates which comparison circuit is used: univariate (U), bivariate (B) or bivaraite from~\cite{TLWRK20}.}
+  \label{table:comparison_circuit_results}
 \end{table}
 
 \begin{itemize}
-\item $m$: cyclotomic order;
-\item $n$: degree of the cyclotomic;
-\item $\delta_\mathcal{R}$: expansion factor (upper-bound);
-\item $p$: plaintext modulus;
-\item $d$: degree of the factors of $\phi_m$ modulo $p$;
-\item depth: $\lceil \log_2(p-1) \rceil + \lceil \log_2(d)\rceil + 1$;
-\item $\ell$: number of factors of of $\phi_m$ modulo $p$;
-\item $s$: number of generators for $(\Z/m\Z)^\times/<p>$;
-\item $\varepsilon$: approximative probability of failure for one equality check.
+  \item $p$: plaintext modulus;
+  \item $m$: cyclotomic order;
+  \item $n$: degree of the cyclotomic;
+  \item $d$: dimension of a slot subspace;
+  \item $\ell$: length of compared vectors over $\F_p^d$;
+  \item $k$: number of 64-bit integers encoded in one ciphertext.
 \end{itemize}
-
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "main"

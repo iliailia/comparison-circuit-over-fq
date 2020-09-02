@@ -217,19 +217,19 @@ Since this function is independent of the choice of $\S$, we can write
   \end{align*}
   where $z = x - y$, $\alpha_i = \sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i}$ and $g(X)$ is a polynomial of degree $(p-3)/2$.
   To evaluate $g(X)$, the Paterson-Stockmeyer algorithm requires $O(\sqrt{p-3})$ non-scalar multiplications.
-  Furthermore, the preprocessing phase of this algorithm computes $z^2, z^4, \dots, z^{2k}$ and $z^{4k}, z^{8k}, \dots, z^{2^m k}$ with $2k(2^m-1) = p-3$.
+  Furthermore, the preprocessing phase of this algorithm computes $z^2, z^4, \dots, z^{2k}$ and $z^{4k}, z^{8k}, \dots, z^{2^r k}$ with $2k(2^r-1) = p-3$.
   We can use these powers to compute the leading term in $m$ steps, namely
   \begin{align*}
-    z^2 z^{2k} z^{4k} \cdots z^{2^m k} = z^{2 + 2k(2^m-1)} = z^{2 + p - 3} = z^{p-1}.
+    z^2 z^{2k} z^{4k} \cdots z^{2^r k} = z^{2 + 2k(2^r-1)} = z^{2 + p - 3} = z^{p-1}.
   \end{align*}
-  Since $m \in O(\log (p/(2k)))$, the asymptotic complexity of evaluating~(\ref{eq:univariate_circuit}) is $O(\sqrt{p-3})$ non-scalar multiplications.
+  Since $r \in O(\log (p/(2k)))$, the asymptotic complexity of evaluating~(\ref{eq:univariate_circuit}) is $O(\sqrt{p-3})$ non-scalar multiplications.
   
   \begin{remark}
     A careful reader can notice that the leading term of~(\ref{eq:univariate_circuit}) is equal to $\chi_p(x-y)$, which is the heaviest part of the equality circuit $\EQ_\S$.
     Thus, we can get $\EQ_\S$ almost for free after evaluating $\LT_\S$, thus saving $O(\log (p-1))$ non-scalar multiplications.
   \end{remark}
 
-\subsection{Lexicographic order}
+\subsection{Lexicographic order}\label{subsec:lexicographic_order}
   Let $\vx=(x_0,x_1,\ldots,x_{\ell-1})$ and $\vy=(y_0,y_1,\ldots,y_{\ell-1}) \in \F_\fieldcard^\ell$ for the lexicographical order $<$ defined by the choice of $\S$:
   \begin{align*}
     \vx < \vy \Leftrightarrow \exists i\in[0,\ell-1] \text{ such that } x_i < y_i \text{ and } \forall j > i ~~ x_j = y_j\,.
