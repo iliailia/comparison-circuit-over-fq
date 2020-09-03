@@ -823,7 +823,7 @@ void Comparator::evaluate_poly(Ctxt& ret, Ctxt& ctxt_p_1, const Ctxt& x) const
 	// get p
 	ZZ p = ZZ(m_context.zMStar.getP());
 
-	if (p > ZZ(3))
+	if (p > ZZ(3)) //if p > 3, use the generic Paterson-Stockmeyer strategy
 	{
 	  // z^2
 	  	Ctxt x2 = x;
@@ -868,7 +868,7 @@ void Comparator::evaluate_poly(Ctxt& ret, Ctxt& ctxt_p_1, const Ctxt& x) const
 
 		ret += top_term;
 	}
-	else
+	else //circuit for p=3
 	{
 		ret = x;
 
