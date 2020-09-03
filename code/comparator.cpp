@@ -83,7 +83,7 @@ void Comparator::compute_poly_params()
 	ZZ p = ZZ(m_context.zMStar.getP());
 	long p_long = conv<long>(p);
 
-	// hardcoded babystep numbers
+	// hardcoded babysteps sizes
 	map<unsigned long, unsigned long> bs_nums
 	{
 		{11, 3}, // 3 (19), 1..4
@@ -108,18 +108,19 @@ void Comparator::compute_poly_params()
   	if(bs_nums.count(p_long) > 0)
   		m_bs_num = bs_nums[p_long];
 
+  	// if p > 3, d = (p-3)/2
   	long d = deg(m_univar_poly);
 
-  	// How many baby steps: set sqrt(n/2), rounded up/down to a power of two
+  	// How many baby steps: set sqrt(d/2), rounded up/down to a power of two
 
 	// FIXME: There may be some room for optimization here: it may be possible to choose this number as something other than a power of two and still maintain optimal depth, in principle we can try all possible values of m_babystep_num between two consecutive powers of two and choose the one that gives the least number of multiplies, conditioned on minimum depth.
 
   	if (m_bs_num <= 0) 
 	{
-		long kk = static_cast<long>(sqrt(d/2.0));
+		long kk = static_cast<long>(sqrt(d/2.0)); //sqrt(d/2)
 		m_bs_num = 1L << NextPowerOfTwo(kk);
 
-    	// heuristic: if k>>kk then use a smaler power of two
+    	// heuristic: if #baby_steps >> kk then use a smaler power of two
     	if ((m_bs_num==16 && d>167) || (m_bs_num>16 && m_bs_num>(1.44*kk)))
       		m_bs_num /= 2;
   	}
@@ -129,19 +130,22 @@ void Comparator::compute_poly_params()
 		cout << "Number of baby steps: " << m_bs_num << endl;
 	}
 
-	// n = ceil(deg(p)/k), deg(p) >= k*n
-	m_gs_num = divc(d,m_bs_num);      
+	// #giant_steps = ceil(d/#baby_steps), d >= #giant_steps * #baby_steps
+	m_gs_num = divc(d,m_bs_num);
 
-	// If n is not a power of two, ensure that poly is monic and that
-	// its degree is divisible by k, then call the recursive procedure
+	if(m_verbose)
+	{
+		cout << "Number of giant steps: " << m_bs_num << endl;
+	}      
+
+	// If #giant_steps is not a power of two, ensure that poly is monic and that
+	// its degree is divisible by #baby_steps, then call the recursive procedure
 
 	// top coefficient is equal to (p^2 - 1)/8 mod p
 	// its inverse is equal to -8 mod p
 	m_top_coef = LeadCoeff(m_univar_poly);
 	ZZ topInv = ZZ(-8) % p; // the inverse mod p of the top coefficient of poly (if any)
-	bool divisible = (m_gs_num * m_bs_num == d); // is the degree divisible by k?
-	//long nonInvertibe = InvModStatus(topInv, top, p);
-	   // 0 if invertible, 1 if not
+	bool divisible = (m_gs_num * m_bs_num == d); // is the degree divisible by #baby_steps?
 
 	// FIXME: There may be some room for optimization below: instead of
 	// adding a term X^{n*k} we can add X^{n'*k} for some n'>n, so long
@@ -149,7 +153,7 @@ void Comparator::compute_poly_params()
 	// multiplications since giantStep[n'] may be easier to compute than
 	// giantStep[n] when n' has fewer 1's than n in its binary expansion.
 
-	m_extra_coef = ZZ::zero();    // extra!=0 denotes an added term extra*X^{n*k}
+	m_extra_coef = ZZ::zero();    // extra!=0 denotes an added term extra*X^{#giant_steps * #baby_steps}
 
 	if (m_gs_num != (1L << NextPowerOfTwo(m_gs_num)))
 	{
@@ -834,10 +838,10 @@ void Comparator::evaluate_poly(Ctxt& ret, Ctxt& ctxt_p_1, const Ctxt& x) const
 
 		DynamicCtxtPowers giantStep(x2k, m_gs_num);
 
-		// Special case when deg(p)>k*(2^e -1)
+		// Special case when #giant_steps is a power of two
 		if (m_gs_num == (1L << NextPowerOfTwo(m_gs_num))) 
-		{ // n is a power of two
-			cout << "I'm computing degPowerOfTwo" << endl;
+		{
+			//cout << "I'm computing degPowerOfTwo" << endl;
 	    	degPowerOfTwo(ret, m_univar_poly, m_bs_num, babyStep, giantStep);
 	    }
 	    else
@@ -857,6 +861,16 @@ void Comparator::evaluate_poly(Ctxt& ret, Ctxt& ctxt_p_1, const Ctxt& x) const
 			}
 		}
 		ret.multiplyBy(x);
+
+		/*
+		cout << "Computed baby steps" << endl;
+		for(int i = 0; i < babyStep.size(); i++)
+			cout << i + 1 << ' ' << babyStep.isPowerComputed(i+1) << endl;
+
+		cout << "Computed giant steps" << endl;
+		for(int i = 0; i < giantStep.size(); i++)
+			cout << i + 1 << ' ' << giantStep.isPowerComputed(i+1) << endl;
+		*/
 
 		// TODO: depth here is not optimal
 		Ctxt top_term = babyStep.getPower(m_baby_index);
