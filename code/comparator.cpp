@@ -86,17 +86,21 @@ void Comparator::compute_poly_params()
 	// hardcoded babysteps sizes
 	map<unsigned long, unsigned long> bs_nums
 	{
+		{5, 1},
+		{7, 2},
 		{11, 3}, // 3 (19), 1..4
   		{13, 3}, // 3 (16), 1..5
   		{17, 4}, // 4 (13), 1..5
-  		{19, 3}, // 3 (14), 1..2
+  		{19, 3}, // 3 (14), 1..4
   		{29, 5}, // 5 (16), 1..6
   		{31, 5}, // 5 (15), 4..6
+  		{37, 5},
   		{47, 5}, // 5 (18), 2..11 
   		{61, 6}, // 6 (19), 4..8 
   		{67, 5}, // 5 (20), 4..8
   		{71, 4}, // 4 (20), 3..7
   		{101, 7}, // 7 (21), 4..8
+  		{109, 7},
   		{131, 8}, // 8 (24), 4..11
   		{167, 10}, // 10 (26), 8..12
   		{173, 10},  // 10 (26), 8..12
@@ -862,16 +866,6 @@ void Comparator::evaluate_poly(Ctxt& ret, Ctxt& ctxt_p_1, const Ctxt& x) const
 		}
 		ret.multiplyBy(x);
 
-		/*
-		cout << "Computed baby steps" << endl;
-		for(int i = 0; i < babyStep.size(); i++)
-			cout << i + 1 << ' ' << babyStep.isPowerComputed(i+1) << endl;
-
-		cout << "Computed giant steps" << endl;
-		for(int i = 0; i < giantStep.size(); i++)
-			cout << i + 1 << ' ' << giantStep.isPowerComputed(i+1) << endl;
-		*/
-
 		// TODO: depth here is not optimal
 		Ctxt top_term = babyStep.getPower(m_baby_index);
 		top_term.multiplyBy(giantStep.getPower(m_giant_index));
@@ -881,6 +875,18 @@ void Comparator::evaluate_poly(Ctxt& ret, Ctxt& ctxt_p_1, const Ctxt& x) const
 		top_term.multByConstant(ZZ((p+1)>> 1));
 
 		ret += top_term;
+
+		cout << "Computed baby steps" << endl;
+		for(int i = 0; i < babyStep.size(); i++)
+		{
+			cout << i + 1 << ' ' << babyStep.isPowerComputed(i+1) << endl; 
+		}
+
+		cout << "Computed giant steps" << endl;
+		for(int i = 0; i < giantStep.size(); i++)
+		{
+			cout << i + 1 << ' ' << giantStep.isPowerComputed(i+1) << endl;
+		}
 	}
 	else //circuit for p=3
 	{
