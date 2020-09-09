@@ -113,7 +113,7 @@ def ps_complexity_optimized(p):
 		print("p must be prime");
 		return 0;
 
-	if(p < 3):
+	if(p <= 3):
 		print("p must be bigger than 3");
 		return 0;
 
@@ -166,3 +166,28 @@ def test_ps_complexity(n):
 		min_k_optimized, min_mul_optimized = ps_complexity_optimized(p);
 		print("p:", p, (min_k, min_mul), (min_k_optimized, min_mul_optimized), min_mul >= min_mul_optimized);
 		p = next_prime(p);
+
+def univariate_circuit(p):
+	'''Returns the coefficients of the univariate comparison polynomial modulo p 
+
+	Params:
+		p(int): prime modulus
+
+	Returns:
+		poly(polynomial over F_p): univariate circuit as polynomial 
+	'''
+	if(not is_prime(p)):
+		print("p must be prime");
+		return 0;
+
+	if(p < 3):
+		print("p must be bigger or equal to 3");
+		return 0;
+
+	F = GF(p);
+	R.<z> = PolynomialRing(F);
+	poly = R(0);
+	half_p = (p-1) / 2;
+	for a in range(-half_p, -1):
+		poly += 1 - (z-F(a))^(p-1);
+	return poly;
