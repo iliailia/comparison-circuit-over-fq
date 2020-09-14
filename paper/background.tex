@@ -1,10 +1,89 @@
-\subsection{Notation}
-
+\subsubsection{Notations}
 Vectors will be written in column form and denoted by boldface lower-case letters. The vector containing only $1$'s in its coordinates is denoted by $\1$. We write $\0$ for the zero vector. The set of integers $\{\ell,\dots,k\}$ is denoted by $[\ell,k]$.
 
 For a positive integer $t$, let $\texttt{wt}(t)$ be the Hamming weight of its binary expansion. We denote the set of residue classes modulo $p$ by $\Z_p$ and the class representatives of $\Z_p$ are taken from the half-open interval $[-p/2, p/2)$.
 
-\subsection{Cyclotomic fields and Chinese Remainder Theorem}\label{subsec:crt}
+\subsection{Comparison of integers with finite fields operations}
+Let $\S$ be a totally ordered set with a binary relation $<$.
+For any $x,y \in \S$, we can define the less-than and the equality functions as follows.
+\begin{align*}
+  \LT_\S(x,y) = 
+  \begin{cases}
+    1, & \text{if } x < y; \\
+    0, & \text{if } x \ge y, \\
+  \end{cases}
+  \qquad
+  \EQ_\S(x,y) = 
+  \begin{cases}
+    1, & \text{if } x = y; \\
+    0, & \text{if } x \neq y. \\
+  \end{cases}
+\end{align*}
+In our case, $\S$ can be thought as a complete set of representatives of a finite field $\F_{p^d}$ of prime characteristic $p\geq 2$.
+
+\subsubsection{Functions over finite fields}\label{subsec:funcff}
+The map defined by $\princhar: x \mapsto x^{p^d-1}$ from $\F_{p^d}$ to the binary set $\{0,1\}$ is called the \emph{principal character}. According to Euler's theorem extended to finite fields, it returns $1$ if $x$ is non-zero and $0$ otherwise. It can thus be used to compute the equality function:
+\begin{align*}
+  \EQ_{\F_{p^d}}(x,y) = 1 - \princhar (x-y).
+\end{align*}
+Moreover, note that since:
+\begin{align}\label{eq:exp_frob}
+  a^{p^d-1} = a^{(p-1)(p^{d-1} + \dots + 1)} = \prod_{i=0}^{d-1} (a^{p-1})^{p^i},
+\end{align}
+$\chi$ can be computed with Frobenius maps ($x \mapsto x^p$) and multiplications.
+
+Every function from $\F_{p^d}^l$ to $\F_{p^d}$ can be interpolated by a unique polynomial which can be defined with Lagrange interpolation and the help of the principal character. 
+\begin{lemma}\label{lem:interpolation}
+  Every function $f: \F_{p^d}^l \rightarrow \F_{p^d}$ is a polynomial function represented by a unique polynomial $P_f(X_1,\dots,X_{l})$ of degree at most $p^d - 1$ in each variable.
+  In particular,
+  \begin{align*}
+    P_f(X_1,\dots,X_{l}) = \sum_{a_1,\dots,a_l \in \F_{p^d}} f(a_1,\dots,a_l) \prod_{i=1}^{l} \left(1 - \princhar(X_i - a_i)\right)\,.
+  \end{align*}
+\end{lemma}
+
+\subsubsection{Comparison of integers}
+For any $d'\mid d$, one can encode integers in $[0,p^{d'}-1]$ as elements of the subfield $\F_{p^{d'}} \subseteq \F_{p^d}$ and use Lemma \ref{lem:interpolation} to compare them using only additions, substractions and multiplications in $\F_{p^{d'}}$.  
+
+In order to compare integers larger than the size of the field $p^d$, one can decompose them in base $\F_{p^{d'}}$, for some $d'\mid d$. In this way, we can represent an integer $x = x_0 + x_1p^{d'} + x_2p^{2d'}+\ldots x_{k-1}p^{(k-1)d'}$ by the vector $\vx=(x_0,x_1,\ldots,x_{k-1})\in\F_{p^{d'}}^k$ of its digits of length $k$.
+
+From there, the comparison of two integers $x$ and $y$ is equivalent to the comparison of their vector of digits $\vx=(x_0,x_1,\ldots,x_{k-1})$ and $\vy=(y_0,y_1,\ldots,y_{k-1})$ using the lexicographical order $\bm{<}$ defined by:
+  \begin{align*}
+    \vx \bm{<} \vy \Leftrightarrow \exists i\in[0,k-1] \text{ such that } x_i < y_i \text{ and } \forall j > i ~~ x_j = y_j\,.
+  \end{align*}
+  As done in~\cite{TLWRK20}, we can employ $\EQ_{\F_{p^{d'}}}$ and $\LT_{\F_{p^{d'}}}$ to compute $\LT(\vx, \vy)$ which evaluates the lexicographical order of $\vx$ and $\vy$ as follows:
+  \begin{align*}
+    \LT(\vx, \vy) = \sum_{i=0}^{k-1} \LT_{\F_{p^{d'}}}(x_{i}, y_{i}) \prod_{j=i+1}^{k-1} \EQ_{\F_{p^{d'}}}(x_{j}, y_{j}).
+  \end{align*}
+  Notice that the multiplicative depth of this function depends essentially of the products of the equality functions.
+  In fact, these products compare subvectors $\vx_i = (x_i, x_{i+1},\dots,x_{k-1})$ and $\vy_i = (y_i, y_{i+1},\dots,y_{k-1})$ for $i \in [1,k-1]$.
+  Thus, we can rewrite $\LT_{\F_{p^{d'}}}$ as
+  \begin{align}\label{eq:general_lex_order}
+    \LT(\vx, \vy) = \sum_{i=0}^{k-1} \LT_{\F_{p^{d'}}}(x_{i}, y_{i}) \EQ_{\F_{p^{d'}}}(\vx_{i+1}, \vy_{i+1}) 
+  \end{align}
+  with the equality function $\EQ_{\F_{p^{d'}}}(\vx_{i+1}, \vy_{i+1})$ that returns $1$ if $\vx_{i+1} = \vy_{i+1}$ and $0$ otherwise.
+  % As shown in~\todo{cite our work}, this function can be realized by a constant-depth circuit in the following way.
+  % \begin{align}\label{eq:rand_eq_circuit}
+  %   \EQ_{\F_\fieldcard, e}(\vx_{i+1},\vy_{i+1}) = 1 - \princhar_{\fieldcard^e}\left(\sum_{j=i+1}^{\ell-1} r_j (x_j - y_j)\right)
+  % \end{align}
+  % where $r_j$ are uniformly random elements from $\F_{\fieldcard^e}$.
+  % This circuit is false-biased with error probability $\fieldcard^{-e}$.
+  % We can compute all $\EQ_{\F_\fieldcard, e}(\vx_{i+1},\vy_{i+1})$ using the same number of multiplications as for the single equality using Algorithm~\ref{alg:vector_equalities_circuit}.\todo{What is the complexity?}
+
+
+%If $\S$ is a complete set of representatives of a finite field $\F_{p^d}$, then the equality function can be easily realized using the principal character of $\F_{p^d}$, namely $\EQ_\S(x,y) = 1 - \princhar_{p^d}(x-y)$.
+% Since this function is independent of the choice of $\S$, we can write
+% \begin{align*}
+%   \EQ_{\F_{p^d}}(x,y) = 1 - \princhar_\fieldcard(x-y).
+% \end{align*}
+% Unfortunately, the comparison function is not as simple and we have to rely on Lagrange interpolation (Lemma \ref{lem:interpolation}) to compute it. Yet, there are two different ways to evaluate it: either interpolate $\LT_\S$ as a bivariate function over $\S^2$  -- i.e. compute $\LT_\S(x,y)$ -- or transform it as a univariate function in $z=x-y$ -- i.e. compute $\LT_\S(x-y,0)$.
+
+% While the second approach might seems simpler, it requires nonetheless to be able to distinguish between ``postive'' and ``negative'' values. This means that if $\S = [0,p']$ for some $p'\geq 1$, since the values of $z = x-y$ can range within the interval $[-p',p']$, it requires to use a plaintext modulus $p\geq 2p'+1$ while being only able to use ``half'' of it.  
+
+
+\subsection{Homomorphic Encryption}
+We are interested in leveled HE schemes that support SIMD operations on their plaintexts. We refer to such schemes as \emph{SIMD-schemes} and this section aims at giving the necessary background regarding these schemes.
+
+\subsubsection{Cyclotomic fields and Chinese Remainder Theorem}\label{subsec:crt}
 
 Let $m$ be a positive integer and $n = \varphi(m)$ where $\varphi$ is the Euler's totient function. 
 Let $\mathcal{K} = \Q(\zeta_{m})$ be the cyclotomic number field constructed by adjoining a primitive $m$-th root of unity $\zeta_{m}\in\C$ to the field of rational numbers. 
@@ -27,22 +106,128 @@ Using multiplication, we can easily define a projection map $\proj_i$ on $\intri
 In particular, $\proj_i(a) = a g_i$, where $g_i \in \intring_t$ encodes $(0 \dots, 1, \dots, 0)$.
 We can generalize this projection for any $I \subseteq \{1,\dots,\ell\}$ to $\proj_I(a) = a g_I$ with $g_I \in \intring_p$ encoding $1$ in the SIMD slots indexed by $I$.\newline
 
-The field $\numfield = \Q(\zeta_{m})$ is a Galois extension and its Galois group $\mathcal{G} = \Gal{(\numfield/\Q)}$ is isomorphic to $\Z_m^\times$  through: $i \mapsto (\sigma_i: X \mapsto X^i)$ where $i \in \Z_m^\times$. The automorphism $\sigma_p$ corresponding to $p$ is called \emph{the Frobenius automorphism} and generates the Galois group $\Gal{(\F_{p^d}/\F_p)}$ of each slot. This means that $\mathcal{F} = <\sigma_p>\subset \mathcal{G}$ partitions the roots of $\Phi_m$  into $\ell$ sets $X_i$ of $d$ elements, each set corresponding to the roots of a factor $F_i$. Therefore the group $\mathcal{H} = \mathcal{G}/\mathcal{F}$ acts transitively on a set of representative $\bar{X}_i$ of each $X_i$ and thus maps a root $\bar{X}_i$ of $F_i$ to a root $\bar{X}_j$ of $F_j$ for $i\neq j$. In other words the elements of $\mathcal{H}$ permute the SIMD slots. However, the order of $\mathcal{H}$ is $n/d = \ell$, which is less than $\ell!$, the number of all possible permutations of the $\ell$ SIMD slots. Nonetheless, it was shown in~\cite{GHS12} that every permutation of SIMD slots can be realized by combination of automorphisms from $\mathcal{H}$, projection maps and additions.
+The field $\numfield = \Q(\zeta_{m})$ is a Galois extension and its Galois group $\mathcal{G} = \Gal{(\numfield/\Q)}$ is isomorphic to $\Z_m^\times$  through: $i \mapsto (\sigma_i: X \mapsto X^i)$ where $i \in \Z_m^\times$. The automorphism $\sigma_p$ corresponding to $p$ is called \emph{the Frobenius automorphism} and generates the Galois group $\Gal{(\F_{p^d}/\F_p)}$ of each slot. This means that $\mathcal{F} = <\sigma_p>\subset \mathcal{G}$ partitions the roots of $\Phi_m$  into $\ell$ sets $X_i$ of $d$ elements, each set corresponding to the roots of a factor $F_i$. Therefore the group $\mathcal{H} = \mathcal{G}/\mathcal{F}$ acts transitively on a set of representative $\bar{X}_i$ of each $X_i$ and thus maps a root $\bar{X}_i$ of $F_i$ to a root $\bar{X}_j$ of $F_j$ for $i\neq j$. In other words the elements of $\mathcal{H}$ permute the SIMD slots. However, the order of $\mathcal{H}$ is $n/d = \ell$, which is less than $\ell!$, the number of all possible permutations of the $\ell$ SIMD slots. Nonetheless, it was shown in~\cite{GHS12} that every permutation of SIMD slots can be realized by combination of automorphisms from $\mathcal{H}$, projection maps and additions.\newline
+
+In this work we will focus on SIMD schemes allowing to perform \emph{exact} computations over encrypted datas. Such schemes include $\BGV$~\cite{BGV12} and $\FV$~\cite{FV12} and have the ring $\intring_p$, for $p\geq 2$, as plaintext space.
+
+\subsubsection{Basic setup}
+
+Let $\lambda$ be the security level of an HE scheme.
+Let $L$ be the maximal multiplicative depth of homomorphic circuits we want to evaluate.
+Let $d$ be the order of the plaintext modulus $p$ modulo the order $m$ of $\intring$.
+Assume that the plaintext space $\intring_p$ has $\slots$ SIMD slots, i.e. $\intring_p \cong \F^\ell_{p^d}$.
+% For a vector $\va \in \F^k_{p^d}$, we denote the plaintext encoding of $\va$ by $\pt(\va)$. 
+The basic part of a SIMD-scheme consists of key generation, encryption and decryption algorithms.
+
+$\KeyGen(1^\lambda, 1^L) \rightarrow (\sk, \pk)$. Given $\lambda$ and $L$, this function generates the secret key $\sk$ and the public key $\pk$.
+Note that the public key contains special key-switching keys that help to transform ciphertexts encrypted under other secret keys back to ciphertexts encrypted under $\sk$. 
+
+$\Encrypt(\pt \in \intring_t, \pk) \rightarrow \ct$. The encryption algorithm takes a plaintext $\pt$ and the public key $\pk$ and outputs a ciphertext $\ct$.
+
+$\Decrypt(\ct, \sk) \rightarrow \pt$. The decryption algorithm takes a ciphertext $\ct$ and the secret key $\sk$ and returns a plaintext $\pt$.
+For freshly encrypted ciphertexts, the decryption correctness means that $\Decrypt(\Encrypt(\pt, \pk), \sk) = \pt$. 
 
 
-\subsection{Functions over finite fields}
-The map defined by $\princhar: x \mapsto x^{p^d-1}$ from $\F_{p^d}$ to the binary set $\{0,1\}$ is called the \emph{principal character}. According to Euler's theorem extended to finite fields, it returns $1$ if $x$ is non-zero and $0$ otherwise. It can thus be used to compute an equality check: $\EQ(x,y) = 1-\chi (x-y)$. Moreover, note that since:
-\begin{align}\label{eq:exp_frob}
-  a^{p^d-1} = a^{(p-1)(p^{d-1} + \dots + 1)} = \prod_{i=0}^{d-1} (a^{p-1})^{p^i},
+\subsubsection{Arithmetic operations}
+
+Homomorphic arithmetic operations are addition and multiplication.
+
+$\Add(\ct_1, \ct_2) \rightarrow \ct$. The addition algorithm takes two input ciphertexts $\ct_1$ and $\ct_2$ encrypting plaintexts $\pt_1$ and $\pt_2$ respectively.
+It outputs a ciphertext $\ct$ that encrypts the sum of these plaintexts in the ring $\intring_p$.
+%It implies that homomorphic addition sums respective SIMD slots of $\pt_1$ and $\pt_2$.
+
+$\AddPlain(\ct_1, \pt_2) \rightarrow \ct$. This algorithm takes a ciphertext $\ct_1$ encrypting a plaintext $\pt_1$ and a plaintext $\pt_2$.
+It outputs a ciphertext $\ct$ that encrypts $\pt_1 + \pt_2$.
+%As for the $\Add$ algorithm, $\AddPlain$ sums respective SIMD slots of $\pt_1$ and $\pt_2$.
+
+$\Mul(\ct_1, \ct_2) \rightarrow \ct$. Given two input ciphertext $\ct_1$ and $\ct_2$ encrypting plaintext $\pt_1$ and $\pt_2$ respectively, the multiplication algorithm outputs a ciphertext $\ct$ that encrypts the plaintext product $\pt_1 \cdot \pt_2$.
+%As a result, homomorphic multiplication multiplies respective SIMD slots of $\pt_1$ and $\pt_2$.
+
+$\MulPlain(\ct_1, \pt_2) \rightarrow \ct$. Given a ciphertext $\ct_1$ encrypting plaintext $\pt_1$ and a plaintext $\pt_2$, this algorithm outputs a ciphertext $\ct$ that encrypts the plaintext product $\pt_1 \cdot \pt_2$.
+%As a result, homomorphic multiplication multiplies respective SIMD slots of $\pt_1$ and $\pt_2$.
+
+Using the above operations as building blocks, one can design homomorphic subtraction algorithms.
+
+$\Sub(\ct_1, \ct_2) = \Add(\ct_1, \MulPlain(\ct_2, \pt(-\1))) \rightarrow \ct$. The subtraction algorithm returns a ciphertext $\ct$ that encrypts the difference of two plaintext messages $\pt_1 - \pt_2$ encrypted by $\ct_1$ and $\ct_2$, respectively.
+
+$\SubPlain(\ct_1, \pt_2) = \AddPlain(\ct_1, \pt_2 \cdot \pt(-\1)) \rightarrow \ct$. This algorithm returns a ciphertext $\ct$ that encrypts $\pt_1 - \pt_2$ where $\pt_1$ is encrypted by $\ct_1$.
+We can also change the order of arguments such that $\SubPlain(\pt_1, \ct_2)$ returns a ciphertext $\ct$ encrypting $\pt_1 - \pt_2$. 
+
+As shown in Section~\ref{subsec:crt}, the projection map $\proj_I$ can select the SIMD slots indexed by a set $I \subseteq \{0,\dots,\slots-1\}$ and set the rest to zero.
+This functionality is homomorphically realized by the $\Select$ function.
+
+$\Select(\ct, I) = \MulPlain(\ct, \pt(\1_I)) \rightarrow \ct'$ where $\1_I$ is a vector having $1$'s in the coordinates indexed by a set $I$ and zeros everywhere else.
+Given a ciphertext $\ct$ encrypting SIMD slots $\vm = (m_0,m_1,\dots,m_{\slots-1})$ and a set $I$, this function returns a ciphertext $\ct'$ that encrypts $\vm' = (m'_0,\dots,m'_{\slots-1})$ such that $m'_i = m_i$ if $i \in I$ and $m'_i = 0$ otherwise.
+
+\subsubsection{Special operations}\label{subsec:special_operations}
+
+One can also homomorphically permute the SIMD slots of a given ciphertext and act on them with the Frobenius automorphism. 
+
+$\Rotate(\ct, i) \rightarrow \ct'$ with $i \in [0, \slots-1]$. Given a ciphertext $\ct$ encrypting SIMD slots 
+$$\vm = (m_0,m_1,\dots,m_{\slots-1}),$$
+the rotation algorithm returns a ciphertext $\ct'$ that encrypts the cyclic shift of $\vm$ by $i$ positions, namely $(m_i,m_{(i+1) \mod \slots},\dots,m_{(i-1) \mod \slots})$.
+
+$\Frob(\ct, i) \rightarrow \ct'$ with $i\in[0,d-1]$. Given a ciphertext $\ct$ encrypting SIMD slots $\vm$ as above, the Frobenius algorithm returns a ciphertext $\ct'$ that encrypts a Frobenius map action on $\vm$, namely $(m^{p^i}_0,m^{p^i}_1,\dots,m^{p^i}_{\slots-1})$.
+
+As discussed in Section~\ref{subsec:funcff}, the $\Frob$ and $\Mul$ operations can be combined to compute the principal character $\princhar$, which turns non-zero values of SIMD slots into $1$ and leaves slots with zeros unchanged.
+
+$\IsNonZero(\ct) \rightarrow \ct'$. Given a ciphertext $\ct$ encrypting SIMD slots $\vm = (m_0,m_1,\dots,m_{\slots-1})$, this function returns a ciphertext $\ct'$ that encrypts:
+\[
+  (\princhar(m_0), \princhar(m_1), \dots, \princhar(m_{\slots-1})).
+\]
+% Kim et al.~\cite{TDSC:KLLW16} showed that one can employ the Frobenius map to decrease the multiplicative depth of $\IsNonZero$.
+Recall that $\princhar(m) = m^{p^d-1} = \prod_{i=0}^{d-1} (m^{p-1})^{p^i}$ as shown in~(\ref{eq:exp_frob}).
+The multiplicative depth of $x^{p-1}$ is equal to $\ceil{\log_2 (p-1)}$.
+The multiplicative depth of $x^{p^i}$ is zero as it can be done by the $\Frob$ operation.
+In total, $d-1$ $\Frob$ operations are needed to compute $\princhar(m)$.
+As a result, the total multiplicative depth of $\IsNonZero$ is
+\begin{align}\label{eq:nonzero_depth}
+  \ceil{\log_2 (p-1)} + \ceil{\log_2 d}.
 \end{align}
-$\chi$ can be computed with Frobenius maps and multiplications. Every function from $\F_{p^d}^l$ to $\F_{p^d}$ can be interpolated by a unique polynomial which can be defined with the help of the principal character. 
-\begin{lemma}\label{lem:interpolation}
-  Every function $f: \F_{p^d}^l \rightarrow \F_{p^d}$ is a polynomial function represented by a unique polynomial $P_f(X_1,\dots,X_{l})$ of degree at most $p^d - 1$ in each variable.
-  In particular,
-  \begin{align*}
-    P_f(X_1,\dots,X_{l}) = \sum_{a_1,\dots,a_l \in \F_{p^d}} f(a_1,\dots,a_l) \prod_{i=1}^{l} \left(1 - \princhar(X_i - a_i)\right)\,.
-  \end{align*}
-\end{lemma}
+Using general exponentiation by squaring, $x^{p-1}$ requires $\floor{\log_2 (p-1)} + \wt(p-1) - 1$ field multiplications.
+Since $d-1$ field multiplications are needed to compute $\prod_{i=0}^{d-1} (x^{p-1})^{p^i}$, the total number of multiplications to compute $\princhar(m)$ is:
+\begin{align}\label{eq:nonzero_width}
+  \floor{\log_2 (p-1)} + \wt(p-1) + d - 2.
+\end{align} 
+
+\subsubsection{Cost of homomorphic operations}\label{subsec:cost}
+Note that every homomorphic ciphertext contains a special component called \emph{noise} that is removed during decryption.
+However, the decryption function can deal only with noise of small enough magnitude; otherwise, this function fails.
+This noise bound is defined by encryption parameters in a way that larger parameters result in a larger bound.
+The ciphertext noise increases after every homomorphic operation and, therefore, approaches its maximal possible bound.
+It implies that to reduce encryption parameters one needs to avoid homomorphic operations that significantly increase the noise.
+Therefore, while designing homomorphic circuits, we need to take into account not only the running time of homomorphic operations but also their effect on the noise.  
+
+Table~\ref{table:he_operations} summarizes the running time and the noise cost of the aforementioned homomorphic operations.
+Similar to~\cite{C:HalSho14}, we divide the operations into expensive, moderate and cheap.
+The expensive operations dominate the cost of a homomorphic circuit.
+The moderate operations are less important, but if there are many of them in a circuit, their total cost can dominate the total cost.
+The cheap operations are the least important and can be omitted in the cost analysis.
+
+It is worth to note that there are two multiplication functions $\Mul$ (ciphertext-ciphertext multiplication) and $\MulPlain$ (ciphertext-plaintext multiplication).
+Since $\Mul$ is much more expensive than $\MulPlain$, the multiplicative depth of a homomorphic circuit is usually calculated with relation to the number of $\Mul$'s.
+
+\begin{table}[t!]
+  \centering
+  \begin{tabular*}{.5\textwidth}{@{\extracolsep{\fill} } c c c }
+    \toprule
+    Operation	& Time			& Noise \\
+    \cmidrule(lr){1-1}\cmidrule(lr){2-3}
+    $\Add$		& cheap			& cheap 	\\
+    $\AddPlain$	& cheap			& cheap \\
+    $\Mul$		& expensive		& expensive 	\\
+    $\MulPlain$	& cheap			& moderate 	\\
+    $\Sub$		& cheap			& cheap  \\
+    $\SubPlain$	& cheap			& cheap  \\
+    $\Select$	& cheap			& moderate \\
+    $\Rotate$ 	 & expensive	& moderate \\
+    $\Frob$		 & expensive	& cheap \\
+    $\IsNonZero$ & expensive    & expensive \\
+    \bottomrule
+  \end{tabular*}
+  \caption{The cost of homomorphic operations with relation to running time and noise growth.}
+  \label{table:he_operations}
+\end{table}
 
 
 % Let $\F_\fieldcard$ be a finite field of characteristic $\fieldchar$.

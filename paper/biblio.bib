@@ -1,3 +1,4 @@
+
 @inproceedings{BGV12,
 author = {Brakerski, Zvika and Gentry, Craig and Vaikuntanathan, Vinod},
 title = {{(Leveled) Fully Homomorphic Encryption without Bootstrapping}},
@@ -42,6 +43,23 @@ series = {ITCS ’12}
   number={2},
 
   pages={357-363},}
+
+@InProceedings{CKKS17,
+author="Cheon, Jung Hee
+and Kim, Andrey
+and Kim, Miran
+and Song, Yongsoo",
+editor="Takagi, Tsuyoshi
+and Peyrin, Thomas",
+title="Homomorphic Encryption for Arithmetic of Approximate Numbers",
+booktitle="Advances in Cryptology -- ASIACRYPT 2017",
+year="2017",
+publisher="Springer International Publishing",
+address="Cham",
+pages="409--437",
+abstract="We suggest a method to construct a homomorphic encryption scheme for approximate arithmetic. It supports an approximate addition and multiplication of encrypted messages, together with a new rescaling procedure for managing the magnitude of plaintext. This procedure truncates a ciphertext into a smaller modulus, which leads to rounding of plaintext. The main idea is to add a noise following significant figures which contain a main message. This noise is originally added to the plaintext for security, but considered to be a part of error occurring during approximate computations that is reduced along with plaintext by rescaling. As a result, our decryption structure outputs an approximate value of plaintext with a predetermined precision.",
+isbn="978-3-319-70694-8"
+}
 
 
 @ARTICLE{CKK16,
@@ -98,7 +116,21 @@ numpages = {25},
 keywords = {Implementation, SIMD operations, Fully homomorphic encryption, 94A60}
 }
 
-  
+@InProceedings{C:HalSho14,
+  author =       "Shai Halevi and
+                  Victor Shoup",
+  title =        "Algorithms in {HElib}",
+  pages =        "554--571",
+  editor =       crypto14ed,
+  booktitle =    crypto14name1,
+  volume =       crypto14vol1,
+  address =      cryptoaddr,
+  month =        crypto14month,
+  publisher =    cryptopub,
+  series =       mylncs,
+  year =         2014,
+  doi =          "10.1007/978-3-662-44371-2_31",
+}
 
 
 
@@ -206,7 +238,7 @@ abstract="We introduce a sorting scheme which is capable of efficiently sorting 
 isbn="978-3-319-22174-8"
 }
 
-@article{SIAM:PS73},
+@article{SIAM:PS73,
   title={On the number of nonscalar multiplications necessary to evaluate polynomials},
   author={Paterson, Michael S and Stockmeyer, Larry J},
   journal={SIAM Journal on Computing},
