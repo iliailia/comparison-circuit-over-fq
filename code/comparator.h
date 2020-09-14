@@ -133,6 +133,9 @@ class Comparator{
     // exact equality 
     void is_zero(Ctxt& ctxt_res, const Ctxt& ctxt_z, long pow = 1) const;
 
+    // minimum/maximum function for digits (vectors of dimension 1 over F_p)
+    void min_max_digit(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;
+
     // conversion to slots
     void int_to_slot(ZZX& poly, unsigned long input, unsigned long enc_base) const; 
 
@@ -150,7 +153,7 @@ public:
   // comparison function
   void compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;
 
-  // minimum/maximum function
+  // minimum/maximum function for general vectors
   void min_max(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;
 
   // test compare function 'runs' times
