@@ -113,7 +113,7 @@ void Comparator::compute_poly_params()
   		m_bs_num = bs_nums[p_long];
 
   	// if p > 3, d = (p-3)/2
-  	long d = deg(m_univar_poly);
+  	long d = deg(m_univar_less_poly);
 
   	// How many baby steps: set sqrt(d/2), rounded up/down to a power of two
 
@@ -147,7 +147,7 @@ void Comparator::compute_poly_params()
 
 	// top coefficient is equal to (p^2 - 1)/8 mod p
 	// its inverse is equal to -8 mod p
-	m_top_coef = LeadCoeff(m_univar_poly);
+	m_top_coef = LeadCoeff(m_univar_less_poly);
 	ZZ topInv = ZZ(-8) % p; // the inverse mod p of the top coefficient of poly (if any)
 	bool divisible = (m_gs_num * m_bs_num == d); // is the degree divisible by #baby_steps?
 
@@ -166,15 +166,15 @@ void Comparator::compute_poly_params()
 	    	m_top_coef = NTL::to_ZZ(1);  // new top coefficient is one
 	    	topInv = m_top_coef;    // also the new inverse is one
 	    	// set extra = 1 - current-coeff-of-X^{n*k}
-	    	m_extra_coef = SubMod(m_top_coef, coeff(m_univar_poly, m_gs_num * m_bs_num), p);
-	    	SetCoeff(m_univar_poly, m_gs_num * m_bs_num); // set the top coefficient of X^{n*k} to one
+	    	m_extra_coef = SubMod(m_top_coef, coeff(m_univar_less_poly, m_gs_num * m_bs_num), p);
+	    	SetCoeff(m_univar_less_poly, m_gs_num * m_bs_num); // set the top coefficient of X^{n*k} to one
 		}
 
 		if (!IsOne(m_top_coef)) 
 		{
-	    	m_univar_poly *= topInv; // Multiply by topInv to make into a monic polynomial
-	    	for (long i = 0; i <= m_gs_num * m_bs_num; i++) rem(m_univar_poly[i], m_univar_poly[i], p);
-	    	m_univar_poly.normalize();
+	    	m_univar_less_poly *= topInv; // Multiply by topInv to make into a monic polynomial
+	    	for (long i = 0; i <= m_gs_num * m_bs_num; i++) rem(m_univar_less_poly[i], m_univar_less_poly[i], p);
+	    	m_univar_less_poly.normalize();
 		}
 	}
 
@@ -204,7 +204,7 @@ void Comparator::create_poly()
 		field_elem.init(ZZ(p));
 
 		// initialization of the univariate comparison polynomial
-		m_univar_poly = ZZX(INIT_MONO, 0, 0);
+		m_univar_less_poly = ZZX(INIT_MONO, 0, 0);
 
 		// loop over all odd coefficient indices
 		for (long indx = 1; indx < p - 1; indx+=2)
@@ -217,21 +217,35 @@ void Comparator::create_poly()
 			  coef += power(field_elem, p - 1 - indx);
 			}
 
-			m_univar_poly += ZZX(INIT_MONO, (indx-1) >> 1, rep(coef));
+			m_univar_less_poly += ZZX(INIT_MONO, (indx-1) >> 1, rep(coef));
 		}
+
+		/*
+		cout << "Less-than poly: ";
+		printZZX(cout, m_univar_less_poly, p);
+		cout << endl;
+		*/
+
+		m_univar_min_max_poly = m_univar_less_poly * ZZX(INIT_MONO, 1, 1);
+
+		/*
+		cout << "Min-max poly: ";
+		printZZX(cout, m_univar_min_max_poly, p);
+		cout << endl;
+		*/
 
 		compute_poly_params();
 	}
 	else
 	{
 		// computing the coefficients of the bivariate polynomial
-		m_bivar_coefs.SetDims(p,p);
+		m_bivar_less_coefs.SetDims(p,p);
 
 		// y^{p-1}
-		m_bivar_coefs[0][p-1] = ZZ(1);
+		m_bivar_less_coefs[0][p-1] = ZZ(1);
 
 		// (p+1)/2 * x^{(p-1)/2} * y^{(p-1)/2}
-		m_bivar_coefs[(p-1) >> 1][(p-1) >> 1] = ZZ((p+1) >> 1);
+		m_bivar_less_coefs[(p-1) >> 1][(p-1) >> 1] = ZZ((p+1) >> 1);
 
 		// iterator
 		ZZ_p field_elem;
@@ -274,16 +288,16 @@ void Comparator::create_poly()
 					inner_sum *= field_elem;
 					outer_sum += inner_sum;
 				}
-				m_bivar_coefs[i][j] = rep(outer_sum);
+				m_bivar_less_coefs[i][j] = rep(outer_sum);
 			}
 		}
 
-		cout << "Bivariate coefficients" << endl << m_bivar_coefs << endl;
+		cout << "Bivariate coefficients" << endl << m_bivar_less_coefs << endl;
 
 		if (m_verbose)
 		{
 			cout << "Comparison polynomial: " << endl;
-			printZZX(cout, m_univar_poly, (p-1)>>1);
+			printZZX(cout, m_univar_less_poly, (p-1)>>1);
 			cout << endl;
 		}
 	}
@@ -418,7 +432,7 @@ Comparator::Comparator(const Context& context, unsigned long d, unsigned long ex
 	//determine the order of p in (Z/mZ)*
 	m_isUnivar = true;
 	unsigned long p = context.zMStar.getP();
-	if (p == 2 || p == 3 || p == 5 || p == 7 || p == 11)
+	if (p == 2 || p == 3 || p == 5)
 		m_isUnivar = false;
 	unsigned long ord_p = context.zMStar.getOrdP();
 	//check that the extension degree divides the order of p
@@ -438,9 +452,14 @@ const DoubleCRT& Comparator::get_mask(double& size, long index) const
 	return m_mulMasks[index];
 }
 
-const ZZX& Comparator::get_poly() const
+const ZZX& Comparator::get_less_than_poly() const
 {
-	return m_univar_poly;
+	return m_univar_less_poly;
+}
+
+const ZZX& Comparator::get_min_max_poly() const
+{
+	return m_univar_min_max_poly;
 }
 
 void Comparator::print_decrypted(const Ctxt& ctxt) const
@@ -825,7 +844,7 @@ void Comparator::less_than_mod_11(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt
 	}
 }
 
-void Comparator::evaluate_poly(Ctxt& ret, Ctxt& ctxt_p_1, const Ctxt& x) const
+void Comparator::evaluate_univar_less_poly(Ctxt& ret, Ctxt& ctxt_p_1, const Ctxt& x) const
 {
 	FHE_NTIMER_START(ComparisonCircuitUnivar);
 	// get p
@@ -846,11 +865,11 @@ void Comparator::evaluate_poly(Ctxt& ret, Ctxt& ctxt_p_1, const Ctxt& x) const
 		if (m_gs_num == (1L << NextPowerOfTwo(m_gs_num))) 
 		{
 			//cout << "I'm computing degPowerOfTwo" << endl;
-	    	degPowerOfTwo(ret, m_univar_poly, m_bs_num, babyStep, giantStep);
+	    	degPowerOfTwo(ret, m_univar_less_poly, m_bs_num, babyStep, giantStep);
 	    }
 	    else
 	    {
-		  	recursivePolyEval(ret, m_univar_poly, m_bs_num, babyStep, giantStep);
+		  	recursivePolyEval(ret, m_univar_less_poly, m_bs_num, babyStep, giantStep);
 
 		  	if (!IsOne(m_top_coef)) 
 		  	{
@@ -903,6 +922,97 @@ void Comparator::evaluate_poly(Ctxt& ret, Ctxt& ctxt_p_1, const Ctxt& x) const
 	FHE_NTIMER_STOP(ComparisonCircuitUnivar);
 }
 
+void Comparator::evaluate_min_max_poly(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
+{
+	FHE_NTIMER_START(MinMaxCircuitUnivar);
+	// get p
+	ZZ p = ZZ(m_context.zMStar.getP());
+
+	// Subtraction z = x - y
+	cout << "Subtraction" << endl;
+	Ctxt ctxt_z = ctxt_x;
+	ctxt_z -= ctxt_y;
+
+	if(m_verbose)
+	{
+		print_decrypted(ctxt_z);
+		cout << endl;
+	}
+  	
+  	// z^2
+  	Ctxt ctxt_z2 = ctxt_z;
+  	ctxt_z2.square(); 
+
+	if (p > ZZ(3)) //if p > 3, use the generic Paterson-Stockmeyer strategy
+	{
+		DynamicCtxtPowers babyStep(ctxt_z2, m_bs_num);
+		const Ctxt& ctxt_z2k = babyStep.getPower(m_bs_num);
+
+		DynamicCtxtPowers giantStep(ctxt_z2k, m_gs_num);
+
+		// compute g(z^2)
+		Ctxt g_z2 = Ctxt(ctxt_z2.getPubKey());;
+		// Special case when #giant_steps is a power of two
+		if (m_gs_num == (1L << NextPowerOfTwo(m_gs_num))) 
+		{
+			//cout << "I'm computing degPowerOfTwo" << endl;
+	    	degPowerOfTwo(g_z2, m_univar_min_max_poly, m_bs_num, babyStep, giantStep);
+	    }
+	    else
+	    {
+		  	recursivePolyEval(g_z2, m_univar_min_max_poly, m_bs_num, babyStep, giantStep);
+
+		  	if (!IsOne(m_top_coef)) 
+		  	{
+		    	g_z2.multByConstant(m_top_coef);
+			}
+
+			if (!IsZero(m_extra_coef)) 
+			{ // if we added a term, now is the time to subtract back
+		    	Ctxt topTerm = giantStep.getPower(m_gs_num);
+		    	topTerm.multByConstant(m_extra_coef);
+		    	g_z2 -= topTerm;
+			}
+		}
+
+		// last term: ((p+1)/2) * (x + y) 
+		Ctxt last_term = ctxt_x;
+		last_term += ctxt_y; 
+		last_term.multByConstant(ZZ((p+1)>> 1));
+
+		ctxt_min = last_term;
+		ctxt_min += g_z2;
+		ctxt_max = last_term;
+		ctxt_max -= g_z2;
+
+		/*
+		cout << "Computed baby steps" << endl;
+		for(int i = 0; i < babyStep.size(); i++)
+		{
+			cout << i + 1 << ' ' << babyStep.isPowerComputed(i+1) << endl; 
+		}
+
+		cout << "Computed giant steps" << endl;
+		for(int i = 0; i < giantStep.size(); i++)
+		{
+			cout << i + 1 << ' ' << giantStep.isPowerComputed(i+1) << endl;
+		}
+		*/
+	}
+	else //circuit for p=3
+	{
+		// last term: ((p+1)/2) * (x + y) 
+		Ctxt last_term = ctxt_x;
+		last_term += ctxt_y; 
+		last_term.multByConstant(ZZ((p+1)>> 1));
+
+		ctxt_min = last_term;
+		ctxt_min += ctxt_z2;
+		ctxt_max = last_term;
+		ctxt_max -= ctxt_z2;
+	}
+	FHE_NTIMER_STOP(MinMaxCircuitUnivar);
+}
 
 void Comparator::less_than_bivar(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
 {
@@ -963,10 +1073,10 @@ void Comparator::less_than_bivar_tan(Ctxt& ctxt_res, const Ctxt& ctxt_x, const C
 		Ctxt sum = Ctxt(ctxt_x.getPubKey());
 		for (long j = 1; j < p; j++)
 		{
-			if (m_bivar_coefs[i][j] == ZZ(0))
+			if (m_bivar_less_coefs[i][j] == ZZ(0))
 				continue;
 			Ctxt tmp = y_powers.getPower(j);
-			tmp.multByConstant(m_bivar_coefs[i][j]);
+			tmp.multByConstant(m_bivar_less_coefs[i][j]);
 			sum += tmp;
 		}
 		sum.multiplyBy(x_powers.getPower(i));
@@ -1098,7 +1208,7 @@ void Comparator::compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y)
 
 			// compute polynomial function for 'z < 0'
 			cout << "Compute univariate comparison polynomial" << endl;
-			evaluate_poly(ctxt_tmp, ctxt_tmp_eq, ctxt_z_p[iCoef]);
+			evaluate_univar_less_poly(ctxt_tmp, ctxt_tmp_eq, ctxt_z_p[iCoef]);
 
 			if(m_verbose)
 			{
@@ -1201,6 +1311,102 @@ void Comparator::compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y)
     FHE_NTIMER_STOP(Comparison);
 }
 
+void Comparator::min_max(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
+{
+	FHE_NTIMER_START(MinMax);
+	if(!m_isUnivar)
+		throw helib::LogicError("Min/Max is not implemented with the bivariate circuit");
+
+	if(m_expansionLen != 1)
+		throw helib::LogicError("Min/Max is not implemented for vectors over F_p");
+
+	// get EncryptedArray
+  	const EncryptedArray& ea = *(m_context.ea);
+  	//extract slots
+	long nSlots = ea.size();
+
+	vector<Ctxt> ctxt_min_p;
+	vector<Ctxt> ctxt_max_p;
+
+	// extract mod p coefficients
+	cout << "Extraction" << endl;
+	vector<Ctxt> ctxt_x_p;
+	extract_mod_p(ctxt_x_p, ctxt_x);
+
+	if(m_verbose)
+    {
+    	for (long iCoef = 0; iCoef < m_slotDeg; iCoef++)
+    	{
+    		cout << "Ctxt x with coefficient " << iCoef << endl;
+	    	print_decrypted(ctxt_x_p[iCoef]);
+	    	cout << endl;
+	    }
+	}
+
+	vector<Ctxt> ctxt_y_p;
+	extract_mod_p(ctxt_y_p, ctxt_y);
+
+	if(m_verbose)
+    {
+    	for (long iCoef = 0; iCoef < m_slotDeg; iCoef++)
+    	{
+    		cout << "Ctxt y with coefficient " << iCoef << endl;
+	    	print_decrypted(ctxt_y_p[iCoef]);
+	    	cout << endl;
+	    }
+	}
+
+	cout << "Compute min/max functions modulo p" << endl;
+	for (long iCoef = 0; iCoef < m_slotDeg; iCoef++)
+	{
+		Ctxt ctxt_tmp_min = Ctxt(ctxt_x.getPubKey());
+		Ctxt ctxt_tmp_max = Ctxt(ctxt_x.getPubKey());
+
+		// compute polynomial function for 'z < 0'
+		cout << "Compute univariate min/max polynomial" << endl;
+		evaluate_min_max_poly(ctxt_tmp_min, ctxt_tmp_max, ctxt_x_p[iCoef], ctxt_y_p[iCoef]);
+
+		if(m_verbose)
+		{
+		  cout << "Result of the min function" << endl;
+		  print_decrypted(ctxt_tmp_min);
+		  cout << endl;
+		}
+
+		if(m_verbose)
+		{
+		  cout << "Result of the max function" << endl;
+		  print_decrypted(ctxt_tmp_max);
+		  cout << endl;
+		}
+
+		ctxt_min_p.push_back(ctxt_tmp_min);
+		ctxt_max_p.push_back(ctxt_tmp_max);
+	}
+
+	ctxt_min = ctxt_min_p[0];
+	ctxt_max = ctxt_max_p[0];
+
+	for (long iCoef = 1; iCoef < m_slotDeg; iCoef++)
+	{
+		vector<ZZX> x_power(nSlots, ZZX(INIT_MONO, iCoef, 1));
+		ZZX x_power_ptxt;
+		ea.encode(x_power_ptxt, x_power);
+
+		// agregate minimum values
+		Ctxt tmp = ctxt_min_p[iCoef];
+		tmp.multByConstant(x_power_ptxt);
+		ctxt_min += tmp;
+
+		// agregate maximum values
+		tmp = ctxt_max_p[iCoef];
+		tmp.multByConstant(x_power_ptxt);
+		ctxt_max += tmp;
+	}
+
+	FHE_NTIMER_STOP(MinMax);
+}
+
 void Comparator::int_to_slot(ZZX& poly, unsigned long input, unsigned long enc_base) const
 { 
     vector<long> decomp;
@@ -1214,7 +1420,7 @@ void Comparator::int_to_slot(ZZX& poly, unsigned long input, unsigned long enc_b
     }
 }
 
-void Comparator::test(long runs) const
+void Comparator::test_compare(long runs) const
 {
   //reset timers
   setTimersOn();
@@ -1371,8 +1577,8 @@ void Comparator::test(long runs) const
 
     const FHEtimer* comp_timer = getTimerByName("Comparison");
 
-    cout << "Avg. time per 64-bit integer: " << 1000.0 * comp_timer->getTime()/static_cast<double>(run+1)/static_cast<double>(numbers_size) << " ms" << endl;
-    cout << "Number of 64-bit integers in one ciphertext "<< numbers_size << endl;
+    cout << "Avg. time per integer: " << 1000.0 * comp_timer->getTime()/static_cast<double>(run+1)/static_cast<double>(numbers_size) << " ms" << endl;
+    cout << "Number of integers in one ciphertext "<< numbers_size << endl;
 
     // remove the line below if it gives bizarre results 
     ctxt_res.cleanUp();
@@ -1390,6 +1596,209 @@ void Comparator::test(long runs) const
       {
         printf("Slot %ld: ", i * m_expansionLen);
         printZZX(cout, decrypted[i * m_expansionLen], ord_p);
+        cout << endl;
+        cout << "Failure" << endl;
+        return;
+      }
+    }
+    cout << endl;
+  }
+}
+
+void Comparator::test_min_max(long runs) const
+{
+	//reset timers
+  setTimersOn();
+  
+  // initialize the random generator
+  random_device rd;
+  mt19937 eng(rd());
+  uniform_int_distribution<unsigned long> distr_u;
+  uniform_int_distribution<long> distr_i;
+
+  // get EncryptedArray
+  const EncryptedArray& ea = *(m_context.ea);
+
+  //extract number of slots
+  long nslots = ea.size();
+
+  //get p
+  unsigned long p = m_context.zMStar.getP();
+
+  //order of p
+  unsigned long ord_p = m_context.zMStar.getOrdP();
+
+  //amount of numbers in one ciphertext
+  unsigned long numbers_size = nslots / m_expansionLen;
+
+  // number of slots occupied by encoded numbers
+  unsigned long occupied_slots = numbers_size * m_expansionLen;
+
+  //encoding base, ((p+1)/2)^d
+  //if 2-variable comparison polynomial is used, it must be p^d
+  unsigned long enc_base = (p + 1) >> 1;
+  if (!m_isUnivar)
+  {
+  	enc_base = p;
+  }
+
+  unsigned long digit_base = power_long(enc_base, m_slotDeg);
+
+  //check that field_size^expansion_len fits into 64-bits
+  int space_bit_size = static_cast<int>(ceil(m_expansionLen * log2(digit_base)));
+  unsigned long input_range = LONG_MAX;
+  if(space_bit_size < 64)
+  {
+    //input_range = power_long(field_size, expansion_len);
+    input_range = power_long(digit_base, m_expansionLen);
+  }
+  cout << "Maximal input: " << input_range << endl;
+
+  long min_capacity = 1000;
+  long capacity;
+  for (int run = 0; run < runs; run++)
+  {
+    printf("Run %d started\n", run);
+
+    vector<ZZX> expected_result_min(occupied_slots);
+    vector<ZZX> expected_result_max(occupied_slots);
+    vector<ZZX> decrypted_min(occupied_slots);
+    vector<ZZX> decrypted_max(occupied_slots);
+
+    // Create the plaintext polynomials for the text and for the pattern
+    vector<ZZX> pol_x(nslots);
+    vector<ZZX> pol_y(nslots);
+    
+    unsigned long input_x;
+    unsigned long input_y;
+    ZZX pol_slot;
+
+    for (int i = 0; i < numbers_size; i++)
+    {
+      input_x = distr_u(eng) % input_range;
+      input_y = distr_u(eng) % input_range;
+
+      if(m_verbose)
+      {
+        cout << "Input" << endl;
+        cout << input_x << endl;
+        cout << input_y << endl;
+      }
+
+      vector<long> decomp_int_x;
+      vector<long> decomp_int_y;
+      vector<long> decomp_char;
+
+      //decomposition of input integers
+      digit_decomp(decomp_int_x, input_x, digit_base, m_expansionLen);
+      digit_decomp(decomp_int_y, input_y, digit_base, m_expansionLen);
+
+      //encoding of slots
+      for (int j = 0; j < m_expansionLen; j++)
+      {
+          //decomposition of a digit
+          int_to_slot(pol_slot, decomp_int_x[j], enc_base);
+          pol_x[i * m_expansionLen + j] = pol_slot;
+      }
+
+      for (int j = 0; j < m_expansionLen; j++)
+      {
+          //decomposition of a digit
+          int_to_slot(pol_slot, decomp_int_y[j], enc_base);
+          pol_y[i * m_expansionLen + j] = pol_slot;
+      }
+
+      if (input_x < input_y)
+      {
+        expected_result_min[i * m_expansionLen] = pol_x[i];
+        expected_result_max[i * m_expansionLen] = pol_y[i];
+      }
+      else
+      {
+        expected_result_min[i * m_expansionLen] = pol_y[i];
+        expected_result_max[i * m_expansionLen] = pol_x[i];
+      }
+    }
+
+    if(m_verbose)
+    {
+      cout << "Input" << endl;
+      for(int i = 0; i < nslots; i++)
+      {
+          printZZX(cout, pol_x[i], ord_p);
+          printZZX(cout, pol_y[i], ord_p);
+          cout << endl;
+      }
+    }
+
+    Ctxt ctxt_x(m_pk);
+    Ctxt ctxt_y(m_pk);
+    ea.encrypt(ctxt_x, m_pk, pol_x);
+    ea.encrypt(ctxt_y, m_pk, pol_y);
+    
+    Ctxt ctxt_min(m_pk);
+    Ctxt ctxt_max(m_pk);
+
+    // comparison function
+    cout << "Start of Min/Max" << endl;
+    min_max(ctxt_min, ctxt_max, ctxt_x, ctxt_y);
+
+    if(m_verbose)
+    {
+      cout << "Input" << endl;
+      for(int i = 0; i < nslots; i++)
+      {
+          printZZX(cout, pol_x[i], ord_p);
+          printZZX(cout, pol_y[i], ord_p);
+          cout << endl;
+      }
+
+      cout << "Output min" << endl;
+      print_decrypted(ctxt_min);
+      cout << endl;
+
+      cout << "Output max" << endl;
+      print_decrypted(ctxt_max);
+      cout << endl;
+    }
+    printNamedTimer(cout, "Extraction");
+    printNamedTimer(cout, "MinMax");
+
+    const FHEtimer* min_max_timer = getTimerByName("MinMax");
+
+    cout << "Avg. time per integer: " << 1000.0 * min_max_timer->getTime()/static_cast<double>(run+1)/static_cast<double>(numbers_size) << " ms" << endl;
+    cout << "Number of integers in one ciphertext "<< numbers_size << endl;
+
+    // remove the line below if it gives bizarre results 
+    ctxt_min.cleanUp();
+    capacity = ctxt_min.bitCapacity();
+    ctxt_max.cleanUp();
+    cout << "Final capacity: " << capacity << endl;
+    if (capacity < min_capacity)
+      min_capacity = capacity;
+    cout << "Min. capacity: " << min_capacity << endl;
+    cout << "Final size: " << ctxt_min.logOfPrimeSet()/log(2.0) << endl;
+    ea.decrypt(ctxt_min, m_sk, decrypted_min);
+    ea.decrypt(ctxt_max, m_sk, decrypted_max);
+
+    for(int i = 0; i < numbers_size; i++)
+    { 
+      if (decrypted_min[i * m_expansionLen] != expected_result_min[i * m_expansionLen])
+      {
+        printf("Slot %ld: ", i * m_expansionLen);
+        printZZX(cout, decrypted_min[i * m_expansionLen], ord_p);
+        cout << endl;
+        cout << "Failure" << endl;
+        return;
+      }
+    }
+    cout << endl;
+    for(int i = 0; i < numbers_size; i++)
+    { 
+      if (decrypted_max[i * m_expansionLen] != expected_result_max[i * m_expansionLen])
+      {
+        printf("Slot %ld: ", i * m_expansionLen);
+        printZZX(cout, decrypted_max[i * m_expansionLen], ord_p);
         cout << endl;
         cout << "Failure" << endl;
         return;

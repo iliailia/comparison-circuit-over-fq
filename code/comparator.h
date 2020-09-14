@@ -32,11 +32,14 @@ class Comparator{
     // univariate or bivariate circuit
     bool m_isUnivar;
 
-    // univariate comparison polynomial
-    ZZX m_univar_poly;
+    // univariate comparison polynomial of the less-than function
+    ZZX m_univar_less_poly;
 
-    // bivariate comparison polynomial coefficients
-    mat_ZZ m_bivar_coefs; 
+    // univariate comparison polynomial of the less-than function
+    ZZX m_univar_min_max_poly;
+
+    // bivariate comparison polynomial coefficients of the less-than function
+    mat_ZZ m_bivar_less_coefs; 
 
     // polynomial evaluation parameters of the Patterson-Stockmeyer algorithm
     // number of baby steps
@@ -101,7 +104,10 @@ class Comparator{
     void mapTo01_subfield(Ctxt& ctxt, long pow) const;
 
     // univariate comparison polynomial evaluation
-    void evaluate_poly(Ctxt& ret, Ctxt& ctxt_p_1, const Ctxt& x) const;
+    void evaluate_univar_less_poly(Ctxt& ret, Ctxt& ctxt_p_1, const Ctxt& x) const;
+
+    // univariate min/max polynomial evaluation
+    void evaluate_min_max_poly(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;
 
     // bivariate less than function comparing slots one by one
     void less_than_bivar(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;
@@ -135,7 +141,8 @@ public:
 	Comparator(const Context& context, unsigned long d, unsigned long expansion_len, const SecKey& sk, bool verbose);
 
 	const DoubleCRT& get_mask(double& size, long index) const;
-  const ZZX& get_poly() const;
+  const ZZX& get_less_than_poly() const;
+  const ZZX& get_min_max_poly() const;
 
   // decrypt and print ciphertext
   void print_decrypted(const Ctxt& ctxt) const;
@@ -143,8 +150,14 @@ public:
   // comparison function
   void compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;
 
+  // minimum/maximum function
+  void min_max(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;
+
   // test compare function 'runs' times
-  void test(long runs) const;
+  void test_compare(long runs) const;
+
+  // test min/max function 'runs' times
+  void test_min_max(long runs) const;
 };
 
 #endif // #ifndef COMPARATOR_H

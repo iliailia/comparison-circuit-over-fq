@@ -188,6 +188,6 @@ def univariate_circuit(p):
 	R.<z> = PolynomialRing(F);
 	poly = R(0);
 	half_p = (p-1) / 2;
-	for a in range(-half_p, -1):
-		poly += 1 - (z-F(a))^(p-1);
+	for a in range(-half_p, 0):
+		poly += (1 - (z-F(a))^(p-1));
 	return poly;

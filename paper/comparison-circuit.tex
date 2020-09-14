@@ -260,6 +260,58 @@ In this work we will follow their blueprint and thus we will only study the func
 %   where $r_j$ are uniformly random elements from $\F_{\fieldcard^e}$.
 %   This circuit is false-biased with error probability $\fieldcard^{-e}$.
 %   We can compute all $\EQ_{\F_\fieldcard, e}(\vx_{i+1},\vy_{i+1})$ using the same number of multiplications as for the single equality using Algorithm~\ref{alg:vector_equalities_circuit}.\todo{What is the complexity?}
+
+\subsection{Min/max function}
+
+  Given the less-than function $\LT_\S$ defined on a set $\S$, one can compute the minimum of two elements $x$ and $y$ in the generic way, namely
+  \begin{align*}
+    \min_\S(x,y) = x \cdot \LT_\S(x,y) + y \cdot (1 - \LT_\S(x,y)).
+  \end{align*}
+  Notice that the difference $x - y$ naturally emerges in this expression, thus hinting that the univariate circuit from~\ref{eq:univariate_circuit} might be useful here.
+  Indeed, by replacing $x - y$ with an indeterminate $z$ we obtain the univariate polynomial representation of the minimum function 
+  \begin{align*}
+    \min_\S(x,y) & = y + z \cdot \left(\frac{p+1}{2} z^{p-1} + \sum_{i=1, \text{odd}}^{p-2} z^i \sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i}\right) \\
+    & = y + \frac{p+1}{2} z + \sum_{i=1}^{\frac{p-1}{2}} z^{2i} \sum_{a=1}^{\frac{p-1}{2}} a^{p-2i} \\
+    & = \frac{p+1}{2} (x+y) + \sum_{i=1}^{\frac{p-1}{2}} z^{2i} \sum_{a=1}^{\frac{p-1}{2}} a^{p-2i} \\
+    & = \frac{p+1}{2} (x+y) + g(z^2)
+  \end{align*}
+  where $g(X)$ is a polynomial of degree $(p-1)/2$. 
+  As a result, $\min(x,y)$ can be computed with $O(\sqrt{p-1})$ non-scalar multiplications via the Paterson-Stockmeyer algorithm.
+
+  Following the above reasoning, the maximum function can be computed as follows
+  \begin{align*}
+    \max_\S(x,y) &= \frac{p+1}{2} (x+y) - \sum_{i=1}^{\frac{p-1}{2}} z^{2i} \sum_{a=1}^{\frac{p-1}{2}} a^{p-2i}.
+  \end{align*}
+  This yields a simple polynomial for the ReLU function.
+  \begin{align*}
+    \ReLU_\S(x) = \max_\S(x,0) &= \frac{p+1}{2} x - \sum_{i=1}^{\frac{p-1}{2}} x^{2i} \sum_{a=1}^{\frac{p-1}{2}} a^{p-2i}.
+  \end{align*}
+
+\subsection{Lexicographic order}\label{subsec:lexicographic_order}
+  Let $\vx=(x_0,x_1,\ldots,x_{\ell-1})$ and $\vy=(y_0,y_1,\ldots,y_{\ell-1}) \in \F_\fieldcard^\ell$ for the lexicographical order $<$ defined by the choice of $\S$:
+  \begin{align*}
+    \vx < \vy \Leftrightarrow \exists i\in[0,\ell-1] \text{ such that } x_i < y_i \text{ and } \forall j > i ~~ x_j = y_j\,.
+  \end{align*}
+  This order induces a function $\LT_{\F_\fieldcard}(\vx, \vy)$ that returns $1$ if $\vx < \vy$ and $0$ otherwise. 
+  As done in~\cite{TLWRK20}, we can employ $\EQ_{\F_\fieldcard}$ and $\LT_{\F_\fieldcard}$ to compute $\LT_{\F_\fieldcard}(\vx, \vy)$ as follows
+  \begin{align*}
+    \LT_{\F_\fieldcard}(\vx, \vy) = \sum_{i=0}^{\ell-2} \LT_{\F_\fieldcard}(x_{i}, y_{i}) \prod_{j=i+1}^{\ell-1} \EQ_{\F_\fieldcard}(x_{j}, y_{j}) + \LT_{\F_\fieldcard}(x_{\ell-1}, y_{\ell-1}).
+  \end{align*}
+  Notice that the multiplicative depth of this function solely depends on the products of the equality functions.
+  In fact, these products compare subvectors $\vx_i = (x_i, x_{i+1},\dots,x_{\ell-1})$ and $\vy_i = (y_i, y_{i+1},\dots,y_{\ell-1})$ for $i \in [1,\ell-1]$.
+  Thus, we can rewrite $\LT_{\F_\fieldcard}$ as
+  \begin{align}\label{eq:general_lex_order}
+    \LT_{\F_\fieldcard}(\vx, \vy) = \sum_{i=0}^{\ell-2} \LT_{\F_\fieldcard}(x_{i}, y_{i}) \EQ_{\F_\fieldcard}(\vx_{i+1}, \vy_{i+1}) + \LT_{\F_\fieldcard}(x_{\ell-1}, y_{\ell-1})
+  \end{align}
+  with the equality function $\EQ_{\F_\fieldcard}(\vx_{i+1}, \vy_{i+1})$ that returns $1$ if $\vx_{i+1} = \vy_{i+1}$ and $0$ otherwise.
+  As shown in~\todo{cite our work}, this function can be realized by a constant-depth circuit in the following way.
+  \begin{align}\label{eq:rand_eq_circuit}
+    \EQ_{\F_\fieldcard, e}(\vx_{i+1},\vy_{i+1}) = 1 - \princhar_{\fieldcard^e}\left(\sum_{j=i+1}^{\ell-1} r_j (x_j - y_j)\right)
+  \end{align}
+  where $r_j$ are uniformly random elements from $\F_{\fieldcard^e}$.
+  This circuit is false-biased with error probability $\fieldcard^{-e}$.
+  We can compute all $\EQ_{\F_\fieldcard, e}(\vx_{i+1},\vy_{i+1})$ using the same number of multiplications as for the single equality using Algorithm~\ref{alg:vector_equalities_circuit}.\todo{What is the complexity?}
+
   \begin{algorithm}[t]
     \KwIn{
     $\ct_\vx$ -- a ciphertext encrypting $\vx \in \F^\ell_\fieldcard$,
