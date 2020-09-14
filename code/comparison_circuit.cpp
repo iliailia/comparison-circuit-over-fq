@@ -26,7 +26,7 @@ using namespace helib;
 
 // the main function that takes 5 arguments (type in Terminal: ./comparison_circuit argv[1] argv[2] argv[3] argv[4] argv[5] argv[6] argv[7])
 // argv[1] - the plaintext modulus
-// argv[2] - the extension degree of a finite field
+// argv[2] - the dimension of a vector space over a finite field
 // argv[3] - the order of the cyclotomic ring
 // argv[4] - the bitsize of the ciphertext modulus in ciphertexts (HElib increases it to fit the moduli chain). The modulus used for public-key generation
 // argv[5] - the length of vectors to be compared
@@ -35,9 +35,9 @@ using namespace helib;
 // argv[8] - exact or randomized circuit (e/r)
 
 // some parameters for quick testing
-// 7 75 90 1 10 y
-// 7 300 90 1 10 y
-// 17 145 120 1 10 y
+// 7 1 75 90 1 10 y
+// 7 1 300 90 1 10 y
+// 17 1 145 120 1 10 y
 int main(int argc, char *argv[]) {
   if(argc < 8)
   {
@@ -97,7 +97,11 @@ int main(int argc, char *argv[]) {
   //repeat experiments several times
   int runs = atoi(argv[6]);
   
-  comparator.test(runs);
+  //test comparison circuit
+  //comparator.test_compare(runs);
+
+  //test min/max circuit
+  comparator.test_min_max(runs);
 
   printAllTimers(cout);
 
