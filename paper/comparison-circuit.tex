@@ -1,54 +1,48 @@
-Let $\S$ be a totally ordered set with a binary relation $<$.
-For any $x,y \in \S$, we can define the less-than and the equality functions as follows.
-\begin{align*}
-  \LT_\S(x,y) = 
-  \begin{cases}
-    1, & \text{if } x < y; \\
-    0, & \text{if } x \ge y, \\
-  \end{cases}
-  \qquad
-  \EQ_\S(x,y) = 
-  \begin{cases}
-    1, & \text{if } x = y; \\
-    0, & \text{if } x \neq y. \\
-  \end{cases}
-\end{align*}
-If $\S$ is a complete set of representatives of a finite field $\F_\fieldcard$, then the equality function can be easily realized using the principal character of $\F_\fieldcard$, namely $\EQ_\S(x,y) = 1 - \princhar_\fieldcard(x-y)$.
-Since this function is independent of the choice of $\S$, we can write
-\begin{align*}
-  \EQ_{\F_{\fieldcard}}(x,y) = 1 - \princhar_\fieldcard(x-y).
-\end{align*}
+As explained in \cite{TLWRK20}, in order to evaluate the comparison function homomorphically one must start by decomposing the numbers $x$ and $y$ to compare into their vector of digits $\vx$ and $\vy\in\S^k = \F_{p^{d'}}^k$. Then the vectors of digits are encrypted in an SIMD fashion and the comparison is performed by first evaluating the comparison function for each digit in parallel using Lemma \ref{lem:interpolation} and then the lexicographical order with Eq. (\ref{eq:general_lex_order}).
+
+The second step relies essentially on the computations of the $\LT_{\S}$ and $\EQ_\S$ functions which are done in the first step and cannot really be optimized in its own. As explained in Section \ref{sec:background}, $\EQ_{\S}$ can be simply evaluated using the \texttt{IsNonZero} function whose computation is also quite simple.
+Unfortunately, the comparison function is not as simple and we have to rely on Lagrange interpolation (Lemma \ref{lem:interpolation}) to compute it. Yet, there are two different ways to evaluate it: either interpolate $\LT_\S$ as a bivariate function over $\S^2$  -- i.e. compute $\LT_\S(x,y)$ -- as done in \cite{TLWRK20}, or transform it as a simple univariate function in $z=x-y$ -- i.e. compute $\LT_\S(x-y,0)$ -- as done in \cite{AINA:NGEG17}. However both \cite{AINA:NGEG17} and \cite{TLWRK20} have evaluated $\LT_\S$ without exploiting the natural structure it offers. In this Section we study the structure of this function in both the bivariate and univariate cases and we show how to exploit it in order to speed-up their evaluation.
+
+Theoretically $d'$ just has to divide $d$ the order of $p$ modulo the cyclotomic index $m$. Note that taking a large $d'$ allows to pack larger digits in each slots and thus increase the throughput of the procedure. However, since the digits are larger, the polynomial resulting from Lagrange interpolation will have degree $p^{d'}-1$ in each variable with $\mathcal{O}(p^{2d'})$ and $\mathcal{O}(p^{d'})$ monomials for the bivariate and univariate case respectively. For a large $d'$, the performance of the procedure will be heavilly degraded. On the other hand, taking a small $d'$, for instance $d'=1$, will allow to perform the digits comparison more efficiently but requires more SIMD slots which will reduce the throughput of the procedure. Nonetheless, the authors of \cite{TLWRK20} proposed a compromise by exploiting the $\F_p$-vector space structure of $\F_{p^{d'}}$.
+
+Their method consists in decomposing each digit $\alpha = \sum_{i=0}^{d'-1}\alpha_i t^i\in\F_{p^{d'}}$ into the vector of its $\F_p$ components $\bm{\alpha} = (\alpha_0,\ldots,\alpha_{d'-1})\in\F_p^{d'}$ by evaluating linear maps. Then, one can compare each digits using $\LT_\S$ for $\S=\F_p$ and the lexicographical order on the vectors of $\F_p$-components. Finally one needs to use the lexicographical order a second time over the vector of digits to get the final result. Thus by selecting the value $d'$ appropriately, this trade-off allows them to find a trade-off on the throughput while keeping good performance.  
+
+In this work we will follow their blueprint and thus we will only study the function $\LT_\S$ for $\S=\F_p$.
 
 \subsection{Bivariate interpolation of $\LT_\S$.}
-
-  The less-than function can be interpolated using Lemma~\ref{lem:interpolation} and the following truth table
+    In contrast to equality, this function depends on the choice of $\S$. Nevertheless, we can fix a certain $\S$ as the default complete set of representatives of $\F_{p}$  and denote $\LT_\S(x,y)$ as $\LT_{\F_p}(x,y)$. Hence from now on we identify the set $\S$ to the interval $[0,p-1]$, where $p\geq 2$ is a prime number. The less-than function can be interpolated using Lemma~\ref{lem:interpolation} and the following truth table:
   \begin{align*}
     \begin{array}{c|ccccc}
-      < & a_0 & a_1 & a_2 & \cdots & a_{\fieldcard-1} \\
+      < & 0~ & 1~ & 2~ & \cdots & p-1 \\
       \hline
-      a_0 & 0 & 1 & 1 & \cdots & 1 \\
-      a_1 & 0 & 0 & 1 & \cdots & 1 \\
-      a_2 & 0 & 0 & 0 & \cdots & 1 \\
+      0 & 0 & 1 & 1 & \cdots & 1 \\
+      1 & 0 & 0 & 1 & \cdots & 1 \\
+      2 & 0 & 0 & 0 & \cdots & 1 \\
       \vdots & \vdots & \vdots & \vdots & \ddots & \vdots \\
-      a_{\fieldcard-1} & 0 & 0 & 0 & \cdots & 0 \\
+      p-1 & 0 & 0 & 0 & \cdots & 0 \\
     \end{array}
   \end{align*}
-  where $a_i \in \S$ for any $i \in [0,\fieldcard-1]$ and $a_i < a_j$ if $i < j$.
-  In particular,
+  In particular we can write:
   \begin{align}\label{eq:less_than_function}
-    \LT_\S(x,y) &= \sum_{a,b \in \S} \LT_\S(a,b) (1-\princhar_\fieldcard(x - a)) (1-\princhar_\fieldcard(y - b)) \nonumber\\
-    &= \sum_{a \in \S} (1-\princhar_\fieldcard(x - a)) \sum_{b \in \S} \LT_\S(a,b)  (1-\princhar_\fieldcard(y - b)) \nonumber\\
-    &= \sum_{a \in \S} (1-\princhar_\fieldcard(x - a)) \sum_{b \in \S, a < b} (1-\princhar_\fieldcard(y - b)).
+    \LT_\S(x,y) &= \sum_{i = 0}^{p-2} \EQ_\S(x,i)\sum_{j = i+1}^{p-1}\EQ_\S(y,j) \nonumber\\
+                &= \sum_{i=0}^{p-2} (1-\princhar(x - i)) \sum_{j=i+1}^{p-1} (1-\princhar (y - j)) \nonumber\\
+                &= \sum_{i=0}^{p-2} (1-(x - i)^{p-1}) \sum_{j=i+1}^{p-1} (1-(y - j)^{p-1}).
   \end{align}
-  In contrast to equality, this function depends on the choice of $\S$.
-  Nevertheless, we can fix a certain $\S$ as the default complete set of representatives of $\F_{\fieldcard}$ and denote $\LT_\S(x,y)$ as $\LT_{\F_\fieldcard}(x,y)$.
-  For example, $\S$ can be $[0,q-1]$ if $q$ is a prime number.
 
-  Let $p$ be a prime number ans $\S = [0,p-1]$.
-  Then $\LT_\S$ has total degree $p$ as proven in Theorem~\ref{lem:less_than_total_degree}.
-  To prove this statement we need the following lemmata.
+  At first sight this polyomial seems to have a total degree at most $2p-2$. It appears this is not the case:
+
+  \begin{theorem} \label{lem:less_than_total_degree}
+    Let $p>2 $ be a prime number and $\S = [0,p-1]$, then $\LT_\S$ is a polynomial of the following form over $\F_p$:
+    \begin{align*}
+      \LT_\S(x,y) = y^{p-1} - \frac{p-1}{2} (xy)^{\frac{p-1}{2}} + \sum_{\substack{i,j>0 \\ i+j \le p}} a_{ij} x^i y^j 
+    \end{align*}
+    where $a_{ij} = \sum_{a=0}^{p-2} \sum_{b=a+1}^{p-1} a^{p-1-i} b^{p-1-j} \in \F_p$. In particular, it has total degree at most $p$.
+  \end{theorem}
+  
+  To prove this statement we need the following lemma.
 
   \begin{lemma}\label{lem:difference_to_p-1}
+    For all $a,b\in\F_p^2$ we have:
     \[
       (a - b)^{p-1} = \sum_{i=0}^{p-1} a^i b^{p-1-i} \mod p.
     \]
@@ -74,28 +68,22 @@ Since this function is independent of the choice of $\S$, we can write
     \]
   \end{lemma}
   \begin{proof}
-    It is enough to prove that the sum $\sum_{a=0}^{p-1} a^n = 0 \mod p$ for any $n < p-1$.
-    Let $g$ be a primitive element of $\F_p$.
+    It is enough to prove that $\sum_{a=0}^{p-1} a^n = 0 \mod p$ for any $0 \leq n < p-1$. For $n = 0$, the sum is equal to $p$ which is congruent to $0$ modulo p. Now let us consider the case $n\geq 1$ and let $g$ be a primitive element of $\F_p$.
     Since $p > 2$, we have $g \ne 1$.
     Thus, we can rewrite the above sum as follows.
-    \begin{align}
-      \sum_{i=1}^{p-1} g^{in} = \frac{g^{pn} - g^n}{g^n - 1}.
-    \end{align}
+    \begin{align*}
+      \sum_{a=0}^{p-1} a^{n} = \sum_{a=1}^{p-1} a^{n} = \sum_{i=1}^{p-1} g^{in} = \frac{g^{pn} - g^n}{g^n - 1}.
+    \end{align*}
     Since $g^{pn} \equiv g^n \mod p$, the sum turns into zero modulo $p$.
   \end{proof}
 
-  \begin{theorem} \label{lem:less_than_total_degree}
-    Let $p$ be a prime number bigger than $2$ and $\S = [0,p-1]$, then $\LT_\S$ is a polynomial over $\F_p$ of the following form
-    \begin{align*}
-      \LT_\S(x,y) = y^{p-1} - \frac{p-1}{2} (xy)^{\frac{p-1}{2}} + \sum_{\substack{i,j>0 \\ i+j \le p}} a_{ij} x^i y^j 
-    \end{align*}
-    where $a_{ij} = \sum_{a=0}^{p-2} \sum_{b=a+1}^{p-1} a^{p-1-i} b^{p-1-j} \in \F_p$.
-  \end{theorem}
-  \begin{proof}
+  Now we can start the proof of Theorem \ref{lem:less_than_total_degree}.
+  
+  \begin{proof}[Theorem \ref{lem:less_than_total_degree}]
     Assume that all computations are done modulo $p$.
-    Using Lemma~\ref{lem:difference_to_p-1}, we obtain
+    Using Lemma~\ref{lem:difference_to_p-1}, we obtain:
     \begin{align*}
-      \LT_\S(x,y) &=  \sum_{a = 0}^{p-2} \left(1-\sum_{i=0}^{p-1} x^i a^{p-1-i}\right) \sum_{b=a+1}^{p-1} \left(1-\sum_{j=0}^{p-1} y^j b^{p-1-j}\right)\\
+      \LT_\S(x,y) &=  \sum_{a = 0}^{p-2} \left(1-\sum_{i=0}^{p-1} x^i a^{p-1-i}\right) \sum_{b=a+1}^{p-1} \left(1-\sum_{j=0}^{p-1} y^j b^{p-1-j}\right).
     \end{align*}
     Let us expand this expression distributively.
     \begin{align*}
@@ -153,6 +141,21 @@ Since this function is independent of the choice of $\S$, we can write
     If $i = (p-1)/2$, then following the above argument, this coefficient is equal to $-(p-1)/2$.
   \end{proof}
 
+  Now that we know a little bit better what $\LT_\S$ looks like we are gonna enumerate some obvious facts which worth being stated:
+  \begin{itemize}
+  \item $\LT_\S(x,0) = 0$ thus $y$ divides $\LT_\S(x,y)$.
+  \item $\LT_\S(x,x) = \LT_\S(y,y) = 0$ thus $(x-y)$ divides $\LT_\S(x,y)$.
+  \item $\LT_\S(p-1,y) = 0$ thus $x+1$ divides $\LT_\S(x,y)$.
+  \end{itemize}
+
+  Therefore there exists a bivariate polynomial $f$ of total degree $p-3$ over $\F_p$ such that:
+  \begin{equation}
+    \label{eq:decompLT}
+    \LT_\S(x,y) = y(x-y)(x+1)f(x,y).
+  \end{equation}
+
+  
+  
 \subsection{Univariate interpolation of $\LT_\S$}
   Another way to compare $x$ and $y$ from $\S$ is to compute the difference $x-y$ and find its sign.
   To compute the sign function (or $\LT_\S(x-y,0)$) using finite field arithmetic, we need to split finite field elements into two classes:  negative ($\F_p^-$) and non-negative ($\F_p^+$).
@@ -229,6 +232,35 @@ Since this function is independent of the choice of $\S$, we can write
     Thus, we can get $\EQ_\S$ almost for free after evaluating $\LT_\S$, thus saving $O(\log (p-1))$ non-scalar multiplications.
   \end{remark}
 
+\subsubsection{Overall procedure}  
+% Theoretically $d'$ just has to divide $d$ the order of $p$ modulo the cyclotomic index $m$. Note that taking $d'$ as large as possible allows to pack larger digits in each slots and thus increase the throughput of the procedure. However, as shown in \ref{eq:nonzero_depth}, the multiplicative depth required to evaluate \texttt{IsNonZero} increases with the degree $d'$ of the considered field. On the other hand, taking a small $d'$, for instance $d'=1$ will allow to perform the digits comparison more efficiently
+
+
+% \subsection{Lexicographic order}\label{subsec:lexicographic_order}
+%   Let $\vx=(x_0,x_1,\ldots,x_{\ell-1})$ and $\vy=(y_0,y_1,\ldots,y_{\ell-1}) \in \F_\fieldcard^\ell$ for the lexicographical order $<$ defined by the choice of $\S$:
+%   \begin{align*}
+%     \vx < \vy \Leftrightarrow \exists i\in[0,\ell-1] \text{ such that } x_i < y_i \text{ and } \forall j > i ~~ x_j = y_j\,.
+%   \end{align*}
+%   This order induces a function $\LT_{\F_\fieldcard}(\vx, \vy)$ that returns $1$ if $\vx < \vy$ and $0$ otherwise. 
+%   As done in~\cite{TLWRK20}, we can employ $\EQ_{\F_\fieldcard}$ and $\LT_{\F_\fieldcard}$ to compute $\LT_{\F_\fieldcard}(\vx, \vy)$ as follows
+%   \begin{align*}
+%     \LT_{\F_\fieldcard}(\vx, \vy) = \sum_{i=0}^{\ell-2} \LT_{\F_\fieldcard}(x_{i}, y_{i}) \prod_{j=i+1}^{\ell-1} \EQ_{\F_\fieldcard}(x_{j}, y_{j}) + \LT_{\F_\fieldcard}(x_{\ell-1}, y_{\ell-1}).
+%   \end{align*}
+%   Notice that the multiplicative depth of this function solely depends on the products of the equality functions.
+%   In fact, these products compare subvectors $\vx_i = (x_i, x_{i+1},\dots,x_{\ell-1})$ and $\vy_i = (y_i, y_{i+1},\dots,y_{\ell-1})$ for $i \in [1,\ell-1]$.
+%   Thus, we can rewrite $\LT_{\F_\fieldcard}$ as
+%   \begin{align}\label{eq:general_lex_order}
+%     \LT_{\F_\fieldcard}(\vx, \vy) = \sum_{i=0}^{\ell-2} \LT_{\F_\fieldcard}(x_{i}, y_{i}) \EQ_{\F_\fieldcard}(\vx_{i+1}, \vy_{i+1}) + \LT_{\F_\fieldcard}(x_{\ell-1}, y_{\ell-1})
+%   \end{align}
+%   with the equality function $\EQ_{\F_\fieldcard}(\vx_{i+1}, \vy_{i+1})$ that returns $1$ if $\vx_{i+1} = \vy_{i+1}$ and $0$ otherwise.
+%   As shown in~\todo{cite our work}, this function can be realized by a constant-depth circuit in the following way.
+%   \begin{align}\label{eq:rand_eq_circuit}
+%     \EQ_{\F_\fieldcard, e}(\vx_{i+1},\vy_{i+1}) = 1 - \princhar_{\fieldcard^e}\left(\sum_{j=i+1}^{\ell-1} r_j (x_j - y_j)\right)
+%   \end{align}
+%   where $r_j$ are uniformly random elements from $\F_{\fieldcard^e}$.
+%   This circuit is false-biased with error probability $\fieldcard^{-e}$.
+%   We can compute all $\EQ_{\F_\fieldcard, e}(\vx_{i+1},\vy_{i+1})$ using the same number of multiplications as for the single equality using Algorithm~\ref{alg:vector_equalities_circuit}.\todo{What is the complexity?}
+
 \subsection{Min/max function}
 
   Given the less-than function $\LT_\S$ defined on a set $\S$, one can compute the minimum of two elements $x$ and $y$ in the generic way, namely
@@ -279,6 +311,7 @@ Since this function is independent of the choice of $\S$, we can write
   where $r_j$ are uniformly random elements from $\F_{\fieldcard^e}$.
   This circuit is false-biased with error probability $\fieldcard^{-e}$.
   We can compute all $\EQ_{\F_\fieldcard, e}(\vx_{i+1},\vy_{i+1})$ using the same number of multiplications as for the single equality using Algorithm~\ref{alg:vector_equalities_circuit}.\todo{What is the complexity?}
+
   \begin{algorithm}[t]
     \KwIn{
     $\ct_\vx$ -- a ciphertext encrypting $\vx \in \F^\ell_\fieldcard$,
