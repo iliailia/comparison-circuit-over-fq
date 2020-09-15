@@ -75,3 +75,28 @@ Here are potential cyclotomic polynomials to use for a failure probability small
 \item $s$: number of generators for $(\Z/m\Z)^\times/<p>$;
 \item $\varepsilon$: approximative probability of failure for one equality check.
 \end{itemize}
+
+\remove{
+\subsection{Min/Max function on vectors}
+
+  \begin{align*}
+    \min_\S(\vx,\vy) = \vx \cdot \LT_\S(\vx,\vy) + \vy \cdot (1 - \LT_\S(\vx,\vy)).
+  \end{align*}
+
+  \begin{align*}
+    \LT_{\F_\fieldcard}(\vx, \vy) = \sum_{i=0}^{\ell-2} \LT_{\F_\fieldcard}(x_{i}, y_{i}) \prod_{j=i+1}^{\ell-1} \EQ_{\F_\fieldcard}(x_{j}, y_{j}) + \LT_{\F_\fieldcard}(x_{\ell-1}, y_{\ell-1}).
+  \end{align*}
+
+  \begin{align*}
+    (x-y) \cdot \EQ_{\F_p}(x,y) = 0
+  \end{align*}
+  
+  \begin{align*}
+    \min_\S(\vx,\vy)_k &= x_k \cdot \LT_\S(\vx,\vy) + y_k \cdot (1 - \LT_\S(\vx,\vy)) \\
+    &= y_k + (x_k - y_k) \cdot \LT_\S(\vx,\vy)) \\
+    &= y_k + (x_k - y_k) \cdot \left(\sum_{i=0}^{\ell-1} \LT_{\F_\fieldcard}(x_{i}, y_{i}) \prod_{j=i+1}^{\ell-1} \EQ_{\F_\fieldcard}(x_{j}, y_{j})\right) \\
+    &= y_k + (x_k - y_k) \cdot \left(\sum_{i=0}^{k-1} \LT_{\F_\fieldcard}(x_{i}, y_{i}) \prod_{j=i+1}^{\ell-1} \EQ_{\F_\fieldcard}(x_{j}, y_{j})\right) \\
+    &+ (x_k - y_k) \cdot \left(\sum_{i=k}^{\ell-1} \LT_{\F_\fieldcard}(x_{i}, y_{i}) \prod_{j=i+1}^{\ell-1} \EQ_{\F_\fieldcard}(x_{j}, y_{j})\right) \\
+    &= y_k + (x_k - y_k) \cdot \left(\sum_{i=k}^{\ell-1} \LT_{\F_\fieldcard}(x_{i}, y_{i}) \prod_{j=i+1}^{\ell-1} \EQ_{\F_\fieldcard}(x_{j}, y_{j})\right)
+  \end{align*}
+  }
