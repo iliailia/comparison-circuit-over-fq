@@ -895,6 +895,7 @@ void Comparator::evaluate_univar_less_poly(Ctxt& ret, Ctxt& ctxt_p_1, const Ctxt
 
 		ret += top_term;
 
+		/*
 		cout << "Computed baby steps" << endl;
 		for(int i = 0; i < babyStep.size(); i++)
 		{
@@ -906,6 +907,7 @@ void Comparator::evaluate_univar_less_poly(Ctxt& ret, Ctxt& ctxt_p_1, const Ctxt
 		{
 			cout << i + 1 << ' ' << giantStep.isPowerComputed(i+1) << endl;
 		}
+		*/
 	}
 	else //circuit for p=3
 	{
@@ -1416,188 +1418,11 @@ void Comparator::min_max(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_x, con
 		return;
 	}
 
-	vector<Ctxt> ctxt_less_p;
-	vector<Ctxt> ctxt_eq_p;
-
-	// bivariate circuit
-	if (!m_isUnivar)
-	{
-		cout << "Extraction" << endl;
-		// extract mod p coefficients
-		vector<Ctxt> ctxt_x_p;
-		extract_mod_p(ctxt_x_p, ctxt_x);
-
-		if(m_verbose)
-	    {
-	    	for (long iCoef = 0; iCoef < m_slotDeg; iCoef++)
-	    	{
-	    		cout << "Ctxt x with coefficient " << iCoef << endl;
-		    	print_decrypted(ctxt_x_p[iCoef]);
-		    	cout << endl;
-		    }
-		}
-
-		vector<Ctxt> ctxt_y_p;
-		extract_mod_p(ctxt_y_p, ctxt_y);
-
-		if(m_verbose)
-	    {
-	    	for (long iCoef = 0; iCoef < m_slotDeg; iCoef++)
-	    	{
-	    		cout << "Ctxt y with coefficient " << iCoef << endl;
-		    	print_decrypted(ctxt_y_p[iCoef]);
-		    	cout << endl;
-		    }
-		}
-
-		cout << "Compute the less-than function modulo p" << endl;
-		for (long iCoef = 0; iCoef < m_slotDeg; iCoef++)
-		{
-			Ctxt ctxt_tmp = Ctxt(ctxt_x.getPubKey());
-			less_than_bivar(ctxt_tmp, ctxt_x_p[iCoef], ctxt_y_p[iCoef]);
-			ctxt_less_p.push_back(ctxt_tmp);
-		}
-
-		cout << "Compute the equality function modulo p" << endl;
-		for (long iCoef = 0; iCoef < m_slotDeg; iCoef++)
-		{
-			// Subtraction z = x - y
-			cout << "Subtraction" << endl;
-			Ctxt ctxt_z = ctxt_x_p[iCoef];
-			ctxt_z -= ctxt_y_p[iCoef];
-			Ctxt ctxt_tmp = Ctxt(ctxt_z.getPubKey());
-			is_zero(ctxt_tmp, ctxt_z);
-			ctxt_eq_p.push_back(ctxt_tmp);
-		}
-	}
-	else // univariate circuit
-	{
-		// Subtraction z = x - y
-		cout << "Subtraction" << endl;
-		Ctxt ctxt_z = ctxt_x;
-		ctxt_z -= ctxt_y;
-
-		if(m_verbose)
-		{
-			print_decrypted(ctxt_z);
-			cout << endl;
-		}
-
-		// extract mod p coefficients
-		cout << "Extraction" << endl;
-		vector<Ctxt> ctxt_z_p;
-		extract_mod_p(ctxt_z_p, ctxt_z);
-
-		if(m_verbose)
-	    {
-	    	for (long iCoef = 0; iCoef < m_slotDeg; iCoef++)
-	    	{
-	    		cout << "Ctxt x with coefficient " << iCoef << endl;
-		    	print_decrypted(ctxt_z_p[iCoef]);
-		    	cout << endl;
-		    }
-		}
-
-		cout << "Compute the less-than and equality functions modulo p" << endl;
-		for (long iCoef = 0; iCoef < m_slotDeg; iCoef++)
-		{
-			Ctxt ctxt_tmp = Ctxt(ctxt_z.getPubKey());
-			Ctxt ctxt_tmp_eq = Ctxt(ctxt_z.getPubKey());
-
-			// compute polynomial function for 'z < 0'
-			cout << "Compute univariate comparison polynomial" << endl;
-			evaluate_univar_less_poly(ctxt_tmp, ctxt_tmp_eq, ctxt_z_p[iCoef]);
-
-			if(m_verbose)
-			{
-			  cout << "Result of the less-than function" << endl;
-			  print_decrypted(ctxt_tmp);
-			  cout << endl;
-			}
-
-			ctxt_less_p.push_back(ctxt_tmp);
-
-			cout << "Computing NOT" << endl;
-			//compute 1 - mapTo01(r_i*(x_i - y_i))
-			ctxt_tmp_eq.negate();
-			ctxt_tmp_eq.addConstant(ZZ(1));
-
-			if(m_verbose)
-			{
-			  cout << "Result of the equality function" << endl;
-			  print_decrypted(ctxt_tmp_eq);
-			  cout << endl;
-			}
-
-			ctxt_eq_p.push_back(ctxt_tmp_eq);
-		}	
-	}
-
-	cout << "Compare digits" << endl;
-	Ctxt ctxt_less = ctxt_less_p[m_slotDeg-1];
-	Ctxt ctxt_eq = ctxt_eq_p[m_slotDeg-1];
-
-	for (long iCoef = m_slotDeg-2; iCoef >= 0; iCoef--)
-	{
-		Ctxt tmp = ctxt_eq;
-		tmp.multiplyBy(ctxt_less_p[iCoef]);
-		ctxt_less += tmp;
-
-		ctxt_eq.multiplyBy(ctxt_eq_p[iCoef]);
-	}
-
-	if(m_verbose)
-	{
-		cout << "Comparison results" << endl;
-		print_decrypted(ctxt_less);
-		cout << endl;
-
-		cout << "Equality results" << endl;
-		print_decrypted(ctxt_eq);
-		cout << endl;
-	}
-
 	Ctxt ctxt_z = ctxt_x;
 	ctxt_z -= ctxt_y;
 
-	if(m_expansionLen == 1)
-	{
-		Ctxt tmp_prod = ctxt_less;
-		tmp_prod.multiplyBy(ctxt_z);
-		ctxt_min = ctxt_y;
-		ctxt_min += tmp_prod;
-
-		ctxt_max = ctxt_x;
-		ctxt_max -= tmp_prod;
-		return;
-	}
-
-	//TODO
-	//compute running products: prod_i 1 - (x_i - y_i)^{p^d-1}
-	cout << "Rotating and multiplying slots with equalities" << endl;
-	shift_and_mul(ctxt_eq, 0);
-
-	if(m_verbose)
-	{
-		print_decrypted(ctxt_eq);
-		cout << endl;
-	}
-
-	//Remove the least significant digit and shift to the left
-	cout << "Remove the least significant digit" << endl;
-	batch_shift_for_mul(ctxt_eq, 0, -1);
-
-	if(m_verbose)
-	{
-		print_decrypted(ctxt_eq);
-		cout << endl;
-	}
-
-	cout << "Final result" << endl;
-
-	Ctxt ctxt_tmp = ctxt_eq;
-	ctxt_tmp.multiplyBy(ctxt_less);
-	shift_and_add(ctxt_tmp, 0);
+	Ctxt ctxt_tmp = Ctxt(ctxt_z.getPubKey());
+	compare(ctxt_tmp, ctxt_x, ctxt_y);
 	ctxt_tmp.multiplyBy(ctxt_z);
 
 	ctxt_min = ctxt_y;
