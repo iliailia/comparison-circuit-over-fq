@@ -24,27 +24,28 @@ using namespace std;
 using namespace NTL;
 using namespace helib;
 
-// the main function that takes 7 arguments (type in Terminal: ./comparison_circuit argv[1] argv[2] argv[3] argv[4] argv[5] argv[6] argv[7])
+// the main function that takes 8 arguments (type in Terminal: ./sorting_circuit argv[1] argv[2] argv[3] argv[4] argv[5] argv[6] argv[7] argv[8])
 // argv[1] - the plaintext modulus
 // argv[2] - the dimension of a vector space over a finite field
 // argv[3] - the order of the cyclotomic ring
 // argv[4] - the bitsize of the ciphertext modulus in ciphertexts (HElib increases it to fit the moduli chain). The modulus used for public-key generation
 // argv[5] - the length of vectors to be compared
-// argv[6] - the number of experiment repetitions
-// argv[7] - print debug info (y/n)
+// argv[6] - the number of values to be sorted
+// argv[7] - the number of experiment repetitions
+// argv[8] - print debug info (y/n)
 
 // some parameters for quick testing
-// 7 1 75 90 1 10 y
-// 7 1 300 90 1 10 y
-// 17 1 145 120 1 10 y
+// 7 1 75 90 1 4 10 y
+// 7 1 300 90 1 6 10 y
+// 17 1 145 120 1 7 10 y
 int main(int argc, char *argv[]) {
-  if(argc < 8)
+  if(argc < 9)
   {
-   throw invalid_argument("There should be exactly 7 arguments\n");
+   throw invalid_argument("There should be exactly 8 arguments\n");
   }
 
   bool verbose = false;
-  if (!strcmp(argv[7], "y"))
+  if (!strcmp(argv[8], "y"))
     verbose = true;
 
   //////////PARAMETER SET UP////////////////
@@ -93,14 +94,14 @@ int main(int argc, char *argv[]) {
   // create Comparator (initialize after buildModChain)
   Comparator comparator(context, d, expansion_len, secret_key, verbose);
 
-  //repeat experiments several times
-  int runs = atoi(argv[6]);
-  
-  //test comparison circuit
-  comparator.test_compare(runs);
+  // number of values to be sorted
+  int num_to_sort = atoi(argv[6]);
 
-  //test min/max circuit
-  //comparator.test_min_max(runs);
+  //repeat experiments 'runs' times
+  int runs = atoi(argv[7]);
+
+  //test sorting
+  comparator.test_sorting(num_to_sort, runs);
 
   printAllTimers(cout);
 

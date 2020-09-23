@@ -1470,6 +1470,307 @@ void Comparator::int_to_slot(ZZX& poly, unsigned long input, unsigned long enc_b
     }
 }
 
+
+void Comparator::sort(vector<Ctxt>& ctxt_out, const vector<Ctxt>& ctxt_in) const
+{
+	FHE_NTIMER_START(Sorting);
+
+	ctxt_out.clear();
+
+	// length of the input vector
+	size_t input_len = ctxt_in.size();
+
+	// plaintext modulus
+  	long p = m_context.zMStar.getP();
+
+	if (input_len > p)
+		throw helib::LogicError("The number of ciphertexts cannot be larger than the plaintext modulus");
+
+	// create a table with all pairwise comparisons and compute the Hamming weight of every row
+	vector<Ctxt> ham_weights;
+	for(size_t i = 0; i < input_len; i++)
+	{
+		//initialize Hamming weights to zero
+		Ctxt ctxt_tmp = Ctxt(ctxt_in[0].getPubKey());
+		ham_weights.push_back(ctxt_tmp);
+	}
+
+	cout << "Computing the comparison table" << endl;
+	for (size_t i = 0; i < input_len - 1; i++)
+	{
+		cout << "Computing Row " << i << endl;
+		for(size_t j = i + 1; j < input_len; j++)
+		{
+			cout << "Computing Column " << j << endl;
+			// compute upper diagonal entries of the comparison table and sum them
+			Ctxt comp_col_j = Ctxt(ctxt_in[0].getPubKey());
+			compare(comp_col_j, ctxt_in[i], ctxt_in[j]);
+			ham_weights[i] += comp_col_j;
+
+			// compute lower diagonal entries of the comparison table by transposition and logical negation of upper diagonal entries
+			//NOT the result to add to the jth row
+			comp_col_j.negate();
+			comp_col_j.addConstant(ZZ(1));
+
+			// add lower diagonal entries to Hamming weight accumulators of related rows
+			ham_weights[j] += comp_col_j;
+		}
+	}
+
+	// print Hamming weights
+	/*
+	for(size_t i = 0; i < input_len; i++)
+	{
+		cout << i << " Row:" << endl;
+		print_decrypted(ham_weights[i]);
+      	cout << endl;
+	}
+	*/
+
+	for(size_t i = 0; i < input_len; i++)
+	{
+		cout << "Computing Element " << i << endl;
+		Ctxt tmp_sum = Ctxt(ctxt_in[i].getPubKey());
+		for(size_t j = 0; j < input_len; j++)
+		{
+			//compare the Hamming weight of the jth row with i
+			Ctxt tmp_prod = ham_weights[j];
+			tmp_prod.addConstant(ZZX(-i));
+			mapTo01_subfield(tmp_prod, 1);
+			tmp_prod.negate();
+			tmp_prod.addConstant(ZZX(1));
+
+			//multiply by the jth input ciphertext
+			tmp_prod.multiplyBy(ctxt_in[j]);
+			tmp_sum += tmp_prod;
+		}
+		ctxt_out.push_back(tmp_sum);
+	}
+
+	// print output ciphertexts
+	/*
+	for(size_t i = 0; i < input_len; i++)
+	{
+		cout << i << " ctxt:" << endl;
+		print_decrypted(ctxt_out[i]);
+      	cout << endl;
+	}
+	*/
+	FHE_NTIMER_STOP(Sorting);
+}
+
+void Comparator::test_sorting(int num_to_sort, long runs) const
+{
+	//reset timers
+  setTimersOn();
+  
+  // initialize the random generator
+  random_device rd;
+  mt19937 eng(rd());
+  uniform_int_distribution<unsigned long> distr_u;
+  uniform_int_distribution<long> distr_i;
+
+  // get EncryptedArray
+  const EncryptedArray& ea = *(m_context.ea);
+
+  //extract number of slots
+  long nslots = ea.size();
+
+  //get p
+  unsigned long p = m_context.zMStar.getP();
+
+  //order of p
+  unsigned long ord_p = m_context.zMStar.getOrdP();
+
+  //amount of numbers in one ciphertext
+  unsigned long numbers_size = nslots / m_expansionLen;
+
+  // number of slots occupied by encoded numbers
+  unsigned long occupied_slots = numbers_size * m_expansionLen;
+
+  //encoding base, ((p+1)/2)^d
+  //if 2-variable comparison polynomial is used, it must be p^d
+  unsigned long enc_base = (p + 1) >> 1;
+  if (!m_isUnivar)
+  {
+  	enc_base = p;
+  }
+
+  unsigned long digit_base = power_long(enc_base, m_slotDeg);
+
+  //check that field_size^expansion_len fits into 64-bits
+  int space_bit_size = static_cast<int>(ceil(m_expansionLen * log2(digit_base)));
+  unsigned long input_range = LONG_MAX;
+  if(space_bit_size < 64)
+  {
+    //input_range = power_long(field_size, expansion_len);
+    input_range = power_long(digit_base, m_expansionLen);
+  }
+  cout << "Maximal input: " << input_range << endl;
+
+  long min_capacity = 1000;
+  long capacity;
+
+  for (int run = 0; run < runs; run++)
+  {
+    printf("Run %d started\n", run);
+
+    // all slots contain the same value
+    vector<vector<ZZX>> expected_result;
+    for (int i = 0; i < num_to_sort; i++)
+    {
+    	vector<ZZX> tmp_vec(occupied_slots,ZZX(INIT_MONO,0,0));
+    	expected_result.push_back(tmp_vec);
+    }
+    
+    // vector of input longs
+    vector<vector<unsigned long>> input_xs;
+    for (int i = 0; i < numbers_size; i++)
+    {
+    	vector<unsigned long> tmp_vec(num_to_sort,0);
+    	input_xs.push_back(tmp_vec);
+    }
+
+    ZZX pol_slot;
+
+    //ciphertexts to sort
+    vector<Ctxt> ctxt_in;
+
+    //sorted ciphertexts
+    vector<Ctxt> ctxt_out;
+
+    for (int i = 0; i < num_to_sort; i++)
+    {
+		// the plaintext polynomials
+		vector<ZZX> pol_x(nslots);
+
+		//encoding of slots
+		for (int k = 0; k < numbers_size; k++)
+		{
+			unsigned long input_x = distr_u(eng) % input_range;
+
+			input_xs[k][i] = input_x;
+		
+			if(m_verbose)
+			{
+				cout << "Input" << endl;
+				cout << input_x << endl;
+			}
+
+			vector<long> decomp_int_x;
+
+			//decomposition of input integers
+			digit_decomp(decomp_int_x, input_x, digit_base, m_expansionLen);
+			for (int j = 0; j < m_expansionLen; j++)
+			{
+			    //decomposition of a digit
+			    int_to_slot(pol_slot, decomp_int_x[j], enc_base);
+			    pol_x[k * m_expansionLen + j] = pol_slot;
+			}
+		}
+
+      	if(m_verbose)
+	    {
+	      cout << "Input" << endl;
+	      for(int j = 0; j < nslots; j++)
+	      {
+	          printZZX(cout, pol_x[j], ord_p);
+	          cout << endl;
+	      }
+	    }
+
+	    Ctxt ctxt_x(m_pk);
+    	ea.encrypt(ctxt_x, m_pk, pol_x);
+
+    	ctxt_in.push_back(ctxt_x);
+    }
+
+    //cout << "Input" << endl;
+    for (int i = 0; i < numbers_size; i++)
+    {
+    	//for (int j = 0; j < num_to_sort; j++)
+    	//	cout << input_xs[i][j] << " ";
+    	//cout << endl;
+    	std::sort(input_xs[i].begin(), input_xs[i].end());
+    }
+
+    //cout << "Expected results" << endl;
+    for (int i = num_to_sort-1; i >= 0; i--)
+    {
+		for (int k = 0; k < numbers_size; k++)
+		{
+			vector<long> decomp_int_x;
+
+			//decomposition of input integers
+			digit_decomp(decomp_int_x, input_xs[k][i], digit_base, m_expansionLen);
+			for (int j = 0; j < m_expansionLen; j++)
+			{
+			    //decomposition of a digit
+			    int_to_slot(pol_slot, decomp_int_x[j], enc_base);
+			    expected_result[num_to_sort-1-i][k * m_expansionLen + j] = pol_slot;
+			}
+		}
+
+		/*
+		cout << num_to_sort-1-i << endl;
+		for(int j = 0; j < nslots; j++)
+		{
+			printZZX(cout, expected_result[num_to_sort-1-i][j], ord_p);
+        	cout << endl;
+		}
+		*/	
+    }
+
+    // comparison function
+    cout << "Start of sorting" << endl;
+    this->sort(ctxt_out, ctxt_in);
+
+    printNamedTimer(cout, "Extraction");
+    printNamedTimer(cout, "ComparisonCircuitBivar");
+    printNamedTimer(cout, "ComparisonCircuitUnivar");
+    printNamedTimer(cout, "EqualityCircuit");
+    printNamedTimer(cout, "ShiftMul");
+    printNamedTimer(cout, "ShiftAdd");
+    printNamedTimer(cout, "Comparison");
+    printNamedTimer(cout, "Sorting");
+
+    const FHEtimer* sort_timer = getTimerByName("Sorting");
+
+    cout << "Avg. time per batch: " << 1000.0 * sort_timer->getTime()/static_cast<double>(run+1)/static_cast<double>(numbers_size) << " ms" << endl;
+    cout << "Number of integers in one ciphertext "<< numbers_size << endl;
+
+    // remove the line below if it gives bizarre results 
+    ctxt_out[0].cleanUp();
+    capacity = ctxt_out[0].bitCapacity();
+    cout << "Final capacity: " << capacity << endl;
+    if (capacity < min_capacity)
+      min_capacity = capacity;
+    cout << "Min. capacity: " << min_capacity << endl;
+    cout << "Final size: " << ctxt_out[0].logOfPrimeSet()/log(2.0) << endl;
+    
+    for (int i = 0; i < num_to_sort; i++)
+    {
+    	vector<ZZX> decrypted(nslots);
+	    ea.decrypt(ctxt_out[i], m_sk, decrypted);
+
+	    for(int j = 0; j < numbers_size; j++)
+	    { 
+	    	for(int k = 0; k < m_expansionLen; k++)
+	    	{
+	    		if (decrypted[j * m_expansionLen + k] != expected_result[i][j * m_expansionLen + k])
+			    {
+			    	printf("Slot %ld: ", j * m_expansionLen + k);
+			    	printZZX(cout, decrypted[j * m_expansionLen + k], ord_p);
+			        cout << endl;
+			        cout << "Failure" << endl;
+			        return;
+			    }
+	    	}
+	    }
+    }
+  }
+}
+
 void Comparator::test_compare(long runs) const
 {
   //reset timers

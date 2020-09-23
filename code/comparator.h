@@ -100,7 +100,7 @@ class Comparator{
     void shift_and_mul(Ctxt& x, long start, long shift_direction = false) const;
 
     // send non-zero elements of a field F_{p^d} to 1 and zero to 0
-    // if d = 1, this map operates on elements of the prime field F_p
+    // if pow = 1, this map operates on elements of the prime field F_p
     void mapTo01_subfield(Ctxt& ctxt, long pow) const;
 
     // univariate comparison polynomial evaluation
@@ -156,11 +156,17 @@ public:
   // minimum/maximum function for general vectors
   void min_max(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;
 
+  // sorting
+  void sort(vector<Ctxt>& ctxt_out, const vector<Ctxt>& ctxt_in) const;
+
   // test compare function 'runs' times
   void test_compare(long runs) const;
 
   // test min/max function 'runs' times
   void test_min_max(long runs) const;
+
+  // test compare function 'runs' times
+  void test_sorting(int num_to_sort, long runs) const;
 };
 
 #endif // #ifndef COMPARATOR_H

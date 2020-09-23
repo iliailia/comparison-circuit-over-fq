@@ -15,6 +15,8 @@ find_package(helib 1.0.0 EXACT REQUIRED)
 include_directories(${PROJECT_SOURCE_DIR})
 
 add_executable(comparison_circuit comparison_circuit.cpp comparator.cpp tools.cpp)
+add_executable(sorting_circuit sorting_circuit.cpp comparator.cpp tools.cpp)
 
 target_link_libraries(comparison_circuit helib)
+target_link_libraries(sorting_circuit helib)
 
