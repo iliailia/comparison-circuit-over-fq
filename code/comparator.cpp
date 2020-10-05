@@ -312,6 +312,7 @@ void Comparator::extraction_init()
 
 	// get p
 	long p = m_context.zMStar.getP();
+	//cout << "p: " << p << endl;
 
 	// get the order of p
 	long d = m_context.zMStar.getOrdP();
@@ -353,9 +354,10 @@ void Comparator::extraction_init()
 			trace_matrix[iRow][iCol] = coef;
 		}
 	}
-	//cout << "Trace matrix" << trace_matrix << endl;
+	//cout << "Trace matrix: " << trace_matrix << endl;
+	//cout << "Modulus: " << trace_matrix[0][0].modulus() << endl; 
 
-	mat_ZZ_pE inv_trace_matrix = inv(trace_matrix);
+	mat_ZZ_pE inv_trace_matrix = NTL::inv(trace_matrix);
 	//cout << "Inverse of trace matrix" << inv_trace_matrix << endl;
 
 	//cout << "Extraction consts: " << endl;
@@ -387,7 +389,7 @@ void Comparator::extraction_init()
 
 void Comparator::extract_mod_p(vector<Ctxt>& mod_p_coefs, const Ctxt& ctxt_x) const
 {
-	FHE_NTIMER_START(Extraction);
+	HELIB_NTIMER_START(Extraction);
 	mod_p_coefs.clear();
 
 	if (m_slotDeg == 1)
@@ -424,7 +426,7 @@ void Comparator::extract_mod_p(vector<Ctxt>& mod_p_coefs, const Ctxt& ctxt_x) co
 		}
 		mod_p_coefs.push_back(mod_p_ctxt);
 	}
-	FHE_NTIMER_STOP(Extraction);
+	HELIB_NTIMER_STOP(Extraction);
 }
 
 Comparator::Comparator(const Context& context, unsigned long d, unsigned long expansion_len, const SecKey& sk, bool verbose): m_context(context), m_slotDeg(d), m_expansionLen(expansion_len), m_sk(sk), m_pk(sk), m_verbose(verbose)
@@ -483,7 +485,7 @@ void Comparator::print_decrypted(const Ctxt& ctxt) const
 
 void Comparator::batch_shift(Ctxt& ctxt, long start, long shift) const
 {
-	FHE_NTIMER_START(BatchShift);
+	HELIB_NTIMER_START(BatchShift);
 	// get EncryptedArray
 	const EncryptedArray& ea = *(m_context.ea);
 	
@@ -500,21 +502,22 @@ void Comparator::batch_shift(Ctxt& ctxt, long start, long shift) const
 	double size;
 	DoubleCRT mask = get_mask(size, index);
 	ctxt.multByConstant(mask, size);
-	FHE_NTIMER_STOP(BatchShift);
+	HELIB_NTIMER_STOP(BatchShift);
 }
 
 void Comparator::batch_shift_for_mul(Ctxt& ctxt, long start, long shift) const
 {
-	FHE_NTIMER_START(BatchShiftForMul);
+	HELIB_NTIMER_START(BatchShiftForMul);
 	// get EncryptedArray
 	const EncryptedArray& ea = *(m_context.ea);
 	
 	// if shift is zero, do nothing
 	if(shift == 0)
 		return;
-
+	cout << "shift started " << shift << endl;
 	// left cyclic rotation
 	ea.rotate(ctxt, shift);
+	cout << "shift finished " << shift << endl;
 
 	long index = static_cast<long>(intlog(2, -shift));
 	//cout << "Mask index: " << index << endl;
@@ -527,12 +530,12 @@ void Comparator::batch_shift_for_mul(Ctxt& ctxt, long start, long shift) const
 	mask.Negate();
 	ctxt.addConstant(mask, mask_size);
 
-	FHE_NTIMER_STOP(BatchShiftForMul);
+	HELIB_NTIMER_STOP(BatchShiftForMul);
 }
 
 void Comparator::shift_and_add(Ctxt& x, long start, long shift_direction) const
 {
-  FHE_NTIMER_START(ShiftAdd);
+  HELIB_NTIMER_START(ShiftAdd);
   long shift_sign = -1;
   if(shift_direction)
     shift_sign = 1;
@@ -546,12 +549,12 @@ void Comparator::shift_and_add(Ctxt& x, long start, long shift_direction) const
     x += tmp;
     e <<=1;
   }
-  FHE_NTIMER_STOP(ShiftAdd);
+  HELIB_NTIMER_STOP(ShiftAdd);
 }
 
 void Comparator::shift_and_mul(Ctxt& x, long start, long shift_direction) const
 {
-  FHE_NTIMER_START(ShiftMul);
+  HELIB_NTIMER_START(ShiftMul);
   long shift_sign = -1;
   if(shift_direction)
     shift_sign = 1;
@@ -565,12 +568,12 @@ void Comparator::shift_and_mul(Ctxt& x, long start, long shift_direction) const
     x.multiplyBy(tmp);
     e <<=1;
   }
-  FHE_NTIMER_STOP(ShiftMul);
+  HELIB_NTIMER_STOP(ShiftMul);
 }
 
 void Comparator::mapTo01_subfield(Ctxt& ctxt, long pow) const
 {
-  FHE_NTIMER_START(MapTo01);	
+  HELIB_NTIMER_START(MapTo01);	
   // get EncryptedArray
   const EncryptedArray& ea = *(m_context.ea);
 
@@ -585,7 +588,7 @@ void Comparator::mapTo01_subfield(Ctxt& ctxt, long pow) const
   if (p > 2)
     ctxt.power((p - 1) / pow); // set y = x^{p-1}
 
-  FHE_NTIMER_STOP(MapTo01);
+  HELIB_NTIMER_STOP(MapTo01);
 }
 
 void Comparator::less_than_mod_2(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
@@ -846,7 +849,7 @@ void Comparator::less_than_mod_11(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt
 
 void Comparator::evaluate_univar_less_poly(Ctxt& ret, Ctxt& ctxt_p_1, const Ctxt& x) const
 {
-	FHE_NTIMER_START(ComparisonCircuitUnivar);
+	HELIB_NTIMER_START(ComparisonCircuitUnivar);
 	// get p
 	ZZ p = ZZ(m_context.zMStar.getP());
 
@@ -921,12 +924,12 @@ void Comparator::evaluate_univar_less_poly(Ctxt& ret, Ctxt& ctxt_p_1, const Ctxt
 
 		ret += top_term;
 	}
-	FHE_NTIMER_STOP(ComparisonCircuitUnivar);
+	HELIB_NTIMER_STOP(ComparisonCircuitUnivar);
 }
 
 void Comparator::evaluate_min_max_poly(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
 {
-	FHE_NTIMER_START(MinMaxCircuitUnivar);
+	HELIB_NTIMER_START(MinMaxCircuitUnivar);
 	// get p
 	ZZ p = ZZ(m_context.zMStar.getP());
 
@@ -1013,16 +1016,16 @@ void Comparator::evaluate_min_max_poly(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctx
 		ctxt_max = last_term;
 		ctxt_max -= ctxt_z2;
 	}
-	FHE_NTIMER_STOP(MinMaxCircuitUnivar);
+	HELIB_NTIMER_STOP(MinMaxCircuitUnivar);
 }
 
 void Comparator::less_than_bivar(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
 {
-  FHE_NTIMER_START(ComparisonCircuitBivar);
+  HELIB_NTIMER_START(ComparisonCircuitBivar);
 
   // uncomment if you want to compare with Tan et al.
-  less_than_bivar_tan(ctxt_res, ctxt_x, ctxt_y);
-  return;
+  //less_than_bivar_tan(ctxt_res, ctxt_x, ctxt_y);
+  //return;
 
   unsigned long p = m_context.zMStar.getP();
 
@@ -1057,7 +1060,7 @@ void Comparator::less_than_bivar(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt&
     cout << endl;
   }
 
-  FHE_NTIMER_STOP(ComparisonCircuitBivar);
+  HELIB_NTIMER_STOP(ComparisonCircuitBivar);
 }
 
 void Comparator::less_than_bivar_tan(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
@@ -1088,7 +1091,7 @@ void Comparator::less_than_bivar_tan(Ctxt& ctxt_res, const Ctxt& ctxt_x, const C
 
 void Comparator::is_zero(Ctxt& ctxt_res, const Ctxt& ctxt_z, long pow) const
 {
-  FHE_NTIMER_START(EqualityCircuit);
+  HELIB_NTIMER_START(EqualityCircuit);
 
   ctxt_res = ctxt_z;
 
@@ -1113,12 +1116,12 @@ void Comparator::is_zero(Ctxt& ctxt_res, const Ctxt& ctxt_z, long pow) const
     cout << endl;
   }
 
-  FHE_NTIMER_STOP(EqualityCircuit);
+  HELIB_NTIMER_STOP(EqualityCircuit);
 }
 
 void Comparator::compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
 {
-	FHE_NTIMER_START(Comparison);
+	HELIB_NTIMER_START(Comparison);
 
 	vector<Ctxt> ctxt_less_p;
 	vector<Ctxt> ctxt_eq_p;
@@ -1310,12 +1313,12 @@ void Comparator::compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y)
       cout << endl;
     }	
 
-    FHE_NTIMER_STOP(Comparison);
+    HELIB_NTIMER_STOP(Comparison);
 }
 
 void Comparator::min_max_digit(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
 {
-	FHE_NTIMER_START(MinMaxDigit);
+	HELIB_NTIMER_START(MinMaxDigit);
 	if(!m_isUnivar)
 		throw helib::LogicError("Min/Max is not implemented with the bivariate circuit");
 
@@ -1406,12 +1409,12 @@ void Comparator::min_max_digit(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_
 		ctxt_max += tmp;
 	}
 
-	FHE_NTIMER_STOP(MinMaxDigit);
+	HELIB_NTIMER_STOP(MinMaxDigit);
 }
 
 void Comparator::min_max(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
 {
-	FHE_NTIMER_START(MinMax);
+	HELIB_NTIMER_START(MinMax);
 	if(m_isUnivar && m_expansionLen == 1 && m_slotDeg == 1)
 	{
 		min_max_digit(ctxt_min, ctxt_max, ctxt_x, ctxt_y);
@@ -1454,7 +1457,35 @@ void Comparator::min_max(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_x, con
       print_decrypted(ctxt_y);
       cout << endl;
     }
-	FHE_NTIMER_STOP(MinMax);
+	HELIB_NTIMER_STOP(MinMax);
+}
+
+void Comparator::array_min(Ctxt& ctxt_res, const vector<Ctxt>& ctxt_in) const
+{
+	HELIB_NTIMER_START(ArrayMin);
+	size_t input_len = ctxt_in.size();
+
+	vector<Ctxt> ctxt_res_vec;
+	for (size_t i  = 0; i < input_len; i++)
+	{
+		ctxt_res_vec.push_back(ctxt_in[i]);
+	}
+
+	size_t cur_len = input_len;
+	while(cur_len > 1)
+	{
+		// compare x[i] and x[n-1-i] where n is the length of ctxt_res_vec
+		for (size_t i  = 0; i < (cur_len >> 1); i++)
+		{
+			if(i != cur_len -  1 - i)
+			{
+				min_max(ctxt_res_vec[i], ctxt_res_vec[cur_len -  1 - i], ctxt_res_vec[i], ctxt_res_vec[cur_len -  1 - i]);
+			}
+		}
+		cur_len = (cur_len >> 1) + (cur_len % 2);
+	}
+	ctxt_res = ctxt_res_vec[0];
+	HELIB_NTIMER_STOP(ArrayMin);
 }
 
 void Comparator::int_to_slot(ZZX& poly, unsigned long input, unsigned long enc_base) const
@@ -1473,7 +1504,7 @@ void Comparator::int_to_slot(ZZX& poly, unsigned long input, unsigned long enc_b
 
 void Comparator::sort(vector<Ctxt>& ctxt_out, const vector<Ctxt>& ctxt_in) const
 {
-	FHE_NTIMER_START(Sorting);
+	HELIB_NTIMER_START(Sorting);
 
 	ctxt_out.clear();
 
@@ -1485,6 +1516,10 @@ void Comparator::sort(vector<Ctxt>& ctxt_out, const vector<Ctxt>& ctxt_in) const
 
 	if (input_len > p)
 		throw helib::LogicError("The number of ciphertexts cannot be larger than the plaintext modulus");
+
+	// multiplications in the equality circuit
+	long eq_mul_num = static_cast<long>(floor(log2(p-1))) + weight(ZZ(p-1)) - 1;
+	cout << "Multiplications in the equality circuit: " << eq_mul_num << endl;
 
 	// create a table with all pairwise comparisons and compute the Hamming weight of every row
 	vector<Ctxt> ham_weights;
@@ -1527,25 +1562,100 @@ void Comparator::sort(vector<Ctxt>& ctxt_out, const vector<Ctxt>& ctxt_in) const
 	}
 	*/
 
-	for(size_t i = 0; i < input_len; i++)
+	if(eq_mul_num * input_len <= p - 2)
+	//if(true)
 	{
-		cout << "Computing Element " << i << endl;
-		Ctxt tmp_sum = Ctxt(ctxt_in[i].getPubKey());
-		for(size_t j = 0; j < input_len; j++)
+		for(size_t i = 0; i < input_len; i++)
 		{
-			//compare the Hamming weight of the jth row with i
-			Ctxt tmp_prod = ham_weights[j];
-			tmp_prod.addConstant(ZZX(-i));
-			mapTo01_subfield(tmp_prod, 1);
-			tmp_prod.negate();
-			tmp_prod.addConstant(ZZX(1));
+			cout << "Computing Element " << i << endl;
+			Ctxt tmp_sum = Ctxt(ctxt_in[i].getPubKey());
+			for(size_t j = 0; j < input_len; j++)
+			{
+				//compare the Hamming weight of the jth row with i
+				Ctxt tmp_prod = ham_weights[j];
+				tmp_prod.addConstant(ZZX(-i));
+				mapTo01_subfield(tmp_prod, 1);
+				tmp_prod.negate();
+				tmp_prod.addConstant(ZZX(1));
 
-			//multiply by the jth input ciphertext
-			tmp_prod.multiplyBy(ctxt_in[j]);
-			tmp_sum += tmp_prod;
+				//multiply by the jth input ciphertext
+				tmp_prod.multiplyBy(ctxt_in[j]);
+				tmp_sum += tmp_prod;
+			}
+			ctxt_out.push_back(tmp_sum);
 		}
-		ctxt_out.push_back(tmp_sum);
 	}
+	else
+	{
+		// equality sums
+		vector<Ctxt> eq_sums;
+
+		// fill ctxt_out with zeros
+		for(size_t i = 0; i < input_len; i++)
+		{
+			ctxt_out.push_back(Ctxt(ctxt_in[0].getPubKey()));
+			eq_sums.push_back(Ctxt(ctxt_in[0].getPubKey()));
+		}
+
+		for (size_t i = 0; i < input_len; i++)
+		{
+			cout << "Adding element " << i << endl;
+
+			// hw_i^j, j in [1,p-1]
+			DynamicCtxtPowers hw_powers(ham_weights[i], p-1);
+			
+			// eq_sums[0] = 1 - hw_i^(p-1)
+			eq_sums[0].clear();
+			eq_sums[0] = hw_powers.getPower(p-1);
+			eq_sums[0].negate();
+			eq_sums[0].addConstant(ZZX(1));
+
+			// eq_sums[0] * ctxt_in[i]
+			eq_sums[0].multiplyBy(ctxt_in[i]);
+
+			// sum_i eq_sums[0] * ctxt_in[i]
+			ctxt_out[0] += eq_sums[0];	
+
+			for (size_t k = 1; k < input_len; k++)
+			{
+				// zeroize
+				eq_sums[k].clear();
+
+				// current sorting index
+				ZZ_p k_zzp;
+				k_zzp.init(ZZ(p));
+				k_zzp = k;
+
+				ZZ_p k_power;
+				k_power.init(ZZ(p));
+
+				for (int j = 1; j < p; j++)
+				{
+					// k^(p-1-j) mod p
+					k_power = power(k_zzp, p - 1 - j);
+					// hw_i^j
+					Ctxt tmp = hw_powers.getPower(j);
+					// hw_i^j * k^(p-1-j)
+					tmp.multByConstant(rep(k_power));
+					// sum hw_i^j * k^(p-1-j)
+					eq_sums[k] += tmp;
+				}
+				// add k^(p-1) to eq_sums
+				eq_sums[k].addConstant(rep(power(k_zzp, p-1)));
+
+				// 1 - sum_(j=0)^(p-1) hw_i^j * k^(p-1-j)
+				eq_sums[k].negate();
+				eq_sums[k].addConstant(ZZX(1));
+
+				// eq_sums[k] * ctxt_in[i]
+				eq_sums[k].multiplyBy(ctxt_in[i]);
+
+				// sum_i eq_sums[k] * ctxt_in[i]
+				ctxt_out[k] += eq_sums[k];
+			}
+		}
+	}
+	
 
 	// print output ciphertexts
 	/*
@@ -1556,7 +1666,7 @@ void Comparator::sort(vector<Ctxt>& ctxt_out, const vector<Ctxt>& ctxt_in) const
       	cout << endl;
 	}
 	*/
-	FHE_NTIMER_STOP(Sorting);
+	HELIB_NTIMER_STOP(Sorting);
 }
 
 void Comparator::test_sorting(int num_to_sort, long runs) const
@@ -2162,5 +2272,209 @@ void Comparator::test_min_max(long runs) const
       }
     }
     cout << endl;
+  }
+}
+
+void Comparator::test_array_min(int input_len, long runs) const
+{
+	//reset timers
+  setTimersOn();
+  
+  // initialize the random generator
+  random_device rd;
+  mt19937 eng(rd());
+  uniform_int_distribution<unsigned long> distr_u;
+  uniform_int_distribution<long> distr_i;
+
+  // get EncryptedArray
+  const EncryptedArray& ea = *(m_context.ea);
+
+  //extract number of slots
+  long nslots = ea.size();
+
+  //get p
+  unsigned long p = m_context.zMStar.getP();
+
+  //order of p
+  unsigned long ord_p = m_context.zMStar.getOrdP();
+
+  //amount of numbers in one ciphertext
+  unsigned long numbers_size = nslots / m_expansionLen;
+
+  // number of slots occupied by encoded numbers
+  unsigned long occupied_slots = numbers_size * m_expansionLen;
+
+  //encoding base, ((p+1)/2)^d
+  //if 2-variable comparison polynomial is used, it must be p^d
+  unsigned long enc_base = (p + 1) >> 1;
+  if (!m_isUnivar)
+  {
+  	enc_base = p;
+  }
+
+  unsigned long digit_base = power_long(enc_base, m_slotDeg);
+
+  //check that field_size^expansion_len fits into 64-bits
+  int space_bit_size = static_cast<int>(ceil(m_expansionLen * log2(digit_base)));
+  unsigned long input_range = LONG_MAX;
+  if(space_bit_size < 64)
+  {
+    //input_range = power_long(field_size, expansion_len);
+    input_range = power_long(digit_base, m_expansionLen);
+  }
+  cout << "Maximal input: " << input_range << endl;
+
+  long min_capacity = 1000;
+  long capacity;
+
+  for (int run = 0; run < runs; run++)
+  {
+    printf("Run %d started\n", run);
+
+    vector<ZZX> expected_result(occupied_slots,ZZX(INIT_MONO,0,0));
+    
+    // vector of input longs
+    vector<vector<unsigned long>> input_xs;
+    for (int i = 0; i < numbers_size; i++)
+    {
+    	vector<unsigned long> tmp_vec(input_len,0);
+    	input_xs.push_back(tmp_vec);
+    }
+
+    ZZX pol_slot;
+
+    //ciphertexts to sort
+    vector<Ctxt> ctxt_in;
+
+    //sorted ciphertexts
+    Ctxt ctxt_out(m_pk);
+
+    for (int i = 0; i < input_len; i++)
+    {
+		// the plaintext polynomials
+		vector<ZZX> pol_x(nslots);
+
+		//encoding of slots
+		for (int k = 0; k < numbers_size; k++)
+		{
+			unsigned long input_x = distr_u(eng) % input_range;
+
+			input_xs[k][i] = input_x;
+		
+			if(m_verbose)
+			{
+				cout << "Input" << endl;
+				cout << input_x << endl;
+			}
+
+			vector<long> decomp_int_x;
+
+			//decomposition of input integers
+			digit_decomp(decomp_int_x, input_x, digit_base, m_expansionLen);
+			for (int j = 0; j < m_expansionLen; j++)
+			{
+			    //decomposition of a digit
+			    int_to_slot(pol_slot, decomp_int_x[j], enc_base);
+			    pol_x[k * m_expansionLen + j] = pol_slot;
+			}
+		}
+
+      	if(m_verbose)
+	    {
+	      cout << "Input" << endl;
+	      for(int j = 0; j < nslots; j++)
+	      {
+	          printZZX(cout, pol_x[j], ord_p);
+	          cout << endl;
+	      }
+	    }
+
+	    Ctxt ctxt_x(m_pk);
+    	ea.encrypt(ctxt_x, m_pk, pol_x);
+
+    	ctxt_in.push_back(ctxt_x);
+    }
+
+    //cout << "Input" << endl;
+    vector<unsigned long> output_xs(numbers_size, 0);
+    for (int i = 0; i < numbers_size; i++)
+    {
+    	/*
+    	for (int j = 0; j < input_len; j++)
+    		cout << input_xs[i][j] << " ";
+    	cout << endl;
+    	*/
+    	output_xs[i] = *std::min_element(input_xs[i].begin(), input_xs[i].end());
+    	//cout << "Output: " << output_xs[i] << endl;
+    }
+
+    //cout << "Expected results" << endl;
+	for (int k = 0; k < numbers_size; k++)
+	{
+		vector<long> decomp_int_x;
+
+		//decomposition of input integers
+		digit_decomp(decomp_int_x, output_xs[k], digit_base, m_expansionLen);
+		for (int j = 0; j < m_expansionLen; j++)
+		{
+		    //decomposition of a digit
+		    int_to_slot(pol_slot, decomp_int_x[j], enc_base);
+		    expected_result[k * m_expansionLen + j] = pol_slot;
+		}
+	}
+
+	/*
+	cout << input_len-1-i << endl;
+	for(int j = 0; j < nslots; j++)
+	{
+		printZZX(cout, expected_result[input_len-1-i][j], ord_p);
+    	cout << endl;
+	}
+	*/
+
+    // comparison function
+    cout << "Start of array minimum" << endl;
+    this->array_min(ctxt_out, ctxt_in);
+
+    printNamedTimer(cout, "Extraction");
+    printNamedTimer(cout, "ComparisonCircuitBivar");
+    printNamedTimer(cout, "ComparisonCircuitUnivar");
+    printNamedTimer(cout, "EqualityCircuit");
+    printNamedTimer(cout, "ShiftMul");
+    printNamedTimer(cout, "ShiftAdd");
+    printNamedTimer(cout, "Comparison");
+    printNamedTimer(cout, "ArrayMin");
+
+    const FHEtimer* sort_timer = getTimerByName("ArrayMin");
+
+    cout << "Avg. time per batch: " << 1000.0 * sort_timer->getTime()/static_cast<double>(run+1)/static_cast<double>(numbers_size) << " ms" << endl;
+    cout << "Number of integers in one ciphertext "<< numbers_size << endl;
+
+    // remove the line below if it gives bizarre results 
+    ctxt_out.cleanUp();
+    capacity = ctxt_out.bitCapacity();
+    cout << "Final capacity: " << capacity << endl;
+    if (capacity < min_capacity)
+      min_capacity = capacity;
+    cout << "Min. capacity: " << min_capacity << endl;
+    cout << "Final size: " << ctxt_out.logOfPrimeSet()/log(2.0) << endl;
+    
+	vector<ZZX> decrypted(nslots);
+    ea.decrypt(ctxt_out, m_sk, decrypted);
+
+    for(int j = 0; j < numbers_size; j++)
+    { 
+    	for(int k = 0; k < m_expansionLen; k++)
+    	{
+    		if (decrypted[j * m_expansionLen + k] != expected_result[j * m_expansionLen + k])
+		    {
+		    	printf("Slot %ld: ", j * m_expansionLen + k);
+		    	printZZX(cout, decrypted[j * m_expansionLen + k], ord_p);
+		        cout << endl;
+		        cout << "Failure" << endl;
+		        return;
+		    }
+    	}
+    }
   }
 }

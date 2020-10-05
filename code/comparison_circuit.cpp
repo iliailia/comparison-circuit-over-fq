@@ -86,7 +86,23 @@ int main(int argc, char *argv[]) {
   secret_key.GenSecKey();
   cout << "Generating key-switching matrices..." << endl;
   // Compute key-switching matrices that we need
-  addSome1DMatrices(secret_key);
+  if (context.zMStar.numOfGens() == 1)
+  {
+    set<long> automVals;
+    long e = 1;
+    while (e < expansion_len){
+      long atm = context.zMStar.genToPow(0, -e);
+      //cout << -e << " " << atm << endl;
+      automVals.insert(atm);
+      e <<=1;
+    }
+    addTheseMatrices(secret_key, automVals);
+  }
+  else
+  {
+    addSome1DMatrices(secret_key);
+  }
+
   if (d > 1)
     addFrbMatrices(secret_key); //might be useful only when d > 1
 
