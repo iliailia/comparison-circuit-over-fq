@@ -31,21 +31,22 @@ using namespace helib;
 // argv[4] - the bitsize of the ciphertext modulus in ciphertexts (HElib increases it to fit the moduli chain). The modulus used for public-key generation
 // argv[5] - the length of vectors to be compared
 // argv[6] - the number of values to be sorted
-// argv[7] - the number of experiment repetitions
-// argv[8] - print debug info (y/n)
+// argv[7] - the number of consecutive comparisons
+// argv[8] - the number of experiment repetitions
+// argv[9] - print debug info (y/n)
 
 // some parameters for quick testing
-// 7 1 75 90 1 4 10 y
-// 7 1 300 90 1 6 10 y
-// 17 1 145 120 1 7 10 y
+// 7 1 75 90 1 4 1 10 y
+// 7 1 300 90 1 6 2 10 y
+// 17 1 145 120 1 7 2 10 y
 int main(int argc, char *argv[]) {
-  if(argc < 9)
+  if(argc < 10)
   {
-   throw invalid_argument("There should be exactly 8 arguments\n");
+   throw invalid_argument("There should be exactly 9 arguments\n");
   }
 
   bool verbose = false;
-  if (!strcmp(argv[8], "y"))
+  if (!strcmp(argv[9], "y"))
     verbose = true;
 
   //////////PARAMETER SET UP////////////////
@@ -116,11 +117,14 @@ int main(int argc, char *argv[]) {
   // number of values to be sorted
   int input_len = atoi(argv[6]);
 
+  // levels of consecutive comparisons
+  long depth = atol(argv[7]); 
+
   //repeat experiments 'runs' times
-  int runs = atoi(argv[7]);
+  int runs = atoi(argv[8]);
 
   //test sorting
-  comparator.test_array_min(input_len, runs);
+  comparator.test_array_min(input_len, depth, runs);
 
   printAllTimers(cout);
 

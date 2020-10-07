@@ -147,7 +147,7 @@ def ps_complexity_optimized(p):
 				mul += 1;
 				print("Danger");
 
-		print(k, mul);
+		#print(k, mul);
 		if mul < min_mul:
 			min_mul = mul;
 			min_k = k;

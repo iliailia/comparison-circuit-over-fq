@@ -105,41 +105,60 @@ void Comparator::compute_poly_params()
   		{167, 10}, // 10 (21), 8..12
   		{173, 10},  // 10 (21), 8..12
   		{271, 9},  // 9 (26), 9..10
-  		{401, 12}  // 12 (28), 9..14
+  		{401, 12},  // 12 (28), 9..14
+  		{659, 11}	// 11 (41), 11..12
   	};
 
-  	m_bs_num = -1;
+  	m_bs_num_comp = -1;
+  	m_bs_num_min = -1;
   	if(bs_nums.count(p_long) > 0)
-  		m_bs_num = bs_nums[p_long];
+  	{
+  		m_bs_num_comp = bs_nums[p_long];
+  		m_bs_num_min = bs_nums[p_long];
+  	}
 
   	// if p > 3, d = (p-3)/2
-  	long d = deg(m_univar_less_poly);
+  	long d_comp = deg(m_univar_less_poly);
+  	// if p > 3, d = (p-1)/2
+  	long d_min = deg(m_univar_min_max_poly);
 
   	// How many baby steps: set sqrt(d/2), rounded up/down to a power of two
 
 	// FIXME: There may be some room for optimization here: it may be possible to choose this number as something other than a power of two and still maintain optimal depth, in principle we can try all possible values of m_babystep_num between two consecutive powers of two and choose the one that gives the least number of multiplies, conditioned on minimum depth.
 
-  	if (m_bs_num <= 0) 
+  	if (m_bs_num_comp <= 0) 
 	{
-		long kk = static_cast<long>(sqrt(d/2.0)); //sqrt(d/2)
-		m_bs_num = 1L << NextPowerOfTwo(kk);
+		long kk = static_cast<long>(sqrt(d_comp/2.0)); //sqrt(d/2)
+		m_bs_num_comp = 1L << NextPowerOfTwo(kk);
 
     	// heuristic: if #baby_steps >> kk then use a smaler power of two
-    	if ((m_bs_num==16 && d>167) || (m_bs_num>16 && m_bs_num>(1.44*kk)))
-      		m_bs_num /= 2;
+    	if ((m_bs_num_comp==16 && d_comp>167) || (m_bs_num_comp>16 && m_bs_num_comp>(1.44*kk)))
+      		m_bs_num_comp /= 2;
+  	}
+  	if (m_bs_num_min <= 0) 
+	{
+		long kk = static_cast<long>(sqrt(d_min/2.0)); //sqrt(d/2)
+		m_bs_num_min = 1L << NextPowerOfTwo(kk);
+
+    	// heuristic: if #baby_steps >> kk then use a smaler power of two
+    	if ((m_bs_num_min==16 && d_min>167) || (m_bs_num_min>16 && m_bs_num_min>(1.44*kk)))
+      		m_bs_num_min /= 2;
   	}
 
 	if(m_verbose)
 	{
-		cout << "Number of baby steps: " << m_bs_num << endl;
+		cout << "Number of baby steps for comparison: " << m_bs_num_comp << endl;
+		cout << "Number of baby steps for min/max: " << m_bs_num_min << endl;
 	}
 
 	// #giant_steps = ceil(d/#baby_steps), d >= #giant_steps * #baby_steps
-	m_gs_num = divc(d,m_bs_num);
+	m_gs_num_comp = divc(d_comp,m_bs_num_comp);
+	m_gs_num_min = divc(d_min,m_bs_num_min);
 
 	if(m_verbose)
 	{
-		cout << "Number of giant steps: " << m_bs_num << endl;
+		cout << "Number of giant steps for comparison: " << m_bs_num_comp << endl;
+		cout << "Number of giant steps for min/max: " << m_bs_num_min << endl;
 	}      
 
 	// If #giant_steps is not a power of two, ensure that poly is monic and that
@@ -147,9 +166,12 @@ void Comparator::compute_poly_params()
 
 	// top coefficient is equal to (p^2 - 1)/8 mod p
 	// its inverse is equal to -8 mod p
-	m_top_coef = LeadCoeff(m_univar_less_poly);
-	ZZ topInv = ZZ(-8) % p; // the inverse mod p of the top coefficient of poly (if any)
-	bool divisible = (m_gs_num * m_bs_num == d); // is the degree divisible by #baby_steps?
+	m_top_coef_comp = LeadCoeff(m_univar_less_poly);
+	m_top_coef_min = LeadCoeff(m_univar_min_max_poly);
+	ZZ topInv_comp = ZZ(-8) % p; // the inverse mod p of the top coefficient of poly (if any)
+	ZZ topInv_min = ZZ(-8) % p; // the inverse mod p of the top coefficient of poly (if any)
+	bool divisible_comp = (m_gs_num_comp * m_bs_num_comp == d_comp); // is the degree divisible by #baby_steps?
+	bool divisible_min = (m_gs_num_min * m_bs_num_min == d_min); // is the degree divisible by #baby_steps?
 
 	// FIXME: There may be some room for optimization below: instead of
 	// adding a term X^{n*k} we can add X^{n'*k} for some n'>n, so long
@@ -157,33 +179,65 @@ void Comparator::compute_poly_params()
 	// multiplications since giantStep[n'] may be easier to compute than
 	// giantStep[n] when n' has fewer 1's than n in its binary expansion.
 
-	m_extra_coef = ZZ::zero();    // extra!=0 denotes an added term extra*X^{#giant_steps * #baby_steps}
+	m_extra_coef_comp = ZZ::zero();    // extra!=0 denotes an added term extra*X^{#giant_steps * #baby_steps}
+	m_extra_coef_min = ZZ::zero();    // extra!=0 denotes an added term extra*X^{#giant_steps * #baby_steps}
 
-	if (m_gs_num != (1L << NextPowerOfTwo(m_gs_num)))
+	if (m_gs_num_comp != (1L << NextPowerOfTwo(m_gs_num_comp)))
 	{
-		if (!divisible) 
+		if (!divisible_comp) 
 		{  // need to add a term
-	    	m_top_coef = NTL::to_ZZ(1);  // new top coefficient is one
-	    	topInv = m_top_coef;    // also the new inverse is one
+	    	m_top_coef_comp = NTL::to_ZZ(1);  // new top coefficient is one
+	    	topInv_comp = m_top_coef_comp;    // also the new inverse is one
 	    	// set extra = 1 - current-coeff-of-X^{n*k}
-	    	m_extra_coef = SubMod(m_top_coef, coeff(m_univar_less_poly, m_gs_num * m_bs_num), p);
-	    	SetCoeff(m_univar_less_poly, m_gs_num * m_bs_num); // set the top coefficient of X^{n*k} to one
+	    	m_extra_coef_comp = SubMod(m_top_coef_comp, coeff(m_univar_less_poly, m_gs_num_comp * m_bs_num_comp), p);
+	    	SetCoeff(m_univar_less_poly, m_gs_num_comp * m_bs_num_comp); // set the top coefficient of X^{n*k} to one
 		}
 
-		if (!IsOne(m_top_coef)) 
+		if (!IsOne(m_top_coef_comp)) 
 		{
-	    	m_univar_less_poly *= topInv; // Multiply by topInv to make into a monic polynomial
-	    	for (long i = 0; i <= m_gs_num * m_bs_num; i++) rem(m_univar_less_poly[i], m_univar_less_poly[i], p);
+	    	m_univar_less_poly *= topInv_comp; // Multiply by topInv to make into a monic polynomial
+	    	for (long i = 0; i <= m_gs_num_comp * m_bs_num_comp; i++) rem(m_univar_less_poly[i], m_univar_less_poly[i], p);
 	    	m_univar_less_poly.normalize();
 		}
 	}
 
+	/*
+	cout << "Less-than poly: ";
+	printZZX(cout, m_univar_less_poly, conv<long>(p));
+	cout << endl;
+	*/
+
+	if (m_gs_num_min != (1L << NextPowerOfTwo(m_gs_num_min)))
+	{
+		if (!divisible_min) 
+		{  // need to add a term
+	    	m_top_coef_min = NTL::to_ZZ(1);  // new top coefficient is one
+	    	topInv_min = m_top_coef_min;    // also the new inverse is one
+	    	// set extra = 1 - current-coeff-of-X^{n*k}
+	    	m_extra_coef_min = SubMod(m_top_coef_min, coeff(m_univar_min_max_poly, m_gs_num_min * m_bs_num_min), p);
+	    	SetCoeff(m_univar_min_max_poly, m_gs_num_min * m_bs_num_min); // set the top coefficient of X^{n*k} to one
+		}
+
+		if (!IsOne(m_top_coef_min)) 
+		{
+	    	m_univar_min_max_poly *= topInv_min; // Multiply by topInv to make into a monic polynomial
+	    	for (long i = 0; i <= m_gs_num_min * m_bs_num_min; i++) rem(m_univar_min_max_poly[i], m_univar_min_max_poly[i], p);
+	    	m_univar_min_max_poly.normalize();
+		}
+	}
+
+	/*
+	cout << "Min-max poly: ";
+	printZZX(cout, m_univar_min_max_poly, conv<long>(p));
+	cout << endl;
+	*/
+
 	long top_deg = conv<long>(p-1) >> 1;
-	m_baby_index = top_deg % m_bs_num;
-	m_giant_index = top_deg / m_bs_num;
+	m_baby_index = top_deg % m_bs_num_comp;
+	m_giant_index = top_deg / m_bs_num_comp;
 	if(m_baby_index == 0)
 	{
-		m_baby_index = m_bs_num;
+		m_baby_index = m_bs_num_comp;
 		m_giant_index -= 1;
 	}
 }
@@ -859,30 +913,30 @@ void Comparator::evaluate_univar_less_poly(Ctxt& ret, Ctxt& ctxt_p_1, const Ctxt
 	  	Ctxt x2 = x;
 	  	x2.square();
 
-		DynamicCtxtPowers babyStep(x2, m_bs_num);
-		const Ctxt& x2k = babyStep.getPower(m_bs_num);
+		DynamicCtxtPowers babyStep(x2, m_bs_num_comp);
+		const Ctxt& x2k = babyStep.getPower(m_bs_num_comp);
 
-		DynamicCtxtPowers giantStep(x2k, m_gs_num);
+		DynamicCtxtPowers giantStep(x2k, m_gs_num_comp);
 
 		// Special case when #giant_steps is a power of two
-		if (m_gs_num == (1L << NextPowerOfTwo(m_gs_num))) 
+		if (m_gs_num_comp == (1L << NextPowerOfTwo(m_gs_num_comp))) 
 		{
 			//cout << "I'm computing degPowerOfTwo" << endl;
-	    	degPowerOfTwo(ret, m_univar_less_poly, m_bs_num, babyStep, giantStep);
+	    	degPowerOfTwo(ret, m_univar_less_poly, m_bs_num_comp, babyStep, giantStep);
 	    }
 	    else
 	    {
-		  	recursivePolyEval(ret, m_univar_less_poly, m_bs_num, babyStep, giantStep);
+		  	recursivePolyEval(ret, m_univar_less_poly, m_bs_num_comp, babyStep, giantStep);
 
-		  	if (!IsOne(m_top_coef)) 
+		  	if (!IsOne(m_top_coef_comp)) 
 		  	{
-		    	ret.multByConstant(m_top_coef);
+		    	ret.multByConstant(m_top_coef_comp);
 			}
 
-			if (!IsZero(m_extra_coef)) 
+			if (!IsZero(m_extra_coef_comp)) 
 			{ // if we added a term, now is the time to subtract back
-		    	Ctxt topTerm = giantStep.getPower(m_gs_num);
-		    	topTerm.multByConstant(m_extra_coef);
+		    	Ctxt topTerm = giantStep.getPower(m_gs_num_comp);
+		    	topTerm.multByConstant(m_extra_coef_comp);
 		    	ret -= topTerm;
 			}
 		}
@@ -950,32 +1004,32 @@ void Comparator::evaluate_min_max_poly(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctx
 
 	if (p > ZZ(3)) //if p > 3, use the generic Paterson-Stockmeyer strategy
 	{
-		DynamicCtxtPowers babyStep(ctxt_z2, m_bs_num);
-		const Ctxt& ctxt_z2k = babyStep.getPower(m_bs_num);
+		DynamicCtxtPowers babyStep(ctxt_z2, m_bs_num_min);
+		const Ctxt& ctxt_z2k = babyStep.getPower(m_bs_num_min);
 
-		DynamicCtxtPowers giantStep(ctxt_z2k, m_gs_num);
+		DynamicCtxtPowers giantStep(ctxt_z2k, m_gs_num_min);
 
 		// compute g(z^2)
 		Ctxt g_z2 = Ctxt(ctxt_z2.getPubKey());;
 		// Special case when #giant_steps is a power of two
-		if (m_gs_num == (1L << NextPowerOfTwo(m_gs_num))) 
+		if (m_gs_num_min == (1L << NextPowerOfTwo(m_gs_num_min))) 
 		{
 			//cout << "I'm computing degPowerOfTwo" << endl;
-	    	degPowerOfTwo(g_z2, m_univar_min_max_poly, m_bs_num, babyStep, giantStep);
+	    	degPowerOfTwo(g_z2, m_univar_min_max_poly, m_bs_num_min, babyStep, giantStep);
 	    }
 	    else
 	    {
-		  	recursivePolyEval(g_z2, m_univar_min_max_poly, m_bs_num, babyStep, giantStep);
+		  	recursivePolyEval(g_z2, m_univar_min_max_poly, m_bs_num_min, babyStep, giantStep);
 
-		  	if (!IsOne(m_top_coef)) 
+		  	if (!IsOne(m_top_coef_min)) 
 		  	{
-		    	g_z2.multByConstant(m_top_coef);
+		    	g_z2.multByConstant(m_top_coef_min);
 			}
 
-			if (!IsZero(m_extra_coef)) 
+			if (!IsZero(m_extra_coef_min)) 
 			{ // if we added a term, now is the time to subtract back
-		    	Ctxt topTerm = giantStep.getPower(m_gs_num);
-		    	topTerm.multByConstant(m_extra_coef);
+		    	Ctxt topTerm = giantStep.getPower(m_gs_num_min);
+		    	topTerm.multByConstant(m_extra_coef_min);
 		    	g_z2 -= topTerm;
 			}
 		}
@@ -1460,9 +1514,15 @@ void Comparator::min_max(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_x, con
 	HELIB_NTIMER_STOP(MinMax);
 }
 
-void Comparator::array_min(Ctxt& ctxt_res, const vector<Ctxt>& ctxt_in) const
+void Comparator::array_min(Ctxt& ctxt_res, const vector<Ctxt>& ctxt_in, long depth) const
 {
 	HELIB_NTIMER_START(ArrayMin);
+
+	if (depth < 0)
+		throw helib::LogicError("depth parameter must be non-negative");
+
+	cout << "Computing the minimum of an array" << endl;
+
 	size_t input_len = ctxt_in.size();
 
 	vector<Ctxt> ctxt_res_vec;
@@ -1472,8 +1532,11 @@ void Comparator::array_min(Ctxt& ctxt_res, const vector<Ctxt>& ctxt_in) const
 	}
 
 	size_t cur_len = input_len;
-	while(cur_len > 1)
+	long level = depth;
+
+	while(cur_len > 1 && level > 0)
 	{
+		cout << "Comparison level: " << depth-level << endl;
 		// compare x[i] and x[n-1-i] where n is the length of ctxt_res_vec
 		for (size_t i  = 0; i < (cur_len >> 1); i++)
 		{
@@ -1483,8 +1546,40 @@ void Comparator::array_min(Ctxt& ctxt_res, const vector<Ctxt>& ctxt_in) const
 			}
 		}
 		cur_len = (cur_len >> 1) + (cur_len % 2);
+		ctxt_res_vec.resize(cur_len, Ctxt(m_pk));
+		level--;
 	}
-	ctxt_res = ctxt_res_vec[0];
+
+	if(cur_len > 1)
+	{
+		// create a table with all pairwise comparisons and compute the Hamming weight of every row
+		vector<Ctxt> ham_weights;
+		get_sorting_index(ham_weights, ctxt_res_vec);
+
+		cout << "Computing the minimum" << endl;
+		ctxt_res = Ctxt(m_pk);
+		for(size_t i = 0; i < ctxt_res_vec.size(); i++)
+		{
+			//compare the Hamming weight of the jth row with i
+			Ctxt tmp_prod = ham_weights[i];
+			tmp_prod.addConstant(ZZX(-(cur_len-1)));
+			mapTo01_subfield(tmp_prod, 1);
+			tmp_prod.negate();
+			tmp_prod.addConstant(ZZX(1));
+
+			//multiply by the jth input ciphertext
+			tmp_prod.multiplyBy(ctxt_res_vec[i]);
+			if(i == 0)
+				ctxt_res = tmp_prod;
+			else
+				ctxt_res += tmp_prod;
+		}
+	}
+	else
+	{
+		ctxt_res = ctxt_res_vec[0];
+	}
+
 	HELIB_NTIMER_STOP(ArrayMin);
 }
 
@@ -1501,6 +1596,49 @@ void Comparator::int_to_slot(ZZX& poly, unsigned long input, unsigned long enc_b
     }
 }
 
+void Comparator::get_sorting_index(vector<Ctxt>& ctxt_out, const vector<Ctxt>& ctxt_in) const
+{
+	ctxt_out.clear();
+
+	// length of the input vector
+	size_t input_len = ctxt_in.size();
+
+	// plaintext modulus
+  	long p = m_context.zMStar.getP();
+
+	if (input_len > p)
+		throw helib::LogicError("The number of ciphertexts cannot be larger than the plaintext modulus");
+
+	// compute the Hamming weight of every row
+	for(size_t i = 0; i < input_len; i++)
+	{
+		//initialize Hamming weights to zero
+		Ctxt ctxt_tmp = Ctxt(ctxt_in[0].getPubKey());
+		ctxt_out.push_back(ctxt_tmp);
+	}
+
+	cout << "Computing the comparison table" << endl;
+	for (size_t i = 0; i < input_len - 1; i++)
+	{
+		cout << "Computing Row " << i << endl;
+		for(size_t j = i + 1; j < input_len; j++)
+		{
+			cout << "Computing Column " << j << endl;
+			// compute upper diagonal entries of the comparison table and sum them
+			Ctxt comp_col_j = Ctxt(ctxt_in[0].getPubKey());
+			compare(comp_col_j, ctxt_in[i], ctxt_in[j]);
+			ctxt_out[i] += comp_col_j;
+
+			// compute lower diagonal entries of the comparison table by transposition and logical negation of upper diagonal entries
+			//NOT the result to add to the jth row
+			comp_col_j.negate();
+			comp_col_j.addConstant(ZZ(1));
+
+			// add lower diagonal entries to Hamming weight accumulators of related rows
+			ctxt_out[j] += comp_col_j;
+		}
+	}
+}
 
 void Comparator::sort(vector<Ctxt>& ctxt_out, const vector<Ctxt>& ctxt_in) const
 {
@@ -1523,6 +1661,9 @@ void Comparator::sort(vector<Ctxt>& ctxt_out, const vector<Ctxt>& ctxt_in) const
 
 	// create a table with all pairwise comparisons and compute the Hamming weight of every row
 	vector<Ctxt> ham_weights;
+
+	get_sorting_index(ham_weights, ctxt_in);
+	/*
 	for(size_t i = 0; i < input_len; i++)
 	{
 		//initialize Hamming weights to zero
@@ -1551,6 +1692,7 @@ void Comparator::sort(vector<Ctxt>& ctxt_out, const vector<Ctxt>& ctxt_in) const
 			ham_weights[j] += comp_col_j;
 		}
 	}
+	*/
 
 	// print Hamming weights
 	/*
@@ -2275,7 +2417,7 @@ void Comparator::test_min_max(long runs) const
   }
 }
 
-void Comparator::test_array_min(int input_len, long runs) const
+void Comparator::test_array_min(int input_len, long depth, long runs) const
 {
 	//reset timers
   setTimersOn();
@@ -2434,7 +2576,7 @@ void Comparator::test_array_min(int input_len, long runs) const
 
     // comparison function
     cout << "Start of array minimum" << endl;
-    this->array_min(ctxt_out, ctxt_in);
+    this->array_min(ctxt_out, ctxt_in, depth);
 
     printNamedTimer(cout, "Extraction");
     printNamedTimer(cout, "ComparisonCircuitBivar");

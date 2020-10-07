@@ -43,13 +43,17 @@ class Comparator{
 
     // polynomial evaluation parameters of the Patterson-Stockmeyer algorithm
     // number of baby steps
-    long m_bs_num;
+    long m_bs_num_comp;
+    long m_bs_num_min;
     // number of giant steps
-    long m_gs_num;
+    long m_gs_num_comp;
+    long m_gs_num_min;
     // leading coefficient
-    ZZ m_top_coef;
+    ZZ m_top_coef_comp;
+    ZZ m_top_coef_min;
     // extra coefficient
-    ZZ m_extra_coef;
+    ZZ m_extra_coef_comp;
+    ZZ m_extra_coef_min;
     
     // indexes to compute x^{p-1}
     long m_baby_index;
@@ -137,7 +141,10 @@ class Comparator{
     void min_max_digit(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const; 
 
     // conversion to slots
-    void int_to_slot(ZZX& poly, unsigned long input, unsigned long enc_base) const; 
+    void int_to_slot(ZZX& poly, unsigned long input, unsigned long enc_base) const;
+
+    // compute an array of positions of ciphertexts in ctxt_in when sorted
+    void get_sorting_index(vector<Ctxt>& ctxt_out, const vector<Ctxt>& ctxt_in) const; 
 
 public:
   // constructor
@@ -157,7 +164,7 @@ public:
   void min_max(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;
 
   // minimum/maximum of an array
-  void array_min(Ctxt& ctxt_res, const vector<Ctxt>& ctxt_in) const;
+  void array_min(Ctxt& ctxt_res, const vector<Ctxt>& ctxt_in, long depth = 0) const;
 
   // sorting
   void sort(vector<Ctxt>& ctxt_out, const vector<Ctxt>& ctxt_in) const;
@@ -172,7 +179,7 @@ public:
   void test_sorting(int num_to_sort, long runs) const;
 
   // test array_minn function
-  void test_array_min(int input_len, long runs) const;
+  void test_array_min(int input_len, long depth, long runs) const;
 };
 
 #endif // #ifndef COMPARATOR_H
