@@ -41,13 +41,20 @@ Every function from $\F_{p^d}^l$ to $\F_{p^d}$ can be interpolated by a unique p
   \end{align*}
 \end{lemma}
 
-\subsubsection{Comparison of vectors}
-  Let $\F_{p^d} = \F_p[X]/\ideal{f(X)}$ for some irreducible monic polynomial $f(X)$ of degree $d$.
-  Let us consider the situation where we want to compare two elements $a,b$ of $\F_{p^d}$ of the form $a = \sum_{i=0}^{d'-1} a_i X^i$ and $b = \sum_{i=0}^{d'-1} b_i X^i$ with $a_i, b_i \in \F_p$, i.e. $a$ and $b$ lie in the vector subspace $\F_{p}^{d'}$ of $\F_{p^d}$.
+\subsubsection{Comparison of integers}
+Let $\F_{p^d} = \F_p[X]/\ideal{f(X)}$ for some irreducible monic polynomial $f(X)$ of degree $d$.
+Let $d'\leq d$ and $\S \subseteq [0,p^{d'}-1)$, we can map $S$ into $\F_{p^d}$ by using the decomposition of integers in base $p$:
 
-  How to compare such elements?
-  Indeed, the order of set $\S$ defines a polynomial function in $\F_{p^d}$, which can be interpolated by Lemma~\ref{lem:interpolation}.
-  However, the degree of this polynomial is at most $p^d-1$, which means that the complexity of this method of comparing elements of $\F_{p}^{d'}$ is independent of $d'$ and exponential in $d$.
+$$\begin{array}{cccc}
+    \iota : & \S & \rightarrow & \F_{p^d} \\
+            & \displaystyle\sum_{i=0}^{d'-1}a_ip^i & \mapsto & \displaystyle\sum_{i=0}^{d'-1}a_i X^{i-1} 
+  \end{array}$$
+Note that the map $\iota$ is injective and gives a one-to-one correspondance between $\S$ and $\F_{p^{d}}$ when $d'=d$ and $\S = [0,p^d)$. This is why from now on we will identify integers belonging to $\S$ with their image by $\iota$ and we will thus omit $\iota$ when the situation will be clear from the context.
+
+Let $a,b\in\S$ two integers we would like to compare, once encoded as elements of the field, $a = \sum_{i=0}^{d'-1} a_i X^i$ and $b = \sum_{i=0}^{d'-1} b_i X^i$ with $a_i, b_i \in \F_p$, they lie in the vector subspace $\F_{p}^{d'}$ of $\F_{p^d}$.
+
+The order of the set $\S$ defines a polynomial function in $\F_{p^d}$, which can thus be interpolated by Lemma~\ref{lem:interpolation}.
+  However, the degree of this polynomial is at most $p^d-1$, which means that with this method the degree of the polynomial to evaluate is independent of $d'$ and exponential in $d$.
 
   Tan et al.~\cite{TLWRK20} proposed an alternative approach that extracts coefficients $a_i, b_i \in \F_p$, which is possible due to the following lemma (see \cite[Theorem 2.24]{LN86} for the proof).
   \begin{lemma}\label{lem:extraction}
@@ -61,7 +68,7 @@ Every function from $\F_{p^d}^l$ to $\F_{p^d}$ can be interpolated by a unique p
       1       & 1       & \dots   & 1             \\
       X       & X^p     & \dots   & X^{p^{d-1}}   \\
       \vdots  & \vdots  & \ddots  & \vdots        \\
-      X^k     & X^{kp}    & \dots   & X^{kp^{d-1}}  \\
+      X^{d-1}     & X^{(d-1)p}    & \dots   & X^{(d-1)p^{d-1}}  \\
     \end{pmatrix}
     \begin{pmatrix}
       \alpha_0      & \alpha_1      & \dots   & \alpha_{d-1}      \\
@@ -77,38 +84,35 @@ Every function from $\F_{p^d}^l$ to $\F_{p^d}$ can be interpolated by a unique p
   where $\mI_d \in \F_{p^d}^{d \times d}$ is the identity matrix.
   Hence, the $i$th column of $\inv{\mX}$ contain all the powers $\alpha_i, \alpha_i^p, \dots, \alpha_i^{p^{d-1}}$, which define the linear map $L_{\alpha_i}$.
 
-  Given the coefficients $a_i, b_i \in \F_p$, we can combine them using the lexicographical order $\bm{<}$ on $\F_{p}^{d'}$ defined by:
+  Therefore, instead of comparing $a$ and $b\in\S$ directly as elements of $\mathbb{F}_{p^d}$, we can compare their vector of coefficients $\bm{a} = (a_0,a_1,\ldots,a_{d'-1})$ and $\bm{b} = (b_0,b_1,\ldots,b_{d'-1}) \in \F_p^{d'}$ using the lexicographical order $\bm{<}$ on $\F_{p}^{d'}$ defined by:
    \begin{align*}
-      a \bm{<} b \Leftrightarrow \exists i\in[0,d'-1] \text{ such that } a_i < b_i \text{ and } \forall j > i ~~ a_j = b_j\,,
+      \bm{a} \bm{<} \bm{b} \Leftrightarrow \exists i\in[0,d'-1] \text{ such that } a_i < b_i \text{ and } \forall j > i ~~ a_j = b_j\,,
     \end{align*}
     which results in the following circuit
     \begin{align*}
-      \LT_{\F_p^{d'}}(a, b) = \sum_{i=0}^{d'-1} \LT_{\F_{p}}(a_{i}, b_{i}) \prod_{j=i+1}^{d'-1} \EQ_{\F_{p}}(a_{j}, b_{j}).
+      \LT_{\F_p^{d'}}(\bm{a}, \bm{b}) = \sum_{i=0}^{d'-1} \LT_{\F_{p}}(a_{i}, b_{i}) \prod_{j=i+1}^{d'-1} \EQ_{\F_{p}}(a_{j}, b_{j}).
     \end{align*}
-  This function requires $d'$ evaluations of $\LT_{\F_{p}}$, $d'$ evaluations of $\EQ_{\F_{p}}$ and $2(d'-1)$ additional multiplications.
-  If we ignore the complexity of digit extraction, the total complexity of comparing elements of $\F_{p}^{d'}$ is $O(d'(p-1))$.
+  This function requires $d'$ evaluations of $\LT_{\F_{p}}$ which has degree at most $p-1$, $d'-1$ evaluations of $\EQ_{\F_{p}}$ which has also degree $p-1$ and $2d'-1$ additional multiplications.
+  Thus, if we ignore the complexity of digit extraction, the total complexity of comparing elements of $\F_{p}^{d'}$ in terms of multiplications is $O(d'(p-1))$.
 
 \subsubsection{Comparison of large integers}
-  %For any $d'\le d$, one can encode integers in $[0,p^{d'}-1]$ as elements of the vector subspace $\F_{p}^{d'}$ of $\F_{p^d}$ and use Lemma \ref{lem:interpolation} to compare them using only additions, substractions and multiplications in $\F_{p^{d'}}$.  
+When the size of the integers to compare exceeds the size of the field $p^d$, we can reapply the same trick by decomposing them in base $p^{d'}$ and then compare their vector of digits using the lexicographical order $\bm{<}$ on $\left(\F_{p}^{d'}\right)^k$, for some $d' \le d$.
 
-  To compare integers larger than the size of the field $p^d$, one can decompose them in base $\F_{p}^{d'}$, for some $d' \le d$. 
-  In this way, we can represent an integer $x = x_0 + x_1p^{d'} + x_2p^{2d'}+\ldots x_{k-1}p^{(k-1)d'}$ by the vector $\vx=(x_0,x_1,\ldots,x_{k-1}) \in \left(\F_{p}^{d'}\right)^k$ of its digits of length $k$.
-
-  From there, the comparison of two integers $x$ and $y$ is equivalent to the comparison of their vector of digits $\vx=(x_0,x_1,\ldots,x_{k-1})$ and $\vy=(y_0,y_1,\ldots,y_{k-1})$ using the lexicographical order $\bm{<}$ on $\left(\F_{p}^{d'}\right)^k$ defined as follows
+In this way, we represent an integer $a = a_0 + a_1p^{d'} + a_2p^{2d'}+\ldots a_{k-1}p^{(k-1)d'}$ by the vector $\va=(\bm{a}_0,\bm{a}_1,\ldots,\bm{a}_{k-1}) \in \left(\F_{p}^{d'}\right)^k$ of its digits of length $k$. The comparison of two integers $a$ and $b$ is thus equivalent to the comparison of their vector of digits $\va=(\bm{a}_0,\bm{a}_1,\ldots,\bm{a}_{k-1})$ and $\vb=(\bm{b}_0,\bm{b}_1,\ldots,\bm{b}_{k-1})$ using the lexicographical order $\bm{<}$ on $\left(\F_{p}^{d'}\right)^k$ defined as follows
     \begin{align*}
-      \vx \bm{<} \vy \Leftrightarrow \exists i\in[0,k-1] \text{ such that } x_i < y_i \text{ and } \forall j > i ~~ x_j = y_j\,.
+      \va \bm{<} \vb \Leftrightarrow \exists i\in[0,k-1] \text{ such that } \bm{a}_i < \bm{b}_i \text{ and } \forall j > i ~~ \bm{a}_j = \bm{b}_j\,.
     \end{align*}
-  As done in~\cite{TLWRK20}, we can employ $\EQ_{\F_{p}^{d'}}$ and $\LT_{\F_{p}^{d'}}$ to compute $\LT(\vx, \vy)$ which evaluates the lexicographical order of $\vx$ and $\vy$ as follows:
+  As done in~\cite{TLWRK20}, we can employ $\EQ_{\F_{p}^{d'}}$ and $\LT_{\F_{p}^{d'}}$ to compute $\LT(\va, \vb)$ which evaluates the lexicographical order of $\va$ and $\vb$ as follows:
   \begin{align*}
-    \LT(\vx, \vy) = \sum_{i=0}^{k-1} \LT_{\F_{p}^{d'}}(x_{i}, y_{i}) \prod_{j=i+1}^{k-1} \EQ_{\F_{p}^{d'}}(x_{j}, y_{j}).
+    \LT(\va, \vb) = \sum_{i=0}^{k-1} \LT_{\F_{p}^{d'}}(\bm{a}_{i}, \bm{b}_{i}) \prod_{j=i+1}^{k-1} \EQ_{\F_{p}^{d'}}(\bm{a}_{j}, \bm{b}_{j}).
   \end{align*}
   Notice that the multiplicative depth of this function depends essentially of the products of the equality functions.
-  In fact, these products compare subvectors $\vx_i = (x_i, x_{i+1},\dots,x_{k-1})$ and $\vy_i = (y_i, y_{i+1},\dots,y_{k-1})$ for $i \in [1,k-1]$.
-  Thus, we can rewrite $\LT_{\F_{p}^{d'}}$ as
+  In fact, these products compare subvectors $\va_i = (\bm{a}_i, \bm{a}_{i+1},\dots,\bm{a}_{k-1})$ and $\vb_i = (\bm{b}_i, \bm{b}_{i+1},\dots \bm{b}_{k-1})$ for $i \in [1,k-1]$.
+  Thus, we can rewrite $\LT$ as:
   \begin{align}\label{eq:general_lex_order}
-    \LT(\vx, \vy) = \sum_{i=0}^{k-1} \LT_{\F_{p}^{d'}}(x_{i}, y_{i}) \EQ_{\F_{p}^{d'}}(\vx_{i+1}, \vy_{i+1}) 
+    \LT(\va, \vb) = \sum_{i=0}^{k-1} \LT_{\F_{p}^{d'}}(\bm{a}_{i},\bm{b}_{i}) \EQ_{\F_{p}^{d'}}(\va_{i+1}, \vb_{i+1}) 
   \end{align}
-  with the equality function $\EQ_{\F_{p}^{d'}}(\vx_{i+1}, \vy_{i+1})$ that returns $1$ if $\vx_{i+1} = \vy_{i+1}$ and $0$ otherwise.
+  with the equality function $\EQ_{\F_{p}^{d'}}(\va_{i+1}, \vb_{i+1})$ that returns $1$ if $\va_{i+1} = \vb_{i+1}$ and $0$ otherwise.
   % As shown in~\todo{cite our work}, this function can be realized by a constant-depth circuit in the following way.
   % \begin{align}\label{eq:rand_eq_circuit}
   %   \EQ_{\F_\fieldcard, e}(\vx_{i+1},\vy_{i+1}) = 1 - \princhar_{\fieldcard^e}\left(\sum_{j=i+1}^{\ell-1} r_j (x_j - y_j)\right)
