@@ -568,11 +568,9 @@ void Comparator::batch_shift_for_mul(Ctxt& ctxt, long start, long shift) const
 	// if shift is zero, do nothing
 	if(shift == 0)
 		return;
-	cout << "shift started " << shift << endl;
 	// left cyclic rotation
 	ea.rotate(ctxt, shift);
-	cout << "shift finished " << shift << endl;
-
+	
 	long index = static_cast<long>(intlog(2, -shift));
 	//cout << "Mask index: " << index << endl;
 	double mask_size;

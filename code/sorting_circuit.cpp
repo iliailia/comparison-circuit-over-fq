@@ -87,21 +87,28 @@ int main(int argc, char *argv[]) {
   secret_key.GenSecKey();
   cout << "Generating key-switching matrices..." << endl;
   // Compute key-switching matrices that we need
-  if (context.zMStar.numOfGens() == 1)
+  if (expansion_len > 1)
   {
-    set<long> automVals;
-    long e = 1;
-    while (e < expansion_len){
-      long atm = context.zMStar.genToPow(0, -e);
-      //cout << -e << " " << atm << endl;
-      automVals.insert(atm);
-      e <<=1;
+    if (context.zMStar.numOfGens() == 1)
+    {
+      set<long> automVals;
+      long e = 1;
+      long ord = context.zMStar.OrderOf(0);
+      bool native = context.zMStar.SameOrd(0);
+      if(!native)
+        automVals.insert(context.zMStar.genToPow(0, -ord));
+      while (e < expansion_len){
+        long atm = context.zMStar.genToPow(0, ord-e);
+        //cout << "Automorphism " << -e << " is " << atm << endl;
+        automVals.insert(atm);
+        e <<=1;
+      }
+      addTheseMatrices(secret_key, automVals);
     }
-    addTheseMatrices(secret_key, automVals);
-  }
-  else
-  {
-    addSome1DMatrices(secret_key);
+    else
+    {
+      addSome1DMatrices(secret_key);
+    }
   }
 
   if (d > 1)

@@ -94,9 +94,13 @@ int main(int argc, char *argv[]) {
     {
       set<long> automVals;
       long e = 1;
+      long ord = context.zMStar.OrderOf(0);
+      bool native = context.zMStar.SameOrd(0);
+      if(!native)
+        automVals.insert(context.zMStar.genToPow(0, -ord));
       while (e < expansion_len){
-        long atm = context.zMStar.genToPow(0, -e);
-        //cout << -e << " " << atm << endl;
+        long atm = context.zMStar.genToPow(0, ord-e);
+        //cout << "Automorphism " << -e << " is " << atm << endl;
         automVals.insert(atm);
         e <<=1;
       }
