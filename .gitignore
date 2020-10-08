@@ -16,3 +16,5 @@ code/sorting_circuit
 code/CMakeFiles/
 CMakeCache.txt
 code/Makefile
+code/min_max_circuit
+code/comparator_old.cpp
