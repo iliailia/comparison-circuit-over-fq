@@ -1,54 +1,43 @@
-Let $\S$ be a totally ordered set with a binary relation $<$.
-For any $x,y \in \S$, we can define the less-than and the equality functions as follows.
-\begin{align*}
-  \LT_\S(x,y) = 
-  \begin{cases}
-    1, & \text{if } x < y; \\
-    0, & \text{if } x \ge y, \\
-  \end{cases}
-  \qquad
-  \EQ_\S(x,y) = 
-  \begin{cases}
-    1, & \text{if } x = y; \\
-    0, & \text{if } x \neq y. \\
-  \end{cases}
-\end{align*}
-If $\S$ is a complete set of representatives of a finite field $\F_\fieldcard$, then the equality function can be easily realized using the principal character of $\F_\fieldcard$, namely $\EQ_\S(x,y) = 1 - \princhar_\fieldcard(x-y)$.
-Since this function is independent of the choice of $\S$, we can write
-\begin{align*}
-  \EQ_{\F_{\fieldcard}}(x,y) = 1 - \princhar_\fieldcard(x-y).
-\end{align*}
+As explained in Section \ref{sec:background}, the comparison of elements over $\mathbb{F}_{p^d}$ boils down to their comparison over $\mathbb{F}_p$. In this section we study the structure of the comparison circuit over $\mathbb{F}_p$. As a consequence, in this section, $\S$ is restricted to $[0,p-1]$ in which case we have for any $(x,y)\in\S^2\subseteq \F_p^2$:
+
+$$ \EQ_{\S}(x,y) = 1 - (x-y)^{p-1}. $$
+
+Unfortunately, the comparison function is not as simple and we have to rely on Lagrange interpolation (Lemma 1) to compute it. Yet, there are two different ways to evaluate it: either interpolate $\LT_\S$ as a bivariate function over $S^2$ -- i.e. compute $\LT_\S(x,y)$ -- as done in \cite{TLWRK20}, or transform it as a simple univariate function in $z = x - y$ -- i.e. compute $\LT_S (z, 0)$ -- as done in \cite{AINA:NGEG17} and \cite{PoPETS:SFR20}. However, all these works have evaluated $\LT_\S$ without exploiting its structure. In this Section we study this structure for both the bivariate and univariate cases and we show how to exploit it in order to speed-up their evaluation.
+
 
 \subsection{Bivariate interpolation of $\LT_\S$.}
 
   The less-than function can be interpolated using Lemma~\ref{lem:interpolation} and the following truth table
-  \begin{align*}
-    \begin{array}{c|ccccc}
-      < & a_0 & a_1 & a_2 & \cdots & a_{\fieldcard-1} \\
+  $$\begin{array}{c|m{1em}m{1em}m{1em}cc}
+      < & 0 & 1 & 2 & \cdots & p-1 \\
       \hline
-      a_0 & 0 & 1 & 1 & \cdots & 1 \\
-      a_1 & 0 & 0 & 1 & \cdots & 1 \\
-      a_2 & 0 & 0 & 0 & \cdots & 1 \\
+      0 & 0 & 1 & 1 & \cdots & 1 \\
+      1 & 0 & 0 & 1 & \cdots & 1 \\
+      2 & 0 & 0 & 0 & \cdots & 1 \\
       \vdots & \vdots & \vdots & \vdots & \ddots & \vdots \\
-      a_{\fieldcard-1} & 0 & 0 & 0 & \cdots & 0 \\
-    \end{array}
-  \end{align*}
-  where $a_i \in \S$ for any $i \in [0,\fieldcard-1]$ and $a_i < a_j$ if $i < j$.
-  In particular,
+      p-1 & 0 & 0 & 0 & \cdots & 0 \\
+    \end{array}$$
+    
+  In particular it can be interpolated by:
   \begin{align}\label{eq:less_than_function}
-    \LT_\S(x,y) &= \sum_{a,b \in \S} \LT_\S(a,b) (1-\princhar_\fieldcard(x - a)) (1-\princhar_\fieldcard(y - b)) \nonumber\\
-    &= \sum_{a \in \S} (1-\princhar_\fieldcard(x - a)) \sum_{b \in \S} \LT_\S(a,b)  (1-\princhar_\fieldcard(y - b)) \nonumber\\
-    &= \sum_{a \in \S} (1-\princhar_\fieldcard(x - a)) \sum_{b \in \S, a < b} (1-\princhar_\fieldcard(y - b)).
+    P_{\LT_\S}(x,y) & = \sum_{a = 0}^{p-2} \EQ_\S(x,a)\sum_{b = a+1}^{p-1} \EQ_\S(y,b) \nonumber\\
+                &= \sum_{a = 0}^{p-2} (1-\princhar_p(x - a)) \sum_{b = a+1}^{p-1} (1-\princhar_p(y - b)) \nonumber \\
+                &= \sum_{a = 0}^{p-2} (1-(x - a)^{p-1}) \sum_{b = a+1}^{p-1} (1-(y - b)^{p-1}).
   \end{align}
-  In contrast to equality, this function depends on the choice of $\S$.
-  Nevertheless, we can fix a certain $\S$ as the default complete set of representatives of $\F_{\fieldcard}$ and denote $\LT_\S(x,y)$ as $\LT_{\F_\fieldcard}(x,y)$.
-  For example, $\S$ can be $[0,q-1]$ if $q$ is a prime number.
 
-  Let $p$ be a prime number ans $\S = [0,p-1]$.
-  Then $\LT_\S$ has total degree $p$ as proven in Theorem~\ref{lem:less_than_total_degree}.
-  To prove this statement we need the following lemmata.
+  From Eq (\ref{eq:less_than_function}), it appears that $P_{\LT_\S}$ has degree at most $p-1$ in each variable and so, at first sight, it seems to have total degree at most $2p - 2$. It appears that this is not the case:
+  \begin{theorem} \label{thm:less_than_total_degree}
+    Let $p>2$ be a prime number and $\S = [0,p-1]$, then $P_{\LT_\S}$ is a polynomial over $\F_p$ of the following form:
+    \begin{align*}
+      P_{\LT_\S}(x,y) = y^{p-1} - \frac{p-1}{2} (xy)^{\frac{p-1}{2}} + \sum_{\substack{i,j>0 \\ i+j \le p}} a_{ij} x^i y^j 
+    \end{align*}
+    where $a_{ij} = \sum_{a=0}^{p-2} \sum_{b=a+1}^{p-1} a^{p-1-i} b^{p-1-j} \in \F_p$. In particular, it has total degree at most $p$.
+  \end{theorem}
+
+  To prove this statement we will need the following Lemma.
 
   \begin{lemma}\label{lem:difference_to_p-1}
+    For all $(a,b)\in\Z^2$ we have:
     \[
       (a - b)^{p-1} = \sum_{i=0}^{p-1} a^i b^{p-1-i} \mod p.
     \]
@@ -74,8 +63,7 @@ Since this function is independent of the choice of $\S$, we can write
     \]
   \end{lemma}
   \begin{proof}
-    It is enough to prove that the sum $\sum_{a=0}^{p-1} a^n = 0 \mod p$ for any $n < p-1$.
-    Let $g$ be a primitive element of $\F_p$.
+    It is enough to prove that the sum $\sum_{a=0}^{p-1} a^n = 0 \mod p$ for any $0 \leq n < p-1$. The case $n=0$ is straightforward, now let us assume $n>0$. Let $g$ be a primitive element of $\F_p$.
     Since $p > 2$, we have $g \ne 1$.
     Thus, we can rewrite the above sum as follows.
     \begin{align}
@@ -84,18 +72,13 @@ Since this function is independent of the choice of $\S$, we can write
     Since $g^{pn} \equiv g^n \mod p$, the sum turns into zero modulo $p$.
   \end{proof}
 
-  \begin{theorem} \label{lem:less_than_total_degree}
-    Let $p$ be a prime number bigger than $2$ and $\S = [0,p-1]$, then $\LT_\S$ is a polynomial over $\F_p$ of the following form
-    \begin{align*}
-      \LT_\S(x,y) = y^{p-1} - \frac{p-1}{2} (xy)^{\frac{p-1}{2}} + \sum_{\substack{i,j>0 \\ i+j \le p}} a_{ij} x^i y^j 
-    \end{align*}
-    where $a_{ij} = \sum_{a=0}^{p-2} \sum_{b=a+1}^{p-1} a^{p-1-i} b^{p-1-j} \in \F_p$.
-  \end{theorem}
-  \begin{proof}
+  We can now start the proof of Theorem \ref{thm:less_than_total_degree}:
+  
+  \begin{proof}[Theorem \ref{thm:less_than_total_degree}]
     Assume that all computations are done modulo $p$.
     Using Lemma~\ref{lem:difference_to_p-1}, we obtain
     \begin{align*}
-      \LT_\S(x,y) &=  \sum_{a = 0}^{p-2} \left(1-\sum_{i=0}^{p-1} x^i a^{p-1-i}\right) \sum_{b=a+1}^{p-1} \left(1-\sum_{j=0}^{p-1} y^j b^{p-1-j}\right)\\
+      P_{\LT_\S}(x,y) &=  \sum_{a = 0}^{p-2} \left(1-\sum_{i=0}^{p-1} x^i a^{p-1-i}\right) \sum_{b=a+1}^{p-1} \left(1-\sum_{j=0}^{p-1} y^j b^{p-1-j}\right)\\
     \end{align*}
     Let us expand this expression distributively.
     \begin{align*}
@@ -137,7 +120,7 @@ Since this function is independent of the choice of $\S$, we can write
     \begin{align*}
       \sum_{b = 1}^{p-1} b^{p-1-j} \sum_{a=0}^{b-1} a^{p-1-i} = \sum_{b=1}^{p-1} Q(b) = 0.
     \end{align*}
-    Thus, the total degree of $\LT_\S$ is at most $p$.
+    Thus, the total degree of $P_{\LT_\S}$ is at most $p$.
 
     In addition, we consider the case when $i = j$.
     Let us consider the following sum
@@ -153,6 +136,175 @@ Since this function is independent of the choice of $\S$, we can write
     If $i = (p-1)/2$, then following the above argument, this coefficient is equal to $-(p-1)/2$.
   \end{proof}
 
+
+  Now that we have a better idea of what $P_{\LT_\S}$ looks like we are gonna enumerate some obvious facts which worth being stated:
+  \begin{itemize}[label=--]
+  \item $P_{\LT_\S} (x, 0) = 0$ thus $y$ divides $P_{\LT_\S} (x, y)$.
+  \item $P_{\LT_\S} (x, x) = P_{\LT_\S} (y,y) = 0$ thus $(x - y)$ divides $P_{\LT_\S} (x, y)$.
+  \item $P_{\LT_\S} (p-1, y)=0$ thus $x + 1$ divides $P_{\LT_\S} (x, y)$.
+  
+  \end{itemize}
+  Therefore there exists a bivariate polynomial $f$ of total degree $p - 3$ over $\F_p$ such that:
+  \begin{equation}
+    \label{eq:decomposition-LT}
+    P_{\LT_\S} (x, y) = y(x - y)(x + 1)f(x, y) \bmod p.
+  \end{equation}
+
+  We will now be interested in the structure of the polynomial $f$.
+
+  \begin{theorem}\label{thm:decomposition-f}
+    Let $p$ be an odd prime, for any $z\in\F_p$ we have:
+    \begin{equation}
+      \label{eq:3}
+       f(z,z) = f(z,0) = f(p-1,z).
+    \end{equation}
+    As a consequence, when $p>3$ there exists a bivariate polynomials $f_1$ of total degree $p-5$ over $\F_p$ such that:
+    \begin{equation}
+      \label{eq:dec-f}
+      f(x,y) = f(x,0) + y(x-y)f_1(x,y) 
+    \end{equation}   
+    or equivalently a bivariate polynomials $f'_1$ of total degree $p-5$ over $\F_p$ such that:
+    \begin{equation}
+      \label{eq:dec-f'}
+      f(x,y) = f(p-1,y) + (x+1)(x-y)f'_1(x,y)
+    \end{equation}    
+  \end{theorem}
+
+  In order to show Eq. (\ref{eq:3}) we will need the following lemma:
+
+  \begin{lemma}\label{lem:structure-f}
+    Let $p>3$ be an odd prime, $i\in[0,p-2]$ and $f$ be the polynomial defined in Eq. (\ref{eq:decomposition-LT}), then for any $z\in[0,p-1]$ we have:
+
+    $$ f(i,z) = f(p-1-z,p-1-i) = -\displaystyle\sum_{k=i+1}^{p-1}\frac{1-(z-k)^{p-1}}{(i+1)z(z-i)} \bmod p.$$
+  \end{lemma}
+
+  \begin{proof}
+    We know that for any $z\in[0,p-1]$ we have:
+    $$\LT_\S(i,z) = \left\{
+      \begin{array}{l}
+        0 ~\text{ if }~ 0\leq z\leq i \\
+        1 ~\text{ otherwise}~
+      \end{array}
+    \right.$$
+    Note that since $i<p-1$, $\LT_\S(i,\cdot)$ is not the zero function. It can be interpolated by the univariate polynomial:
+    $$P_{\LT_\S}(i,z) = \displaystyle\sum_{k=i+1}^{p-1}\left[1-(z-k)^{p-1}\right] \bmod p. $$
+    
+    Similarly:
+    \begin{align*}
+      P_{\LT_\S}(x,p-1-i) &= \displaystyle\sum_{k=0}^{p-2}\left[1-(x-k)^{p-1}\right]\displaystyle\sum_{l=k+1}^{p-1}\left[1-(p-1-i-l)^{p-1}\right] \\
+                          &= \displaystyle\sum_{k=0}^{p-2-i}\left[1-(x-k)^{p-1}\right]  \bmod p
+    \end{align*}
+    So:
+    \begin{align*}
+      P_{\LT_\S}(p-1-z,p-1-i) &= \displaystyle\sum_{k=0}^{p-2-i}\left[1-(p-1-z-k)^{p-1}\right]  \bmod p \\
+                              &= \displaystyle\sum_{k=i+1}^{p-1}\left[1-(k-z)^{p-1}\right]  \bmod p \\
+                              &= \displaystyle\sum_{k=i+1}^{p-1}\left[1-(z-k)^{p-1}\right]  \bmod p \\
+                              &=  P_{\LT_\S}(i,z) \bmod p.
+    \end{align*}
+    Now let $A$ be the bivariate polynomial defined over $\F_p$ by:
+    $$A(x,y) = y(x-y)(x+1).$$
+    We have:
+    \begin{align*}
+      A(p-1-z,p-1-i) &= -(i+1)(-z+i)(-z) \bmod p \\
+                     &= -(i+1)z(z-i) \bmod p\\
+                     &= A(i,z) \bmod p.
+    \end{align*}
+    Again, note that since $i < p-1$, $A(i,z)\neq 0 \bmod p$.
+    
+    Starting from Eq. (\ref{eq:decomposition-LT}) we can write:
+    \begin{align*}
+      P_i(z) =& A(i,z)f(i,z) = A(p-1-z,p-1-i)f(p-1-z,p-1-i) \bmod p \\
+      \Leftrightarrow & A(i,z)f(i,z) - A(p-1-z,p-1-i)f(p-1-z,p-1-i) = 0 \bmod p \\
+      \Leftrightarrow & A(i,z)(f(i,z) - f(p-1-z,p-1-i)) = 0 \bmod p
+    \end{align*}
+    Given that $A(i,z)\neq 0 \bmod p$ and that $\F_p[z]$ is an integral domain we obtain what we want:
+
+    $$ f(i,z) = f(p-1-z,p-1-i) \bmod p. $$
+
+    The last equality is obtained by dividing $P_{LT_\S}(i,z)$ with $A(i,z)\neq 0 \bmod p$.
+  \end{proof}
+  Now we can start the proof of Theorem \ref{thm:decomposition-f}.
+  \begin{proof}[Theorem \ref{thm:decomposition-f}]
+    Equation (\ref{eq:3}) says that the first column, the last line and the descending diagonal of the table of values of $f$ are equals (cf. Table \ref{tab:values-f}).
+    \begin{table}[h]
+      \centering
+      \begin{tabular}{m{1.5em}|m{1em}m{1em}m{1em}m{1em}m{1em}m{1em}c}
+        \backslashbox{$x$}{$y$} & 0 & 1 & 2 & 3 & 4 & 5 & 6 \\
+        \hline
+        0 & \bf{0} & 6 & 5 & 3 & 3 & 5 & 6 \\
+        1 & \bf{4} & \bf{4} & 5 & 4 & 2 & 4 & 5 \\
+        2 & \bf{2} & 0 & \bf{2} & 3 & 2 & 3 & 2 \\
+        3 & \bf{2} & 0 & 0 & \bf{2} & 3 & 4 & 3 \\
+        4 & \bf{2} & 0 & 0 & 0 & \bf{2} & 5 & 5 \\
+        5 & \bf{4} & 0 & 0 & 0 & 0 & \bf{4} & 6 \\
+        6 & \bf{0} & \bf{4} & \bf{2} & \bf{2} & \bf{2} & \bf{4} & \bf{0} \\
+      \end{tabular}
+      \vspace{1em}\caption{Values $f(x,y)$ for $x,y\in\F_7$.}
+      \label{tab:values-f}
+    \end{table}
+    
+    Lemma \ref{lem:structure-f} says that for any $0\leq i< p-1$ the $i$-th row (starting from $y=0$) and the $p-1-i$-th column (starting from $x=p-1$) of the table are equals. Another consequence of Lemma \ref{lem:structure-f} is that the values on any descending diagonal of the table form a palindrome, hence this true in particular for the main descending diagonal $(x=y)$.
+
+    Now let us show that for any $0\leq i < p-1$ we have $f(i,0) = f(i,i)$. The case $i=0$ is trivial, for $i>0$ we know from Lemma \ref{lem:structure-f} that:
+    $$ f(i,z) = -\displaystyle\sum_{k=i+1}^{p-1}\frac{1-(z-k)^{p-1}}{(i+1)z(z-i)} \bmod p, $$
+    which can be rewritten modulo $p$ as:
+    \begin{align*}
+      f(i,z) & = -\frac{p-1-i - \displaystyle\sum_{k=i+1}^{p-1}(z-k)^{p-1}}{(i+1)z(z-i)} = -\frac{p-1-i - \displaystyle\sum_{k=i+1}^{p-1}\displaystyle\sum_{j=0}^{p-1}z^j k^{p-1-j}}{(i+1)z(z-i)} \\
+             & = -\frac{p-1-i - \displaystyle\sum_{j=0}^{p-1}\left(\displaystyle\sum_{k=i+1}^{p-1} k^{p-1-j}\right)z^j}{(i+1)z(z-i)}  = \frac{\displaystyle\sum_{j=1}^{p-1}\left(\displaystyle\sum_{k=i+1}^{p-1} k^{p-1-j}\right)z^{j-1}}{(i+1)(z-i)}.
+    \end{align*}
+    Similarly:
+    \begin{align*}
+      f(i,z) & = -\frac{p-1-i - \displaystyle\sum_{k=1}^{p-1-i}(z-i-k)^{p-1}}{(i+1)z(z-i)} = -\frac{p-1-i - \displaystyle\sum_{k=1}^{p-1-i}\displaystyle\sum_{j=0}^{p-1}(z-i)^j k^{p-1-j}}{(i+1)z(z-i)} \\
+             & = -\frac{p-1-i - \displaystyle\sum_{j=0}^{p-1}\left(\displaystyle\sum_{k=1}^{p-1-i} k^{p-1-j}\right)(z-i)^j}{(i+1)z(z-i)}  = \frac{\displaystyle\sum_{j=1}^{p-1}\left(\displaystyle\sum_{k=1}^{p-1-i} k^{p-1-j}\right)(z-i)^{j-1}}{(i+1)z}
+    \end{align*}
+
+    So for any $0 < i < p-1$, from the first expression we obtain:
+    $$f(i,0) = -\frac{\sum_{k=i+1}^{p-1} k^{p-2}}{i(i+1)},$$
+    from the second expression we get:
+    \begin{align*}
+      f(i,i) &= \frac{\sum_{k=1}^{p-1-i} k^{p-2}}{i(i+1)} = \frac{\sum_{k'=i+1}^{p-1} (p-k)^{p-2}}{i(i+1)} = \frac{\sum_{k'=i+1}^{p-1} (-k')^{p-2}}{i(i+1)} \bmod p \\
+      &= \frac{\sum_{k'=i+1}^{p-1} (k')^{p-2}}{i(i+1)} = f(0,i).
+    \end{align*}
+
+    At this point we have shown that for $0\leq i<p-1$ we have $f(i,0) = f(i,i)$. This means that the first column and the descending diagonal are equals up to the last line. Since the values of the descending diagonal form a palindrome, the same applies to the values of the first column and thus of the last line.
+
+    At this point the last thing we have to prove to get Eq. (\ref{eq:3}) is that $f(0,0) = f(p-1,0) = f(p-1,p-1) \bmod p$. Lemma \ref{lem:structure-f} already gives us the first equality, so we just have to prove the last one.
+
+    We have:
+    $$ P_{\LT_\S}(0,z)  = -\sum_{j=1}^{p-1}\left(\sum_{k=1}^{p-1}k^{p-1-j}\right)z^j  = z^{p-1} \bmod p \text{ (cf. Lemma \ref{lem:sum_poly}).} $$
+
+    Moreover, let $A(x,y) = y(x-y)(x+1)$, we have $A(0,z) = -z^2$. So from Eq.~(\ref{eq:decomposition-LT}) we obtain $f(0,z) = -z^{p-3}$ and so $f(0,0) = f(p-1,p-1) = -1 \bmod p$ if $p = 3$ and $0$ otherwise.
+
+    To conclude we have to show that $f(p-1,0) = -1 \bmod p$ if $p=3$ and $0$ otherwise. Since both $A$ and $\LT_\S$ vanishes on the first column of the table ($y=0$) and the last line ($x=p-1$) we cannot use their values on these lines to derive the value of $f(p-1,0)$. So this time we will estimate $\LT_\S$ and $A$ on the ascending diagonal. Since $A(p-1-z,z) = z^2(1+2z) \bmod p$ if we want to prove that $f(p-1,0) = 0 \bmod p$ (resp. $1$ if $p=3$) we have to show that the coefficient of degree $0,1,2$ of $P_{\LT_\S}(p-1-z,z)$ are equals to $0$, (resp $0, 1$ are equals to $0$ and the coefficient of degree $2$ is equal to $-1$).
+
+    By definition, $\LT_\S(p-1,0) = P_{LT_\S}(p-1,0) = 0 \bmod p$, so the coefficient of degree $0$ is equal to $0$. Now let us have a look at the formal derivative of $P_{\LT_\S}(p-1-z,z)$. We have: 
+    $$ P_{LT_\S}(p-1-z,z) = \sum_{k=0}^{p-2}\underbrace{[1-(1+z+k)^{p-1}]}_{=g_k(z)}\underbrace{\sum_{l=k+1}^{p-1}[1-(z-l)^{p-1}]}_{=h_k(z)} \bmod p $$
+ 
+  For $0\leq k \leq p-2$, we have $g_k(0) = 1-(1+k)^{p-1} = 0 \bmod p$, and also $h_k(0) = \sum_{l=k+1}^{p-1}[1-l^{p-1}] = 0 \bmod p$ since $0<l\leq p-1$. 
+
+Therefore $P'_{LT_\S}(p-1,0) = \sum_{k=0}^{p-2}\left(g_k'(0)h_k(0) + g_k(0)h'_k(0) \right) = 0 \bmod p$ therefore the coefficient of degree $1$ is also equal to $0$. Now let us have a look at the formal derivative at the second order of $P_{\LT_\S}(p-1-z)$:
+$$P''_{\LT_\S}(p-1-z,z) = \sum_{k=0}^{p-2}\left(g_k''(z)h_k(z) + 2g_k'(z)h'_k(z) + g_k(z)h''_k(z) \right).$$
+Thus in $z=0$ we obtain: 
+\begin{align*}
+  P''_{\LT_\S}(p-1,0) & = 2\sum_{k=0}^{p-2}g_k'(0)h'_k(0) = -2\sum_{k=0}^{p-2}(1+k)^{p-2}\sum_{l=k+1}^{p-1}l^{p-2} \\
+                      &= -2\left(\sum_{k=1}^{(p-1)/2}k^{p-2}\sum_{l=k}^{p-1}l^{p-2} + \sum_{k=(p+1)/2}^{p-1}k^{p-2}\sum_{l=k}^{p-1}l^{p-2}\right) \\
+                      & = -2\left(\sum_{k=1}^{(p-1)/2}k^{p-2}\sum_{l=k}^{p-1}l^{p-2} + \sum_{k=1}^{(p-1)/2}(-k)^{p-2}\sum_{l=p-k}^{p-1}l^{p-2}\right) \\
+                      & = -2\sum_{k=1}^{(p-1)/2}k^{p-2}\left(\sum_{l=k}^{p-1}l^{p-2} -  \sum_{l=p-k}^{p-1}l^{p-2}\right) \\
+                      & = -2\sum_{k=1}^{(p-1)/2}k^{p-2}\sum_{l=k}^{p-1-k}l^{p-2} = -2\sum_{k=1}^{(p-1)/2}k^{2p-4} \\
+                      & = -2\sum_{k=1}^{(p-1)/2}k^{p-3} = -\sum_{k=1}^{(p-1)/2}k^{p-3} - \sum_{k=1}^{(p-1)/2}(-k)^{p-3} \\
+                      & = -\sum_{k=1}^{p-1}k^{p-3}  \bmod p\\
+                      & = 1 ~\text{ if } p = 3 ~\text{ and }~ 0 ~\text{ otherwise.}
+\end{align*}
+The coefficient of degree 2 is equal to $P''_{\LT_\S}(p-1,0)/2 = -1 \bmod 3$.
+Thus overall $f(p-1,0) = f(p-1,p-1) = f(0,0)$ and we have proved Eq. (\ref{eq:3}). The rest of the theorem is straightforward:
+\begin{itemize}
+\item $y$ and $(x-y)$ divide $f(x,y)-f(x,0) = f(x,y)-f(x,x) \bmod p$ which implies (\ref{eq:dec-f}). 
+\item $x+1$ and $(x-y)$ divide $f(x,y)-f(p-1,y) = f(x,y)-f(y,y) \bmod p$ which implies (\ref{eq:dec-f'}).
+\end{itemize}
+Note that when $p=3$ $f(x,y) = 1 \bmod p.$
+\end{proof}
+  
+  
 \subsection{Univariate interpolation of $\LT_\S$}
   Another way to compare $x$ and $y$ from $\S$ is to compute the difference $x-y$ and find its sign.
   To compute the sign function (or $\LT_\S(x-y,0)$) using finite field arithmetic, we need to split finite field elements into two classes:  negative ($\F_p^-$) and non-negative ($\F_p^+$).
