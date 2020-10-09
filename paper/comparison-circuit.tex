@@ -286,7 +286,18 @@ Unfortunately, the comparison function is not as simple and we have to rely on L
  
   For $0\leq k \leq p-2$, we have $g_k(0) = 1-(1+k)^{p-1} = 0 \bmod p$, and also $h_k(0) = \sum_{l=k+1}^{p-1}[1-l^{p-1}] = 0 \bmod p$ since $0<l\leq p-1$. 
 
-Therefore $P'_{LT_\S}(p-1,0) = \sum_{k=0}^{p-2}\left(g_k'(0)h_k(0) + g_k(0)h'_k(0) \right) = 0 \bmod p$ therefore the coefficient of degree $1$ is also equal to $0$. Now let us have a look at the formal derivative at the second order of $P_{\LT_\S}(p-1-z)$:
+Therefore $P'_{LT_\S}(p-1,0) = \sum_{k=0}^{p-2}\left(g_k'(0)h_k(0) + g_k(0)h'_k(0) \right) = 0 \bmod p$ therefore the coefficient of degree $1$ is also equal to $0$. 
+\que{$P_{LT_\S}(p-1-z,z)$ must be equal to $1$ for any $z \in [\frac{p+1}{2}, p-1]$.
+It implies that 
+\begin{align*}
+  P_{LT_\S}(p-1-z,z) &= \sum_{k=\frac{p+1}{2}}^{p-1} (1 - (z-k)^{p-1}) \\
+  &= \sum_{k=1}^{\frac{p-1}{2}} (1 - (z+k)^{p-1}) \\
+  &= \frac{p-1}{2} - \sum_{k=1}^{\frac{p-1}{2}} \sum_{i=0}^{p-1} z^i (-k)^{p-1-i} \\
+  &= - \sum_{i=1}^{p-1} z^i \sum_{k=1}^{\frac{p-1}{2}} (-k)^{p-1-i}.
+\end{align*}
+Hence, the coefficient of degree $1$ is equal to $-\sum_{k=1}^{\frac{p-1}{2}} (-k)^{p-2} = \sum_{k=1}^{\frac{p-1}{2}} k^{p-2}$, which is not zero.
+}
+Now let us have a look at the formal derivative at the second order of $P_{\LT_\S}(p-1-z)$:
 $$P''_{\LT_\S}(p-1-z,z) = \sum_{k=0}^{p-2}\left(g_k''(z)h_k(z) + 2g_k'(z)h'_k(z) + g_k(z)h''_k(z) \right).$$
 Thus in $z=0$ we obtain: 
 \begin{align*}
