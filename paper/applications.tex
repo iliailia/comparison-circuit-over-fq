@@ -1,0 +1,29 @@
+\subsection{Sorting}
+\label{subsec:sorting}
+
+	%%%%%%
+	To demonstrate the efficiency of our algorithm, we applied it to a popular computational task that demands multiple comparisons, sorting.
+	The best sorting algorithm in terms of running time is due to~\cite{CDSS15}.
+	For a given array $\va = (a_0,\dots,a_{n-1})$, this algorithm computes a matrix $\mL$ whose entries are defined by
+	\begin{align*}
+		\mL_{ij} =
+		\begin{cases}
+			\LT(a_i, a_j) & \text{ if } i < j, \\
+			0 & \text{ if } i = j, \\
+			1 - \LT(a_i, a_j) & \text{ if } i > j.
+		\end{cases}
+	\end{align*}
+	It is easy to see that the Hamming weight of the $i$th row of $\mL$ is equal to the position of $a_i$ after sorting $\va$ in the descending order.
+	For example, the zero weight indicates that there are no elements of $\va$ bigger than $a_i$; thus, $a_i$ is the maximum value of $\va$.
+	\todo{Continue with sum of equalities}
+	%%%%%%
+
+\subsection{$\min/\max$ of a vector}
+\label{sec:min/max}
+
+	%%%%%%
+	Minimum requires at least $n-1$ comparisons \todo{cite Cormen, section 9.1}
+	\todo{Tournament method}
+
+	\todo{Use sorting above to reduce depth}
+	%%%%%%

@@ -209,7 +209,7 @@ Since this function is independent of the choice of $\S$, we can write
   The above lemma implies that the less-than function can be expressed by a univariate polynomial of degree $p-1$.
   In general, such polynomials are evaluated in $O(p-1)$ steps according to Horner's method.
   However, in homomorphic computation model, multiplication by a scalar coefficient is usually much cheaper then ``non-scalar'' multiplication of expressions containing input variables $x$ and $y$.
-  To reduce the number of non-scalar multiplications, we can resort to the Paterson-Stockmeyer algorithm~\cite{SIAM:PS73} that requires $O(\sqrt{2(p-1)}$ such multiplications.
+  To reduce the number of non-scalar multiplications, we can resort to the Paterson-Stockmeyer algorithm~\cite{SIAM:PS73} that requires $O(\sqrt{2(p-1)})$ such multiplications.
   However, we can improve this complexity by exploiting the fact that the polynomial in~(\ref{eq:univariate_circuit}) has only one coefficient with an even index, the leading one.
   Thus, we can rewrite~(\ref{eq:univariate_circuit}) as follows
   \begin{align*}
