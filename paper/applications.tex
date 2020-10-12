@@ -1,10 +1,9 @@
 \subsection{Sorting}
 \label{subsec:sorting}
 
-	%%%%%%
 	To demonstrate the efficiency of our algorithm, we applied it to a popular computational task that demands multiple comparisons, sorting.
-	The best sorting algorithm in terms of running time is due to~\cite{CDSS15}.
-	For a given array $\va = (a_0,\dots,a_{n-1})$, this algorithm computes a matrix $\mL$ whose entries are defined by
+	The best sorting algorithm in terms of running time is the direct sorting algorithm due to~\cite{CDSS15}.
+	For a given array $\va = (a_0,\dots,a_{n-1})$, this algorithm computes a \emph{comparison matrix} $\mL$ whose entries are defined by
 	\begin{align*}
 		\mL_{ij} =
 		\begin{cases}
@@ -13,12 +12,32 @@
 			1 - \LT(a_i, a_j) & \text{ if } i > j.
 		\end{cases}
 	\end{align*}
-	It is easy to see that the Hamming weight of the $i$th row of $\mL$ is equal to the position of $a_i$ after sorting $\va$ in the descending order.
-	For example, the zero weight indicates that there are no elements of $\va$ bigger than $a_i$; thus, $a_i$ is the maximum value of $\va$.
-	\todo{Continue with sum of equalities}
-	%%%%%%
+	It is easy to see that the Hamming weight of the $i$th row of $\mL$ is uniques and equal to the array index of $a_i$ after sorting $\va$ in the descending order.
+	For example, the zero weight indicates that there are no elements of $\va$ bigger than $a_i$; thus, $a_i$ is the first value of $\va$ after sorting, or the maximum element of $\va$.
 
-\subsection{$\min/\max$ of a vector}
+	%%%%%%
+	To arrange $\va$ in the right order, we extract its elements by comparing the current array index $i$ with the Hamming weights of the comparison matrix rows ($\wt(\mL[j])$).  
+	\begin{align*}
+		a'_i = \sum_{j=0}^{n-1} \EQ(i,\wt\left(\mL[j]\right)) \cdot a_j.
+	\end{align*}
+	Since each row has a unique Hamming weight, there exist only one $a_j$ that will be assigned to $a'_i$.
+
+	The direct sorting algorithm requires $n(n-1)/2$ less-than operations and $n^2$ equality operations.
+	While computing equalities, we can reduce the total number of ciphertext-ciphertext multiplications if $n$ is large enough.
+	Recall that $\EQ(i,\wt\left(\mL[j]\right)) = 1 - (i-\wt\left(\mL[j]\right))^{p-1}$, which implies that $\EQ$ needs $M = \log_2(p-1) + \wt(p-1) - 1$ ciphertext-ciphertext multiplications.
+	Hence, to compute $\EQ(i,\wt\left(\mL[j]\right))$ for all $i \in [0,n-1]$, we should perform $n M$ multiplications.
+	Using Lemma~\ref{lem:difference_to_p-1}, we can rewrite $\EQ(x,y) = 1 - \sum_{k=0}^{p-1} i^k \cdot \wt\left(\mL[j]\right)^{p-1-k}$.
+	If we precompute the powers $\wt\left(\mL[j]\right)^{p-1-k}$, then we need only $p-2$ multiplications to compute all the equalities $\EQ(i,\wt\left(\mL[j]\right))$.
+	Hence, if $p-2 < nM$, or $n > (p-2)/M$, the latter approach results in a smaller number of ciphertext-ciphertext multiplications.
+	One can argue that the latter approach introduces $p-1$ plaintext-ciphertext multiplications ($i^k \cdot \wt\left(\mL[j]\right)^{p-1-k}$) and $p-2$ additions. 
+	However, these operations are much faster in practice than ciphertext-ciphertext multiplication such that the gain from reduced ciphertext-ciphertext multiplications becomes dominant. 
+	
+	The main advantage of direct sorting is that its multiplicative depth is independent of the array length, namely $d = d(\LT) + d(\EQ) + d(\wt) + 1$.
+	This allows to avoid large encryption parameters and costly bootstrapping operations.
+	We can further reduce this depth by computing the Hamming weight modulo a plaintext modulus $p$ that is equal or larger than the length of an array $n$.  
+	%%%%%%%
+
+\subsection{$\min/\max$ of an array}
 \label{sec:min/max}
 
 	%%%%%%

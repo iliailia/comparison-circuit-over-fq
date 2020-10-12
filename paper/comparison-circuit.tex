@@ -398,9 +398,10 @@ Note that when $p=3$ $f(x,y) = 1 \bmod p.$
 
 \subsection{Min/max function}
 
-  Given the less-than function $\LT_\S$ defined on a set $\S$, one can compute the minimum of two elements $x$ and $y$ in the generic way, namely
+  Given the less-than function $\LT_\S$ defined on a set $\S$, one can compute the minimum of two elements $x$ and $y$ in the following generic way
   \begin{align*}
-    \min_\S(x,y) = x \cdot \LT_\S(x,y) + y \cdot (1 - \LT_\S(x,y)).
+    \min_\S(x,y) &= x \cdot \LT_\S(x,y) + y \cdot (1 - \LT_\S(x,y)) \\
+    &= y + (x-y) \cdot \LT_\S(x,y)
   \end{align*}
   Notice that the difference $x - y$ naturally emerges in this expression, thus hinting that the univariate circuit from~\ref{eq:univariate_circuit} might be useful here.
   Indeed, by replacing $x - y$ with an indeterminate $z$ we obtain the univariate polynomial representation of the minimum function 
@@ -417,7 +418,7 @@ Note that when $p=3$ $f(x,y) = 1 \bmod p.$
   \begin{align*}
     \max_\S(x,y) &= \frac{p+1}{2} (x+y) - \sum_{i=1}^{\frac{p-1}{2}} z^{2i} \sum_{a=1}^{\frac{p-1}{2}} a^{p-2i}.
   \end{align*}
-  This yields a simple polynomial for the ReLU function.
+  \todo{create a remark here} This yields a simple polynomial for the ReLU function.
   \begin{align*}
     \ReLU_\S(x) = \max_\S(x,0) &= \frac{p+1}{2} x - \sum_{i=1}^{\frac{p-1}{2}} x^{2i} \sum_{a=1}^{\frac{p-1}{2}} a^{p-2i}.
   \end{align*}
