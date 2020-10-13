@@ -9,18 +9,27 @@
 		\begin{cases}
 			\LT(a_i, a_j) & \text{ if } i < j, \\
 			0 & \text{ if } i = j, \\
-			1 - \LT(a_i, a_j) & \text{ if } i > j.
+			1 - \LT(a_j, a_i) & \text{ if } i > j.
 		\end{cases}
 	\end{align*}
-	It is easy to see that the Hamming weight of the $i$th row of $\mL$ is uniques and equal to the array index of $a_i$ after sorting $\va$ in the descending order.
+	It is easy to see that the Hamming weight of the $i$th row of $\mL$ is unique and equal to the array index of $a_i$ after sorting $\va$ in the descending order.
 	For example, the zero weight indicates that there are no elements of $\va$ bigger than $a_i$; thus, $a_i$ is the first value of $\va$ after sorting, or the maximum element of $\va$.
 
-	%%%%%%
 	To arrange $\va$ in the right order, we extract its elements by comparing the current array index $i$ with the Hamming weights of the comparison matrix rows ($\wt(\mL[j])$).  
 	\begin{align*}
 		a'_i = \sum_{j=0}^{n-1} \EQ(i,\wt\left(\mL[j]\right)) \cdot a_j.
 	\end{align*}
 	Since each row has a unique Hamming weight, there exist only one $a_j$ that will be assigned to $a'_i$.
+
+	%%%%%%%%%%
+	\begin{remark}
+		Since the matrix $\mL$ is defined by $n(n-1)/2$ elements, it can be costly to keep it in memory.
+		Instead we can compute the Hamming weights of its rows by iteratively computing one comparison $\LT(a_i, a_j)$ with $i < j$ at a time.
+		To achieve this, we create an array of size $n$ initialized with zeros that eventually will store the Hamming weights.
+		Then, we add the outcome of $\LT(a_i, a_j)$ to the $i$th element of this array and the result of $1-\LT(a_i, a_j)$ to the $j$th element.
+		In this approach, only $n$ elements of the Hamming weight array are being kept in RAM.
+	\end{remark}
+	%%%%%%%%%
 
 	The direct sorting algorithm requires $n(n-1)/2$ less-than operations and $n^2$ equality operations.
 	While computing equalities, we can reduce the total number of ciphertext-ciphertext multiplications if $n$ is large enough.
@@ -34,8 +43,7 @@
 	
 	The main advantage of direct sorting is that its multiplicative depth is independent of the array length, namely $d = d(\LT) + d(\EQ) + d(\wt) + 1$.
 	This allows to avoid large encryption parameters and costly bootstrapping operations.
-	We can further reduce this depth by computing the Hamming weight modulo a plaintext modulus $p$ that is equal or larger than the length of an array $n$.  
-	%%%%%%%
+	We can further reduce this depth by computing the Hamming weight modulo a plaintext modulus $p$ that is equal or larger than the length of an array $n$.
 
 \subsection{$\min/\max$ of an array}
 \label{sec:min/max}
