@@ -46,8 +46,15 @@
 \subsection{Min/max of an array}
 \label{sec:min/max}
 
-	Another application of our comparison algorithm is concerned with the minimum (or maximum) function.
-	The minimum function requires at least $n-1$ pairwise minimums~\cite{CLR09}, which can be achieved by \emph{the tournament method}.
+	Another application of our comparison algorithm is concerned with the minimum (or maximum) function of an array.
+	To find the minimum of an input array, at least $n-1$ calls to the pairwise minimum function are required~\cite[Chapter 9]{CLR09}, which can be achieved by \emph{the tournament method}.
+	%%%%%%%%%%%%
+	In this method, one reduces the size of the input array in $\ceil{\log n}$ iterations.
+	In each iteration, the input array is divided into pairs. 
+	If the array length is odd, one element is stashed for the next iteration. 
+	Then, the maximum of each pair is removed from the array.
+	The algorithm stops when only one element is left; this is the minimum of the input array, see Figure~\ref{fig:minimum_tournament}. 
+	%%%%%%%%%%%%
 	\begin{figure}
 		\centering
 		\begin{tikzpicture}
@@ -88,7 +95,8 @@
 			\node at (6.5, 2.75) {$\min(a_0,a_1,a_2,a_3)$};
 
 		\end{tikzpicture}
-		\caption{\todo{write a caption}}
+		\caption{The tournament method of finding the minimum of an array. In each stage, the array elements are divided into pairs. Only minimum of a pair go to the next stage.}
+		\label{fig:minimum_tournament}
 	\end{figure}
 	
 	\todo{Tournament method}
