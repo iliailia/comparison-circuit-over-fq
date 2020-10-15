@@ -287,16 +287,16 @@ Unfortunately, the comparison function is not as simple and we have to rely on L
   For $0\leq k \leq p-2$, we have $g_k(0) = 1-(1+k)^{p-1} = 0 \bmod p$, and also $h_k(0) = \sum_{l=k+1}^{p-1}[1-l^{p-1}] = 0 \bmod p$ since $0<l\leq p-1$. 
 
 Therefore $P'_{LT_\S}(p-1,0) = \sum_{k=0}^{p-2}\left(g_k'(0)h_k(0) + g_k(0)h'_k(0) \right) = 0 \bmod p$ therefore the coefficient of degree $1$ is also equal to $0$. 
-\que{$P_{LT_\S}(p-1-z,z)$ must be equal to $1$ for any $z \in [\frac{p+1}{2}, p-1]$.
-It implies that 
-\begin{align*}
-  P_{LT_\S}(p-1-z,z) &= \sum_{k=\frac{p+1}{2}}^{p-1} (1 - (z-k)^{p-1}) \\
-  &= \sum_{k=1}^{\frac{p-1}{2}} (1 - (z+k)^{p-1}) \\
-  &= \frac{p-1}{2} - \sum_{k=1}^{\frac{p-1}{2}} \sum_{i=0}^{p-1} z^i (-k)^{p-1-i} \\
-  &= - \sum_{i=1}^{p-1} z^i \sum_{k=1}^{\frac{p-1}{2}} (-k)^{p-1-i}.
-\end{align*}
-Hence, the coefficient of degree $1$ is equal to $-\sum_{k=1}^{\frac{p-1}{2}} (-k)^{p-2} = \sum_{k=1}^{\frac{p-1}{2}} k^{p-2}$, which is not zero.
-}
+% \que{$P_{LT_\S}(p-1-z,z)$ must be equal to $1$ for any $z \in [\frac{p+1}{2}, p-1]$.
+% It implies that 
+% \begin{align*}
+%   P_{LT_\S}(p-1-z,z) &= \sum_{k=\frac{p+1}{2}}^{p-1} (1 - (z-k)^{p-1}) \\
+%   &= \sum_{k=1}^{\frac{p-1}{2}} (1 - (z+k)^{p-1}) \\
+%   &= \frac{p-1}{2} - \sum_{k=1}^{\frac{p-1}{2}} \sum_{i=0}^{p-1} z^i (-k)^{p-1-i} \\
+%   &= - \sum_{i=1}^{p-1} z^i \sum_{k=1}^{\frac{p-1}{2}} (-k)^{p-1-i}.
+% \end{align*}
+% Hence, the coefficient of degree $1$ is equal to $-\sum_{k=1}^{\frac{p-1}{2}} (-k)^{p-2} = \sum_{k=1}^{\frac{p-1}{2}} k^{p-2}$, which is not zero.
+% }
 Now let us have a look at the formal derivative at the second order of $P_{\LT_\S}(p-1-z)$:
 $$P''_{\LT_\S}(p-1-z,z) = \sum_{k=0}^{p-2}\left(g_k''(z)h_k(z) + 2g_k'(z)h'_k(z) + g_k(z)h''_k(z) \right).$$
 Thus in $z=0$ we obtain: 
@@ -339,22 +339,22 @@ Note that when $p=3$ $f(x,y) = 1 \bmod p.$
     \chi_{\F_p^-}(z) = \sum_{a=-\frac{p-1}{2}}^{-1} 1 - (z - a)^{p-1}.
   \end{align*}
   In other words, this function outputs $1$ if $z$ is negative and $0$ otherwise.
-  Combining the above facts, we obtain the following $\LT_\S$ function.
+  Combining the above facts the $\LT_\S$ function can be interpolated by the following polynomial.
   \begin{align*}
-    \LT_\S(x,y) = \sum_{a=-\frac{p-1}{2}}^{-1} 1 - (x - y - a)^{p-1}.
+    Q_{\LT_\S}(x,y) = \sum_{a=-\frac{p-1}{2}}^{-1} 1 - (x - y - a)^{p-1} \bmod p.
   \end{align*}
-  The following lemma describes all the coefficients of $\LT_\S$.
+  The following lemma describes all the coefficients of $Q_{\LT_\S}$.
   \begin{lemma}
-    For an odd prime $p$ and $\S = [0, (p-1)/2]$, the $\LT_\S$ function is equal to the following polynomial over $\F_p$
+    For an odd prime $p$ and $\S = [0, (p-1)/2]$, the $\LT_\S$ function can be interpolated by the following polynomial over $\F_p$
     \begin{align}\label{eq:univariate_circuit}
-      \LT_\S(x,y) = \frac{p+1}{2} (x-y)^{p-1} + \sum_{i=1, \text{odd}}^{p-2} (x-y)^i \sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i}.
+      Q_{\LT_\S}(x,y) = \frac{p+1}{2} (x-y)^{p-1} + \sum_{i=1, \text{odd}}^{p-2} (x-y)^i \sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i}.
     \end{align}
   \end{lemma}
   \begin{proof}
     Let $z = x-y$.
-    Thus we can rewrite $\LT_\S$ as the univariate indicator function $\chi_{\F_p^-}$, namely
+    Thus we can rewrite $Q_{\LT_\S}$ as the univariate indicator function $\chi_{\F_p^-}$, namely
     \begin{align*}
-      \LT_\S(x,y) = \chi_{\F_p^-}(z) = \sum_{a=-\frac{p-1}{2}}^{-1} 1 - (z - a)^{p-1}.
+      Q_{\LT_\S}(x,y) = \chi_{\F_p^-}(z) = \sum_{a=-\frac{p-1}{2}}^{-1} 1 - (z - a)^{p-1}.
     \end{align*}
     Thanks to Lemma~\ref{lem:difference_to_p-1}, we can expand $(z-a)^{p-1}$ and obtain
     \begin{align*}
@@ -365,8 +365,8 @@ Note that when $p=3$ $f(x,y) = 1 \bmod p.$
     \begin{align*}
       -\sum_{a=-\frac{p-1}{2}}^{-1} a^{p-1-i} &= -\sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i} = -\frac{\sum_{a=-\frac{p-1}{2}}^{\frac{p-1}{2}} a^{p-1-i}}{2}.
     \end{align*}
-    This coefficient is equal to $0$ for any positive even $i$ not equal to $p-1$ as $\sum_{a=0}^{p-1} a^{p-1-i} = 0$ in this case.
-    The $(p-1)$-th coefficient is equal to $-(p-1)/2 = (p+1)/2$.
+    This coefficient is equal to $0$ for any even $0<i < p-1$ as $\sum_{a=0}^{p-1} a^{p-1-i} = 0$ in this case.
+    The $(p-1)$-th coefficient is equal to $-(p-1)/2 = (p+1)/2 \bmod p$.
     If $i$ is odd, then we can rewrite the $i$th coefficient in the following way
     \begin{align*}
       -\sum_{a=-\frac{p-1}{2}}^{-1} a^{p-1-i} &= \sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i},
@@ -423,197 +423,197 @@ Note that when $p=3$ $f(x,y) = 1 \bmod p.$
     \ReLU_\S(x) = \max_\S(x,0) &= \frac{p+1}{2} x - \sum_{i=1}^{\frac{p-1}{2}} x^{2i} \sum_{a=1}^{\frac{p-1}{2}} a^{p-2i}.
   \end{align*}
 
-\subsection{Lexicographic order}\label{subsec:lexicographic_order}
-  Let $\vx=(x_0,x_1,\ldots,x_{\ell-1})$ and $\vy=(y_0,y_1,\ldots,y_{\ell-1}) \in \F_\fieldcard^\ell$ for the lexicographical order $<$ defined by the choice of $\S$:
-  \begin{align*}
-    \vx < \vy \Leftrightarrow \exists i\in[0,\ell-1] \text{ such that } x_i < y_i \text{ and } \forall j > i ~~ x_j = y_j\,.
-  \end{align*}
-  This order induces a function $\LT_{\F_\fieldcard}(\vx, \vy)$ that returns $1$ if $\vx < \vy$ and $0$ otherwise. 
-  As done in~\cite{TLWRK20}, we can employ $\EQ_{\F_\fieldcard}$ and $\LT_{\F_\fieldcard}$ to compute $\LT_{\F_\fieldcard}(\vx, \vy)$ as follows
-  \begin{align*}
-    \LT_{\F_\fieldcard}(\vx, \vy) = \sum_{i=0}^{\ell-2} \LT_{\F_\fieldcard}(x_{i}, y_{i}) \prod_{j=i+1}^{\ell-1} \EQ_{\F_\fieldcard}(x_{j}, y_{j}) + \LT_{\F_\fieldcard}(x_{\ell-1}, y_{\ell-1}).
-  \end{align*}
-  Notice that the multiplicative depth of this function solely depends on the products of the equality functions.
-  In fact, these products compare subvectors $\vx_i = (x_i, x_{i+1},\dots,x_{\ell-1})$ and $\vy_i = (y_i, y_{i+1},\dots,y_{\ell-1})$ for $i \in [1,\ell-1]$.
-  Thus, we can rewrite $\LT_{\F_\fieldcard}$ as
-  \begin{align}\label{eq:general_lex_order}
-    \LT_{\F_\fieldcard}(\vx, \vy) = \sum_{i=0}^{\ell-2} \LT_{\F_\fieldcard}(x_{i}, y_{i}) \EQ_{\F_\fieldcard}(\vx_{i+1}, \vy_{i+1}) + \LT_{\F_\fieldcard}(x_{\ell-1}, y_{\ell-1})
-  \end{align}
-  with the equality function $\EQ_{\F_\fieldcard}(\vx_{i+1}, \vy_{i+1})$ that returns $1$ if $\vx_{i+1} = \vy_{i+1}$ and $0$ otherwise.
-  As shown in~\todo{cite our work}, this function can be realized by a constant-depth circuit in the following way.
-  \begin{align}\label{eq:rand_eq_circuit}
-    \EQ_{\F_\fieldcard, e}(\vx_{i+1},\vy_{i+1}) = 1 - \princhar_{\fieldcard^e}\left(\sum_{j=i+1}^{\ell-1} r_j (x_j - y_j)\right)
-  \end{align}
-  where $r_j$ are uniformly random elements from $\F_{\fieldcard^e}$.
-  This circuit is false-biased with error probability $\fieldcard^{-e}$.
-  We can compute all $\EQ_{\F_\fieldcard, e}(\vx_{i+1},\vy_{i+1})$ using the same number of multiplications as for the single equality using Algorithm~\ref{alg:vector_equalities_circuit}.\todo{What is the complexity?}
-  \begin{algorithm}[t]
-    \KwIn{
-    $\ct_\vx$ -- a ciphertext encrypting $\vx \in \F^\ell_\fieldcard$,
-    $\ct_\vy$ -- a ciphertext encrypting $\vy \in \F^\ell_\fieldcard$.
-    }
-    \KwOut{$\ct$ -- a ciphertext containing the output of $\EQ_{\F_\fieldcard, e}(\vx_{i+1},\vy_{i+1})$ in the $i$th SIMD slot}
-    $\ct_1 \leftarrow \Shift(\ct_\vx, 1)$ // removes the value $x_0$ and shifts $\vx$ to the left\\
-    $\ct_2 \leftarrow \Shift(\ct_\vy, 1)$ // removes the value $y_0$ and shifts $\vy$ to the left\\
-    $\ct \leftarrow \Sub(\ct_1, \ct_2)$ // $(x_i - y_i), i \in [1,\ell-1]$\\
-    $r_0,r_1,\dots,r_{\ell-1} \leftarrow \udist(\F_{\fieldcard^e})$ //\todo{define uniform distribution}\\ 
-    $\pt_r \leftarrow \pt(r_0,r_1,\dots,r_{\ell-1})$\\
-    $\ct \leftarrow \ct \cdot \pt_r$ // $r_i(x_i - y_i), i \in [1,\ell-1]$\\
-    $k \leftarrow 1$// $\sum_{j=i}^{\ell-1} r_i(x_i - y_i), i \in [1,\ell-1]$\\
-    \While{$k < \ell-1$}{
-      $\ct_{tmp} \leftarrow \Shift(\ct, k)$\\
-      $\ct \leftarrow \ct + \ct_{tmp}$\\
-      $k \leftarrow 2k$\\
-    }
-    $\ct \leftarrow \Power(\ct, \fieldcard^e-1)$ //$\princhar_{\fieldcard^e}\left(\sum_{j=i}^{\ell-1} r_i(x_i - y_i)\right), i \in [1,\ell-1]$ \\
-    $\ct \leftarrow 1 - \ct$\\
-    \textbf{Return} $\ct$.
-    \caption{Homomorphic circuit computing $\EQ_{\F_\fieldcard, e}(\vx_{i+1},\vy_{i+1})$ in parallel.}\label{alg:vector_equalities_circuit}
-  \end{algorithm}
+% \subsection{Lexicographic order}\label{subsec:lexicographic_order}
+%   Let $\vx=(x_0,x_1,\ldots,x_{\ell-1})$ and $\vy=(y_0,y_1,\ldots,y_{\ell-1}) \in \F_\fieldcard^\ell$ for the lexicographical order $<$ defined by the choice of $\S$:
+%   \begin{align*}
+%     \vx < \vy \Leftrightarrow \exists i\in[0,\ell-1] \text{ such that } x_i < y_i \text{ and } \forall j > i ~~ x_j = y_j\,.
+%   \end{align*}
+%   This order induces a function $\LT_{\F_\fieldcard}(\vx, \vy)$ that returns $1$ if $\vx < \vy$ and $0$ otherwise. 
+%   As done in~\cite{TLWRK20}, we can employ $\EQ_{\F_\fieldcard}$ and $\LT_{\F_\fieldcard}$ to compute $\LT_{\F_\fieldcard}(\vx, \vy)$ as follows
+%   \begin{align*}
+%     \LT_{\F_\fieldcard}(\vx, \vy) = \sum_{i=0}^{\ell-2} \LT_{\F_\fieldcard}(x_{i}, y_{i}) \prod_{j=i+1}^{\ell-1} \EQ_{\F_\fieldcard}(x_{j}, y_{j}) + \LT_{\F_\fieldcard}(x_{\ell-1}, y_{\ell-1}).
+%   \end{align*}
+%   Notice that the multiplicative depth of this function solely depends on the products of the equality functions.
+%   In fact, these products compare subvectors $\vx_i = (x_i, x_{i+1},\dots,x_{\ell-1})$ and $\vy_i = (y_i, y_{i+1},\dots,y_{\ell-1})$ for $i \in [1,\ell-1]$.
+%   Thus, we can rewrite $\LT_{\F_\fieldcard}$ as
+%   \begin{align}\label{eq:general_lex_order}
+%     \LT_{\F_\fieldcard}(\vx, \vy) = \sum_{i=0}^{\ell-2} \LT_{\F_\fieldcard}(x_{i}, y_{i}) \EQ_{\F_\fieldcard}(\vx_{i+1}, \vy_{i+1}) + \LT_{\F_\fieldcard}(x_{\ell-1}, y_{\ell-1})
+%   \end{align}
+%   with the equality function $\EQ_{\F_\fieldcard}(\vx_{i+1}, \vy_{i+1})$ that returns $1$ if $\vx_{i+1} = \vy_{i+1}$ and $0$ otherwise.
+%   As shown in~\todo{cite our work}, this function can be realized by a constant-depth circuit in the following way.
+%   \begin{align}\label{eq:rand_eq_circuit}
+%     \EQ_{\F_\fieldcard, e}(\vx_{i+1},\vy_{i+1}) = 1 - \princhar_{\fieldcard^e}\left(\sum_{j=i+1}^{\ell-1} r_j (x_j - y_j)\right)
+%   \end{align}
+%   where $r_j$ are uniformly random elements from $\F_{\fieldcard^e}$.
+%   This circuit is false-biased with error probability $\fieldcard^{-e}$.
+%   We can compute all $\EQ_{\F_\fieldcard, e}(\vx_{i+1},\vy_{i+1})$ using the same number of multiplications as for the single equality using Algorithm~\ref{alg:vector_equalities_circuit}.\todo{What is the complexity?}
+%   \begin{algorithm}[t]
+%     \KwIn{
+%     $\ct_\vx$ -- a ciphertext encrypting $\vx \in \F^\ell_\fieldcard$,
+%     $\ct_\vy$ -- a ciphertext encrypting $\vy \in \F^\ell_\fieldcard$.
+%     }
+%     \KwOut{$\ct$ -- a ciphertext containing the output of $\EQ_{\F_\fieldcard, e}(\vx_{i+1},\vy_{i+1})$ in the $i$th SIMD slot}
+%     $\ct_1 \leftarrow \Shift(\ct_\vx, 1)$ // removes the value $x_0$ and shifts $\vx$ to the left\\
+%     $\ct_2 \leftarrow \Shift(\ct_\vy, 1)$ // removes the value $y_0$ and shifts $\vy$ to the left\\
+%     $\ct \leftarrow \Sub(\ct_1, \ct_2)$ // $(x_i - y_i), i \in [1,\ell-1]$\\
+%     $r_0,r_1,\dots,r_{\ell-1} \leftarrow \udist(\F_{\fieldcard^e})$ //\todo{define uniform distribution}\\ 
+%     $\pt_r \leftarrow \pt(r_0,r_1,\dots,r_{\ell-1})$\\
+%     $\ct \leftarrow \ct \cdot \pt_r$ // $r_i(x_i - y_i), i \in [1,\ell-1]$\\
+%     $k \leftarrow 1$// $\sum_{j=i}^{\ell-1} r_i(x_i - y_i), i \in [1,\ell-1]$\\
+%     \While{$k < \ell-1$}{
+%       $\ct_{tmp} \leftarrow \Shift(\ct, k)$\\
+%       $\ct \leftarrow \ct + \ct_{tmp}$\\
+%       $k \leftarrow 2k$\\
+%     }
+%     $\ct \leftarrow \Power(\ct, \fieldcard^e-1)$ //$\princhar_{\fieldcard^e}\left(\sum_{j=i}^{\ell-1} r_i(x_i - y_i)\right), i \in [1,\ell-1]$ \\
+%     $\ct \leftarrow 1 - \ct$\\
+%     \textbf{Return} $\ct$.
+%     \caption{Homomorphic circuit computing $\EQ_{\F_\fieldcard, e}(\vx_{i+1},\vy_{i+1})$ in parallel.}\label{alg:vector_equalities_circuit}
+%   \end{algorithm}
   
-  Let us go back to the lexicographic order in equation~(\ref{eq:general_lex_order}).
-  Assume that we have a ciphertext $\ct_{\LT}$ containing $\LT_{\F_\fieldcard}(x_i, y_i)$ in the $i$th slot (\todo{elaborate on that}) and the output $\ct_{\EQ}$ of Algorithm~\ref{alg:vector_equalities_circuit}.
-  We set the $\ell-1$ slot of $\ct_{\EQ}$ to $1$ and multiply it by $\ct_{\LT}$.
-  The resulting ciphertext contains all the products $\LT_{\F_\fieldcard}(x_{i}, y_{i}) \EQ_{\F_\fieldcard}(\vx_{i+1}, \vy_{i+1})$ for any $i \in [0,\ell-2]$ and $\LT_{\F_\fieldcard}(x_{\ell-1}, y_{\ell-1})$, which can be summed in the same way as in the while circuit of Algorithm~\ref{alg:vector_equalities_circuit}.
-  As a result, we obtain a ciphertext with the output of $\LT_{\F_\fieldcard}(\vx, \vy)$ in the first SIMD slot.
+%   Let us go back to the lexicographic order in equation~(\ref{eq:general_lex_order}).
+%   Assume that we have a ciphertext $\ct_{\LT}$ containing $\LT_{\F_\fieldcard}(x_i, y_i)$ in the $i$th slot (\todo{elaborate on that}) and the output $\ct_{\EQ}$ of Algorithm~\ref{alg:vector_equalities_circuit}.
+%   We set the $\ell-1$ slot of $\ct_{\EQ}$ to $1$ and multiply it by $\ct_{\LT}$.
+%   The resulting ciphertext contains all the products $\LT_{\F_\fieldcard}(x_{i}, y_{i}) \EQ_{\F_\fieldcard}(\vx_{i+1}, \vy_{i+1})$ for any $i \in [0,\ell-2]$ and $\LT_{\F_\fieldcard}(x_{\ell-1}, y_{\ell-1})$, which can be summed in the same way as in the while circuit of Algorithm~\ref{alg:vector_equalities_circuit}.
+%   As a result, we obtain a ciphertext with the output of $\LT_{\F_\fieldcard}(\vx, \vy)$ in the first SIMD slot.
 
-  \subsubsection{Comparing large integers.}
-  Since any integer $z$ can be represented in base $\fieldcard$ as $z = \sum_{i=0}^{\ell-1} z_i q^i$, we can encode $z$ into SIMD slots as a vector $(z_0,z_1,\dots,z_{\ell-1}) \in \F_{\fieldcard}^\ell$.
-  As shown above, we can compare such vectors using the lexicographic order function in~(\ref{eq:general_lex_order}) and thus compare integers larger than $\fieldcard$.
+%   \subsubsection{Comparing large integers.}
+%   Since any integer $z$ can be represented in base $\fieldcard$ as $z = \sum_{i=0}^{\ell-1} z_i q^i$, we can encode $z$ into SIMD slots as a vector $(z_0,z_1,\dots,z_{\ell-1}) \in \F_{\fieldcard}^\ell$.
+%   As shown above, we can compare such vectors using the lexicographic order function in~(\ref{eq:general_lex_order}) and thus compare integers larger than $\fieldcard$.
 
-  \todo{Incorporate the following into the complexity analysis.} 
-  We can obtain ciphertexts encrypting $(x,x,\ldots, x)$ and $(y,y,\ldots, y)$ with $2\log_2(q-1)\texttt{Rot}$ and $2\log_2(q-1)\texttt{Add}$. 
+%   \todo{Incorporate the following into the complexity analysis.} 
+%   We can obtain ciphertexts encrypting $(x,x,\ldots, x)$ and $(y,y,\ldots, y)$ with $2\log_2(q-1)\texttt{Rot}$ and $2\log_2(q-1)\texttt{Add}$. 
 
-  From there we can obtain encryptions of $(x,x-1,\ldots, x-q-2)$ and $(y-1,y-2,\ldots, y-q-1)$ with $2\texttt{Add}$. We can apply $f$ to these vectors in parallel with a depth of $\log (p-1) + \log d$ for a cost of $2(\log (p-1) + wt(p-1) + d - 2) \texttt{Mult}$. This can be minimized by choosing $p = 2^d + 1$ for some $d$.
+%   From there we can obtain encryptions of $(x,x-1,\ldots, x-q-2)$ and $(y-1,y-2,\ldots, y-q-1)$ with $2\texttt{Add}$. We can apply $f$ to these vectors in parallel with a depth of $\log (p-1) + \log d$ for a cost of $2(\log (p-1) + wt(p-1) + d - 2) \texttt{Mult}$. This can be minimized by choosing $p = 2^d + 1$ for some $d$.
 
-  With $2$ more $\texttt{Sub}$ we obtain encryptions of $(1-f(x), 1-f(x-1), \ldots, 1-f(x-q-2))$ and $(1-f(y-1), 1-f(y-2), \ldots, 1-f(y-q-1))$. From there we can get an encryption of the different partial sums in $\log_2(q-1)\texttt{Rot}$, $\log_2(q-1)\texttt{Select}$ and $\log_2(q-1)\texttt{Add}$. The algorithm works as follow:
+%   With $2$ more $\texttt{Sub}$ we obtain encryptions of $(1-f(x), 1-f(x-1), \ldots, 1-f(x-q-2))$ and $(1-f(y-1), 1-f(y-2), \ldots, 1-f(y-q-1))$. From there we can get an encryption of the different partial sums in $\log_2(q-1)\texttt{Rot}$, $\log_2(q-1)\texttt{Select}$ and $\log_2(q-1)\texttt{Add}$. The algorithm works as follow:
 
-  \begin{center}
-    \begin{tikzpicture}[scale=0.8]
-      \newcommand\y{-4};
+%   \begin{center}
+%     \begin{tikzpicture}[scale=0.8]
+%       \newcommand\y{-4};
       
-      \draw (0,2) -- (16,2);
-      \draw (0,0) -- (16,0);    
-      \foreach \x in {0,...,8}{
-        \draw (2*\x,0) -- (2*\x,2);
-      }
-      \foreach \x in {0,...,7}{
-        \node at (2*\x+1,1) {$x_\x$};
-      }
+%       \draw (0,2) -- (16,2);
+%       \draw (0,0) -- (16,0);    
+%       \foreach \x in {0,...,8}{
+%         \draw (2*\x,0) -- (2*\x,2);
+%       }
+%       \foreach \x in {0,...,7}{
+%         \node at (2*\x+1,1) {$x_\x$};
+%       }
 
-      \draw (0,2+\y) -- (16,2+\y);
-      \draw (0,\y) -- (16,\y);    
-      \foreach \x in {0,...,8}{
-        \draw (2*\x,0+\y) -- (2*\x,2+\y);
-      }
+%       \draw (0,2+\y) -- (16,2+\y);
+%       \draw (0,\y) -- (16,\y);    
+%       \foreach \x in {0,...,8}{
+%         \draw (2*\x,0+\y) -- (2*\x,2+\y);
+%       }
 
-      \node at (1,1+\y) {$x_0 + x_1$};
-      \node at (3,1+\y) {$x_1 + x_2$};
-      \node at (5,1+\y) {$x_2 + x_3$};
-      \node at (7,1+\y) {$x_3 + x_4$};
-      \node at (9,1+\y) {$x_4 + x_5$};
-      \node at (11,1+\y) {$x_5 + x_6$};
-      \node at (13,1+\y) {$x_6 + x_7$};
-      \node at (15,1+\y) {$x_7$};
+%       \node at (1,1+\y) {$x_0 + x_1$};
+%       \node at (3,1+\y) {$x_1 + x_2$};
+%       \node at (5,1+\y) {$x_2 + x_3$};
+%       \node at (7,1+\y) {$x_3 + x_4$};
+%       \node at (9,1+\y) {$x_4 + x_5$};
+%       \node at (11,1+\y) {$x_5 + x_6$};
+%       \node at (13,1+\y) {$x_6 + x_7$};
+%       \node at (15,1+\y) {$x_7$};
 
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       
-      \draw (0,2+2*\y) -- (16,2+2*\y);
-      \draw (0,0+2*\y) -- (16,0+2*\y);    
-      \foreach \x in {0,...,8}{
-        \draw (2*\x,0+2*\y) -- (2*\x,2+2*\y);
-      }
+%       \draw (0,2+2*\y) -- (16,2+2*\y);
+%       \draw (0,0+2*\y) -- (16,0+2*\y);    
+%       \foreach \x in {0,...,8}{
+%         \draw (2*\x,0+2*\y) -- (2*\x,2+2*\y);
+%       }
 
-      \node at (1,1+2*\y) {$\begin{array}{c}
-          x_0 + x_1  \\
-          + x_2 + x_3
-        \end{array}$};
-      \node at (3,1+2*\y) {$\begin{array}{c}
-          x_1 + x_2  \\
-          + x_3 + x_4
-        \end{array}$};
-      \node at (5,1+2*\y) {$\begin{array}{c}
-          x_2 + x_3  \\
-          + x_4 + x_5
-        \end{array}$};
-      \node at (7,1+2*\y) {$\begin{array}{c}
-          x_3 + x_4  \\
-          + x_5 + x_6
-        \end{array}$};
-      \node at (9,1+2*\y) {$\begin{array}{c}
-          x_4 + x_5  \\
-          +x_6 + x_7
-        \end{array}$};
-      \node at (11,1+2*\y) {$\begin{array}{c}
-          x_5 + x_6  \\
-          + x_7
-        \end{array}$};
-      \node at (13,1+2*\y) {$x_6 + x_7$};
-      \node at (15,1+2*\y) {$x_7$};
+%       \node at (1,1+2*\y) {$\begin{array}{c}
+%           x_0 + x_1  \\
+%           + x_2 + x_3
+%         \end{array}$};
+%       \node at (3,1+2*\y) {$\begin{array}{c}
+%           x_1 + x_2  \\
+%           + x_3 + x_4
+%         \end{array}$};
+%       \node at (5,1+2*\y) {$\begin{array}{c}
+%           x_2 + x_3  \\
+%           + x_4 + x_5
+%         \end{array}$};
+%       \node at (7,1+2*\y) {$\begin{array}{c}
+%           x_3 + x_4  \\
+%           + x_5 + x_6
+%         \end{array}$};
+%       \node at (9,1+2*\y) {$\begin{array}{c}
+%           x_4 + x_5  \\
+%           +x_6 + x_7
+%         \end{array}$};
+%       \node at (11,1+2*\y) {$\begin{array}{c}
+%           x_5 + x_6  \\
+%           + x_7
+%         \end{array}$};
+%       \node at (13,1+2*\y) {$x_6 + x_7$};
+%       \node at (15,1+2*\y) {$x_7$};
 
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       
-      \draw (0,2+3*\y) -- (16,2+3*\y);
-      \draw (0,0+3*\y) -- (16,0+3*\y);    
-      \foreach \x in {0,...,8}{
-        \draw (2*\x,0+3*\y) -- (2*\x,2+3*\y);
-      }
+%       \draw (0,2+3*\y) -- (16,2+3*\y);
+%       \draw (0,0+3*\y) -- (16,0+3*\y);    
+%       \foreach \x in {0,...,8}{
+%         \draw (2*\x,0+3*\y) -- (2*\x,2+3*\y);
+%       }
 
-      \node at (1,1+3*\y) {$\begin{array}{c}
-          x_0 + x_1  \\
-                              + x_2 + x_3 \\
-                              + x_4 + x_5 \\
-                              + x_6 + x_7
-        \end{array}$};
-      \node at (3,1+3*\y) {$\begin{array}{c}
-          x_1 + x_2  \\
-                              + x_3 + x_4 \\
-                              + x_5 + x_6 \\
-                              + x_7 \\
-        \end{array}$};
-      \node at (5,1+3*\y) {$\begin{array}{c}
-          x_2 + x_3  \\
-                              + x_4 + x_5 \\
-                              + x_6 + x_7
-        \end{array}$};
-      \node at (7,1+3*\y) {$\begin{array}{c}
-          x_3 + x_4  \\
-                              + x_5 + x_6 \\
-                              +x_7
-        \end{array}$};
-      \node at (9,1+3*\y) {$\begin{array}{c}
-          x_4 + x_5  \\
-          +x_6 + x_7
-        \end{array}$};
-      \node at (11,1+3*\y) {$\begin{array}{c}
-          x_5 + x_6  \\
-          + x_7
-        \end{array}$};
-      \node at (13,1+3*\y) {$x_6 + x_7$};
-      \node at (15,1+3*\y) {$x_7$};
+%       \node at (1,1+3*\y) {$\begin{array}{c}
+%           x_0 + x_1  \\
+%                               + x_2 + x_3 \\
+%                               + x_4 + x_5 \\
+%                               + x_6 + x_7
+%         \end{array}$};
+%       \node at (3,1+3*\y) {$\begin{array}{c}
+%           x_1 + x_2  \\
+%                               + x_3 + x_4 \\
+%                               + x_5 + x_6 \\
+%                               + x_7 \\
+%         \end{array}$};
+%       \node at (5,1+3*\y) {$\begin{array}{c}
+%           x_2 + x_3  \\
+%                               + x_4 + x_5 \\
+%                               + x_6 + x_7
+%         \end{array}$};
+%       \node at (7,1+3*\y) {$\begin{array}{c}
+%           x_3 + x_4  \\
+%                               + x_5 + x_6 \\
+%                               +x_7
+%         \end{array}$};
+%       \node at (9,1+3*\y) {$\begin{array}{c}
+%           x_4 + x_5  \\
+%           +x_6 + x_7
+%         \end{array}$};
+%       \node at (11,1+3*\y) {$\begin{array}{c}
+%           x_5 + x_6  \\
+%           + x_7
+%         \end{array}$};
+%       \node at (13,1+3*\y) {$x_6 + x_7$};
+%       \node at (15,1+3*\y) {$x_7$};
 
-      \foreach \x in {2,...,8}
-      \draw[->,thick = 2pt] (2*\x-0.1-1,2) to[bend right] (2*\x-3+0.1,2);
+%       \foreach \x in {2,...,8}
+%       \draw[->,thick = 2pt] (2*\x-0.1-1,2) to[bend right] (2*\x-3+0.1,2);
 
-      \foreach \x in {3,...,8}
-      \draw[->,thick = 2pt] (2*\x-0.1-1,2+\y) to[bend right] (2*\x-5+0.1,2+\y);
+%       \foreach \x in {3,...,8}
+%       \draw[->,thick = 2pt] (2*\x-0.1-1,2+\y) to[bend right] (2*\x-5+0.1,2+\y);
 
-      \foreach \x in {5,...,8}
-      \draw[->,thick = 2pt] (2*\x-0.1-1,2+2*\y) to[bend right] (2*\x-9+0.1,2+2*\y);
+%       \foreach \x in {5,...,8}
+%       \draw[->,thick = 2pt] (2*\x-0.1-1,2+2*\y) to[bend right] (2*\x-9+0.1,2+2*\y);
 
-  \end{tikzpicture}
-  \end{center}
+%   \end{tikzpicture}
+%   \end{center}
 
-  From there we just have to compute the scalar product of the two vectors with $1\texttt{Mult} + \log_2(q-1)\texttt{Rot} + \log_2(q-1)\texttt{Add}$. \newline
+%   From there we just have to compute the scalar product of the two vectors with $1\texttt{Mult} + \log_2(q-1)\texttt{Rot} + \log_2(q-1)\texttt{Add}$. \newline
 
-  So overall we can compute $<$ over $\mathbb{F}_q$ for $q = p^d$ in:
+%   So overall we can compute $<$ over $\mathbb{F}_q$ for $q = p^d$ in:
 
-  \begin{itemize}
-  \item $4\log_2 (q-1) \texttt{Rot}$
-  \item $(4\log_2 (q-1) + 4) \texttt{Add}$
-  \item $(2(\log (p-1) + wt(p-1) + d - 2) + 1) \texttt{Mult}$
-  \item $(\log_2 (q-1) + 1) \texttt{Select}$
-  \end{itemize}
+%   \begin{itemize}
+%   \item $4\log_2 (q-1) \texttt{Rot}$
+%   \item $(4\log_2 (q-1) + 4) \texttt{Add}$
+%   \item $(2(\log (p-1) + wt(p-1) + d - 2) + 1) \texttt{Mult}$
+%   \item $(\log_2 (q-1) + 1) \texttt{Select}$
+%   \end{itemize}
 
 
 %%% Local Variables:
