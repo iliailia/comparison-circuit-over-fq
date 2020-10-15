@@ -47,14 +47,12 @@
 \label{sec:min/max}
 
 	Another application of our comparison algorithm is concerned with the minimum (or maximum) function of an array.
-	To find the minimum of an input array, at least $n-1$ calls to the pairwise minimum function are required~\cite[Chapter 9]{CLR09}, which can be achieved by \emph{the tournament method}.
-	%%%%%%%%%%%%
+	To find the minimum of an input array, at least $n-1$ calls of the pairwise minimum function are required~\cite[Chapter 9]{CLR09}, which can be achieved by \emph{the tournament method}.
 	In this method, one reduces the size of the input array in $\ceil{\log n}$ iterations.
 	In each iteration, the input array is divided into pairs. 
 	If the array length is odd, one element is stashed for the next iteration. 
 	Then, the maximum of each pair is removed from the array.
 	The algorithm stops when only one element is left; this is the minimum of the input array, see Figure~\ref{fig:minimum_tournament}. 
-	%%%%%%%%%%%%
 	\begin{figure}
 		\centering
 		\begin{tikzpicture}
@@ -98,7 +96,15 @@
 		\caption{The tournament method of finding the minimum of an array. In each stage, the array elements are divided into pairs. Only minimum of a pair go to the next stage.}
 		\label{fig:minimum_tournament}
 	\end{figure}
-	
-	\todo{Tournament method}
+	%%%%%%%%%%
+	Unfortunately, the tournament method has a big multiplicative complexity, namely $\ceil{\log n} d(\min)$, which enforces us to use either impractical encryption parameters or a slow bootstrapping function.
 
-	\todo{Use sorting above to reduce depth}
+	To reduce the depth, we can combine the tournament method and direct sorting.
+	First, we perform $\ell$ iterations of the tournament algorithm, which leaves us with an array $\va' = (a_0, \dots, a_{n'-1})$ of length $n' = \ceil{n/2^\ell}$ containing the minimum.
+	Then, we can find the minimum by computing the comparison table as in direct sorting and extracting an element with the Hamming weight of its row equal to $n'-1$, i.e.
+	\begin{align*}
+		\min(\va') = \sum_{j=0}^{n'-1} \EQ(n'-1,\wt\left(\mL[j]\right)) \cdot a'_j.
+	\end{align*}
+	Unfortunately, this approach involves quadratic number of comparison operations ($\LT$) due to the computation of the comparison table.
+	However, the depth is reduced to $\ell \cdot d(\min) + d(\LT) + d(\EQ) + 1$, which allows us to set reasonable encryption parameters and to avoid bootstrapping, see Section~\ref{sec:impl-results}.
+	%%%%%%%%%%
