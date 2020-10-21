@@ -96,7 +96,6 @@
 		\caption{The tournament method of finding the minimum of an array. In each stage, the array elements are divided into pairs. Only minimum of a pair go to the next stage.}
 		\label{fig:minimum_tournament}
 	\end{figure}
-	%%%%%%%%%%
 	Unfortunately, the tournament method has a big multiplicative complexity, namely $\ceil{\log n} d(\min)$, which enforces us to use either impractical encryption parameters or a slow bootstrapping function.
 
 	To reduce the depth, we can combine the tournament method and direct sorting.
@@ -107,4 +106,3 @@
 	\end{align*}
 	Unfortunately, this approach involves quadratic number of comparison operations ($\LT$) due to the computation of the comparison table.
 	However, the depth is reduced to $\ell \cdot d(\min) + d(\LT) + d(\EQ) + 1$, which allows us to set reasonable encryption parameters and to avoid bootstrapping, see Section~\ref{sec:impl-results}.
-	%%%%%%%%%%

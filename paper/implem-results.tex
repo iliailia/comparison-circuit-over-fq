@@ -3,9 +3,21 @@ For a fair comparison with the prior work, we also implemented the algorithm of 
 The code will be publicly available.
 For experiments, we used an ordinary commodity laptop equipped with an Intel Dual-Core i5-7267U CPU (running at 3.1 GHz) and 8 GB of RAM without multi-threading.
 
+%%%%%%%%%
+In the tables presented below, the following notation is used:
+\begin{itemize}
+  \item $p$: the plaintext modulus;
+  \item $q$: the ciphertext modulus;
+  \item $m$: the cyclotomic order of the ring $\R$;
+  \item $n$: the degree of the ring $\R$;
+  \item $d$: the dimension of a slot subspace used for digit encoding;
+  \item $\ell$: the dimension of digit vectors encoding input integers over $\F_p^d$;
+  \item $k$: the number of input integers encoded in one ciphertext.
+\end{itemize}
+%%%%%%%%%%
+
 To compare our algorithms with the state of the art, we ran the lexicographic order algorithm to compute the less-than function on 64-bit integers.
 The results of these experiments are presented in Table~\ref{table:comparison_circuit_results}.
-
 \begin{table}[h]
   \centering
   \begin{tabular*}{.9\textwidth}{@{\extracolsep{\fill} } c c c c c c c}
@@ -106,14 +118,32 @@ The results of these experiments are presented in Table~\ref{table:comparison_ci
   \label{table:comparison_circuit_results}
 \end{table}
 
-\begin{itemize}
-  \item $p$: plaintext modulus;
-  \item $m$: cyclotomic order;
-  \item $n$: degree of the cyclotomic;
-  \item $d$: dimension of a slot subspace;
-  \item $\ell$: length of compared vectors over $\F_p^d$;
-  \item $k$: number of 64-bit integers encoded in one ciphertext.
-\end{itemize}
+\begin{table}[h]
+  \centering
+  \begin{tabular*}{.9\textwidth}{@{\extracolsep{\fill} } c c c c c}
+    \toprule
+    $N$     & $\log_2 q$    & \#Trials  & Avg. total time, s    & Amortized time per slot, ms \\
+    \midrule
+    \multicolumn{5}{l}{8-bit integers ($d=2$, $\ell=1$, $k=9352$)} \\
+    \cmidrule(lr){1-5}
+    4       & ?             & 32        & 186.28                & 19.92 \\
+    8       & 599           & 20        & 867.46                & 92.76 \\
+    16      & 599           & 20        & 3652.23               & 390.53 \\
+    32      & 599           & 16        & 14780.72              & 1580.49 \\
+    64      & ?             & 2         & 60665.9               & 6486.94 \\
+    \midrule
+    \multicolumn{5}{l}{32-bit integers ($d=3$, $\ell=2$, $k=4676$)} \\
+    \cmidrule(lr){1-5}
+    4       & ?             & 20        & 299.17                & 63.98 \\
+    8       & ?             & 20        & 1356.19               & 290.03 \\
+    16      & ?             & 18        & 5699.19               & 1218.82 \\
+    32      & 684           & 11        & 23006.37              & 4920.10 \\
+    64      & 684           & 1         & 89828.9               & 19210.6 \\
+    \bottomrule
+  \end{tabular*}
+  \caption{The running time needed to sort $N$ 8-bit and 32-bit integers with $p=167$, $m=28057$ and $n=28056$. The minimal security level is 92 bits according to the LWE estimator~\cite{lwe_estimator}}
+  \label{table:sorting_circuit_results}
+\end{table}
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "main"
