@@ -3,6 +3,11 @@ For a fair comparison with the prior work, we also implemented the algorithm of 
 The code will be publicly available.
 For experiments, we used an ordinary commodity laptop equipped with an Intel Dual-Core i5-7267U CPU (running at 3.1 GHz) and 8 GB of RAM without multi-threading.
 
+To compare our algorithms with the state of the art, we ran the lexicographic order algorithm to compute the less-than function on 64-bit integers.
+The results of these experiments are presented in Table~\ref{table:comparison_circuit_results}.
+In addition, we ran the direct sorting algorithm and the array minimum function from Section~\ref{sec:applications}, see Tables~\ref{table:sorting_circuit_results} and~\ref{table:minimum_circuit_results}.
+\todo{Compare TFHE-based and HEAAN-based solutions.}
+
 In the tables presented below, the following notation is used:
 \begin{itemize}
   \item $p$: the plaintext modulus;
@@ -14,9 +19,19 @@ In the tables presented below, the following notation is used:
   \item $k$: the number of input integers encoded in one ciphertext.
 \end{itemize}
 
-To compare our algorithms with the state of the art, we ran the lexicographic order algorithm to compute the less-than function on 64-bit integers.
-The results of these experiments are presented in Table~\ref{table:comparison_circuit_results}.
-\todo{Compare to \cite{CDSS15}, TFHE-based and HEAAN-based solutions.}
+%%%%%%%%%%%
+In all the experiments, the encryption parameters of BGV are chosen according to the following strategy.
+The plaintext modulus $p$ is a prime number such that SIMD slots are isomorphic to a finite field.
+Next, we choose the order $m$ of $\intring$ with large enough $\phi(m)$ to support our homomorphic algorithms.
+In addition, $m$ is chosen to be a prime number such that $p$ has a small order modulo $m$.
+The former constraint makes sure that the slot permutation group $\mathcal{H}$ is cyclic, which results in a better performance (for more details, see \cite[Appendix C.3]{GHS12}).
+The latter constraint maximizes the number of SIMD slots, thus reducing the amortized running time of our algorithms.
+
+We ran our algorithms with $p$ in the interval $[3,659]$.
+However, Table~\ref{table:comparison_circuit_results} contains the results with the best amortized running time and the results for small $p$'s, where the bivariate comparison circuits (ours and from~\cite{TLWRK20}) have a comparable running time to the univariate circuit.
+For the sorting and the array minimum applications (Tables~\ref{table:sorting_circuit_results} and~\ref{table:minimum_circuit_results}), we showed only the results with $p$ giving the best running time. 
+%%%%%%%%%%%%
+
 \begin{table}[h]
   \centering
   \begin{tabular*}{.9\textwidth}{@{\extracolsep{\fill} } c c c c c c c}
@@ -119,28 +134,28 @@ The results of these experiments are presented in Table~\ref{table:comparison_ci
 
 \begin{table}[h]
   \centering
-  \begin{tabular*}{.9\textwidth}{@{\extracolsep{\fill} } c c c c c}
+  \begin{tabular*}{.9\textwidth}{@{\extracolsep{\fill} } c c c c c c}
     \toprule
-    $N$     & $\log_2 q$    & \#Trials  & \makecell{Avg. total \\ time, s}    & \makecell{Amortized time \\ per slot, ms} \\
+    $N$     & $\log_2 q$    & \#Trials  & \makecell{Avg. total \\ time, s}    & \makecell{Amortized time \\ per slot, ms} & \makecell{Amortized time \\ per slot, ms \cite{CDSS15}} \\
     \midrule
-    \multicolumn{5}{l}{8-bit integers ($d=2$, $\ell=1$, $k=9352$)} \\
-    \cmidrule(lr){1-5}
-    4       & >580             & 32        & 186.28                & 19.92 \\
-    8       & 599           & 20        & 867.46                & 92.76 \\
-    16      & 599           & 20        & 3652.23               & 390.53 \\
-    32      & 599           & 20        & 14769.23              & 1579.26 \\
-    64      & >600             & 2         & 60665.9               & 6486.94 \\
+    \multicolumn{6}{l}{8-bit integers ($d=2$, $\ell=1$, $k=9352$)} \\
+    \cmidrule(lr){1-6}
+    4       & 589     & 32        & 186.28       & 20    & 140 \\
+    8       & 599     & 20        & 867.46       & 93    & 690 \\
+    16      & 599     & 20        & 3652.23      & 391   & 3140\\
+    32      & 599     & 20        & 14769.23     & 1579  & 13900 \\
+    64      & 604     & 2         & 60665.9      & 6487  & 60000 \\
     \midrule
-    \multicolumn{5}{l}{32-bit integers ($d=3$, $\ell=2$, $k=4676$)} \\
-    \cmidrule(lr){1-5}
-    4       & >650             & 20        & 299.17                & 63.98 \\
-    8       & >660             & 20        & 1356.19               & 290.03 \\
-    16      & >660             & 20        & 5700.12               & 1219.02 \\
-    32      & 684           & 13        & 23066.90              & 4933.04 \\
-    64      & 684           & 1         & 89828.9               & 19210.6 \\
+    \multicolumn{6}{l}{32-bit integers ($d=3$, $\ell=2$, $k=4676$)} \\
+    \cmidrule(lr){1-6}
+    4       & 659     & 20        & 299.17       & 64    & 200 \\
+    8       & 671     & 20        & 1356.19      & 290   & 944 \\
+    16      & 671     & 20        & 5700.12      & 1219  & 4280 \\
+    32      & 684     & 20        & 23017.03     & 4922  & 18600 \\
+    64      & 684     & 1         & 89828.9      & 19211 & 49700 \\
     \bottomrule
   \end{tabular*}
-  \caption{The running time needed to sort $N$ 8-bit or 32-bit integers with $p=167$, $m=28057$ and $n=28056$. The minimal security level is 92 bits according to the LWE estimator~\cite{lwe_estimator}.}
+  \caption{The running time needed to sort $N$ 8-bit or 32-bit integers with $p=167$, $m=28057$ and $n=28056$. The minimal security level is 92 bits according to the LWE estimator~\cite{lwe_estimator}. Note that the amortized timing per slot from~\cite{CDSS15} is obtained with the LTV scheme~\cite{STOC:LopTroVai12}, which was attacked by Albrecht et al.~\cite{C:AlbBaiDuc16}.}
   \label{table:sorting_circuit_results}
 \end{table}
 
@@ -156,17 +171,17 @@ The results of these experiments are presented in Table~\ref{table:comparison_ci
     4       & 2     & 406           & 20        & 50.55     & 9.68 \\
     8       & 3     & 579           & 20        & 151.75    & 29.07 \\
     16      & 4     & 766           & 20        & 386.87    & 74.11 \\
-    32      & 3     & 884          & 20        & 946.01    & 181.23 \\
-    64      & 3     & 884          & ??        & ????.??   & 417.59 \\
+    32      & 3     & 825           & 20        & 883.68    & 169.29 \\
+    64      & 3     & 854           & 20        & 2111.56   & 404.51 \\
     \midrule
     \multicolumn{5}{l}{32-bit integers ($d=6$, $\ell=2$, $k=2610$)} \\
     \cmidrule(lr){1-6}
     2       & 1     & 406           & 20        & 37.71     & 14.54 \\
     4       & 2     & 753           & 20        & 157.80    & 60.46 \\
-    8       & 1     & 854           & 20        & 545.56    & 209.03 \\
-    16      & 1     & 854           & 20        & 1786.80   & 684.60 \\
-    32      & 1     & 854           & ??        & ????.??   & ????.?? \\
-    64      & 1     & ???           & ??        & ?????.??  & ?????.?? \\
+    8       & 1     & 825           & 20        & 506.24    & 193.96 \\
+    16      & 1     & 839           & 20        & 1694.15   & 649.10 \\
+    32      & 1     & 854           & 20        & 6440.27   & 2467.54 \\
+    64      & 1     & 884           & ??        & ?????.??  & ?????.?? \\
     \bottomrule
   \end{tabular*}
   \caption{The running time needed to find the minimum of $N$ 8-bit or 32-bit integers with $p=17$, $m=41761$ and $n=41760$. The parameter $T$ is equal to the number of the tournament method stages. The minimal security level is 121 bits according to the LWE estimator~\cite{lwe_estimator}.}
