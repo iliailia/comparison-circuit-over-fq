@@ -318,7 +318,16 @@ Thus overall $f(p-1,0) = f(p-1,p-1) = f(0,0)$ and we have proved Eq. (\ref{eq:3}
 \end{itemize}
 Note that when $p=3$ $f(x,y) = 1 \bmod p.$
 \end{proof}
-  
+
+The decomposition of $f$ given in Theorem \ref{thm:decomposition-f} by Eq. (\ref{eq:dec-f}) can be recursively applied to each polynomial $f_i$ so that in the end, by denoting $Y=y(x-y)$, we obtain:
+
+\begin{equation}
+  \label{eq:decomposition-f-final}
+  f(x,y) = f_0(x,0) + f_1(x,0)Y + f_2(x,0)Y^2 + \cdots + f_{(p-3)/2}(x,0)Y^{(p-3)/2}
+\end{equation}
+with $\deg (f_{i}(x,0)) = p-3 - 2i$ and $f_0 = f$. A similar decomposition can be otain using Eq. (\ref{eq:dec-f'}). Our proof of this recursive decomposition is, once again, quite long and with no real interest for the purpose of this work. Therefore we defer it to the extended version of this paper.\newline
+
+All in all, using the decomposition of $f$ given by Eq. (\ref{eq:decomposition-f-final}) $P_{\LT_\S}(x,y)$ can be evaluated with a relatively small number of non-scalar multiplications for small values of $p$: $p-1$ for $2\leq p \leq 7$ as opposed to $3p-5$ with the method of \cite{TLWRK20}. Although in practice this approach allows to reduce significantly the complexity of the evaluation of $LT_\S$, its asymptotic complexity remains linear in $p$: $\mathcal{O}(p)$.  
   
 \subsection{Univariate interpolation of $\LT_\S$}
   Another way to compare $x$ and $y$ from $\S$ is to compute the difference $x-y$ and find its sign.
