@@ -10,6 +10,10 @@
 \item \cite{NGEG17}: analysis of bit-wise and digit-wise comparison. Conclusion: bit-wise is more efficient because it has depth $\mathcal{O}(\log(l))$ instead of $\mathcal{O}(l)$ for digit-wise comparisons. Does not use the depth-free Frobenius automorphism\dots
 
 \item \cite{JS19}: bit-wise comparison using SIMD. Conclusion: more efficient than without SIMD. Less interesting than \cite{CKK15} and does not even cite it.
+
+\item \cite{AC:CKKLL19,EPRINT:CheKimKim19}: comparison and min/max functions with CKKS.
+
+\item \cite{AC:CGGI17}: TFHE-based min/max functions. It is faster than we thought. The fastest algorithm to compare two $n$-bit integers takes $170n$ microseconds, which is comparable to our timings.
  
 \item \cite{LKN19}: modified shell sort. Make shell sort more efficient for HE from $\mathcal{O}(n^2)$ to $\mathcal{O}(n^{3/2}\sqrt{\alpha+\log\log n})$ with failure probability of $2^{-\alpha}$. Complexity worst than for Batcher even-odd merge sort network.
 
@@ -18,6 +22,7 @@
 \item \cite{AINA:NGEG17}: the univariate circuit is used in the context of sorting. There is no formal description of the circuit properties and complexity. Neither the decomposition method of~\cite{TLWRK20} or the lexicographic circuit is used.
 
 \item \cite{PoPETS:SFR20}: the univariate circuit is used in the context of top-$k$ selection. As above, there is no formal description of the circuit properties and complexity. Neither the decomposition method of~\cite{TLWRK20} or the lexicographic circuit is used. Their minimum function is based on the comparison table from~\cite{CDSS15}, but its multiplicative complexity is quadratic in the length of an input array. In our case, it is $O(n \log n)$.
+
 \end{itemize}
 
 
