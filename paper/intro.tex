@@ -1,3 +1,30 @@
+\ac{FHE} gives the ability to perform any kind of computations directly over encrypted data. It is therefore a natural candidate for privacy-preserving outsourced storage and computation technics. Since Gentry's breakthrough in 2009, it has received a worldwide attention which has resulted in numerous improvements. As so, \ac{FHE} can now be used in practice in many practical scenarii \todo{citations} and is currently going through a standardization process \cite{HomomorphicEncryptionSecurityStandard}.
+
+However, although \ac{FHE} offers a relatively efficient alternative for secure computations, some functions remain difficult to evaluate efficiently. Step functions, which are required in many \ac{FHE} applications, are a good example of such functions. The difficulty to evaluate them homomorphically comes from their intrinsic discontinuous nature. This is mainly due to the hardness of evaluating a very common and relatively simple function: the comparison function.
+
+The comparison function is an elementary function which is required in many applications; from the simple \emph{Millionaires problem} of Yao \cite{Yao82}, to advance machine learning tasks such as \emph{genome analysis} as proposed in the iDASH competitions\footnote{http://www.humangenomeprivacy.org/2020/index.html}. Although it has been the object of several works over the past years, comparing numbers homomorphically remains hardly efficient. Nonetheless, several methods for evaluating the comparison function have been developped those last years which depend on the kind of homomorphic encryption scheme used. These different schemes can be classified in three different categories:
+
+\begin{itemize}
+\item The first one represents the schemes encrypting their input bit-wise meaning that each bit of the input is encrypted into a different ciphertext. From their the operations are carried over each bit separately. Examples of such schemes include FHEW \cite{DM15} and TFHE \cite{CGGI16}. These schemes are the most efficient ones in practice if one considers the total running time.
+  
+\item The second category corresponds to word-wise encryption schemes allowing to perform computations in an \ac{SIMD} fashion \cite{SV14}. These schemes allow, not only to encrypt words of more than one bit, but also to encrypt several of them in different slots such as the operations carried over a single ciphertext will be carried over each of its slot in a parallel fashion similarly to \ac{SIMD}. Schemes with this features include BGV \cite{BGV12} and BFV \cite{FV12}. Although operations on these schemes are less efficient than for bit-wise encryption schemes, they become more efficient if one considers the number of slots on which the computation was performed: the \emph{amortized cost}.
+
+\item The CKKS scheme \cite{CKKS17}, which allows to perform computations over approximated numbers, forms the third category. It is similar to the second category in the sense that one can pack several numbers in parallel. Actually, this is the scheme allowing to pack the largest number of elements in a single ciphertext, and as a consequence it presents the best amortized cost. However, in this case computations are not exact which means that the results are only valid up to a certain precision.
+\end{itemize}
+
+
+\subsection{Contributions}
+In this work we study the structure of the circuits corresponding to the comparison function for schemes belonging to the second aforementionned category such as BGV and BFV. For this category of schemes there exists essentially two approaches: either compare the two numbers $x$ and $y$ directly by evaluating a bivariate polynomial in $x$ and $y$, or study the sign of the difference $z=x-y$ by evaluating a univariate polynomial in $z$.
+
+By exploiting the structure of these two polynomials, we show that it is possible to evaluate them more efficiently than what was proposed in the state-of-the-art. The benefit of our approach results in significant performance enhancement for both methods. Using our bivariate circuit we can compare two 64-bits integers with an amortized cost of 21ms which is a gain of $40\%$ when compared to the best previously reported results. On the other hand, with our univariate circuit we obtain an amortized cost as small as 11ms which is comparable to what can be obtained with CKKS \todo{update depending on experimental results}, while the result of our methods is exact. 
+
+We also apply the result of our methods to simple popular computational tasks using comparisons: sorting $N$ numbers and computing minimum/maximum of an array. As a result, for $N=64$ we obtain an amortized cost of 6.5s to sort 8-bit integers and 19.2s for 32-bit integers which is faster than state-of-the-art by a factor 9 and 2.5 respectively. We can also obtain the minimum of $N=64$ 8-bit integers with an amortized cost of 0.4ms and \todo{??}ms for 32-bit integers.
+
+\subsection{Related Art}
+\label{sec:related-art}
+\input{related-art.tex}
+
+
 
 
 %%% Local Variables:

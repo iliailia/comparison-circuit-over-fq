@@ -325,14 +325,31 @@ The decomposition of $f$ given in Theorem \ref{thm:decomposition-f} by Eq. (\ref
   \label{eq:decomposition-f-final}
   f(x,y) = f_0(x,0) + f_1(x,0)Y + f_2(x,0)Y^2 + \cdots + f_{(p-3)/2}(x,0)Y^{(p-3)/2}
 \end{equation}
-with $\deg (f_{i}(x,0)) = p-3 - 2i$ and $f_0 = f$. A similar decomposition can be otain using Eq. (\ref{eq:dec-f'}). Our proof of this recursive decomposition is, once again, quite long and with no real interest for the purpose of this work. Therefore we defer it to the extended version of this paper.\newline
+with $\deg (f_{i}(x,0)) = p-3 - 2i$ and $f_0 = f$. A similar decomposition can be obtained using Eq. (\ref{eq:dec-f'}). Our proof of this recursive decomposition is, once again, quite long and with no real interest for the purpose of this work. Therefore we defer it to the extended version of this paper.\newline
 
-All in all, using the decomposition of $f$ given by Eq. (\ref{eq:decomposition-f-final}) $P_{\LT_\S}(x,y)$ can be evaluated with a relatively small number of non-scalar multiplications for small values of $p$: $p-1$ for $2\leq p \leq 7$ as opposed to $3p-5$ with the method of \cite{TLWRK20}. Although in practice this approach allows to reduce significantly the complexity of the evaluation of $LT_\S$, its asymptotic complexity remains linear in $p$: $\mathcal{O}(p)$.  
+\paragraph{Complexity analysis}
+In \cite{TLWRK20}, the authors proposed to evaluate $P_{\LT_S}(x,y)$ by evaluating each monomials separately before summing them up. This requires to precompute the powers of $x$ and $y$ up to $p-1$ for a total of $2p-4$ non-scalar multiplications. Then one need another $p-1$ non-scalar multiplications to evaluate each monomial $((\sum_i c_i x^i)y^j)_{j}$ where the $c_i$s are scalars in $\F_p$, before summing them together to get the final result. Overall their evaluation of $P_{\LT_\S}$ requires $3p-5$ non-sclar multiplications. \newline
+
+Following the idea of \cite{TLWRK20} and using the decomposition of $f$ given in Eq. (\ref{eq:decomposition-f-final}) one needs:
+\begin{itemize}
+\item $2$ multiplications to get $(x+1)Y$ for $p\geq 3$ and only $1$ when $p=2$;
+\end{itemize}
+and then for $p\geq 5$:
+\begin{itemize}
+\item $p-4$ multiplications to compute the $x^i$s for $2\leq i \leq p-3$ required to compute the terms $f_i(x,0)$;
+\item $(p-5)/2$ multiplications to compute the $Y^i$ for $2\leq i \leq (p-3)/2$;
+\item $(p-3)/2$ multiplications to compute the products $f_i(x,0)\cdot Y^i$;
+\item $1$ final multiplication to multiply $f$ and $(x+1)Y$.
+\end{itemize}
+
+Thus overall, for $p\geq 5$, one needs at most $2p-5$ non scalar multiplications to evaluate $P_{\LT_\S}(x,y)$ homomorphically. Actually by optimising the way of computing the $f_i$ this number can be slightly reduced. For instance for $p=5$ and $7$ it can be done using only $4$ and $6$ multiplications respectively (see Appendix \todo{ref}), hence for a prime $2\leq p \leq 7$, $P_{\LT_\S}(x,y)$ can be computed with only $p-1$ non-scalar multiplications.
+
+Overall, for $p\geq 5$, our method saves $p$ multiplications over the method of \cite{TLWRK20}. However its complexity remains linear in $p$ which is unpractical for performing homomorphic comparisons using large digits (and thus a large $p$).
   
 \subsection{Univariate interpolation of $\LT_\S$}
-  Another way to compare $x$ and $y$ from $\S$ is to compute the difference $x-y$ and find its sign.
+The linear complexity for evaluating the bivariate circuit comes from the fact that it is bivariate. However it is possible to evaluate univariate polynomials of degree $p-1$ in $\mathcal{O}(\sqrt{p})$ non scalar multiplications using \cite{SIAM:PS73}. Therefore it would be interesting to be able to evaluate $\LT_S$ using a univariate polynomial. This can be achieved by computing the difference $x-y$ of the two values to compare and find its sign.
   To compute the sign function (or $\LT_\S(x-y,0)$) using finite field arithmetic, we need to split finite field elements into two classes:  negative ($\F_p^-$) and non-negative ($\F_p^+$).
-  In addition, for any $x, y \in \S$ the following property should hold
+  In addition, for any $x, y \in \S$ the following property should hold:
   \begin{align*}
     x - y \in 
     \begin{cases}
