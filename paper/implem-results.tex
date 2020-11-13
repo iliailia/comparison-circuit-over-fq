@@ -6,7 +6,6 @@ For experiments, we used an ordinary commodity laptop equipped with an Intel Dua
 To compare our algorithms with the state of the art, we ran the lexicographic order algorithm to compute the less-than function on 64-bit integers.
 The results of these experiments are presented in Table~\ref{table:comparison_circuit_results}.
 In addition, we ran the direct sorting algorithm and the array minimum function from Section~\ref{sec:applications}, see Tables~\ref{table:sorting_circuit_results} and~\ref{table:minimum_circuit_results}.
-\todo{Compare TFHE-based and HEAAN-based solutions.}
 
 In the tables presented below, the following notation is used:
 \begin{itemize}
@@ -19,7 +18,6 @@ In the tables presented below, the following notation is used:
   \item $k$: the number of input integers encoded in one ciphertext.
 \end{itemize}
 
-%%%%%%%%%%%
 In all the experiments, the encryption parameters of BGV are chosen according to the following strategy.
 The plaintext modulus $p$ is a prime number such that SIMD slots are isomorphic to a finite field.
 Next, we choose the order $m$ of $\intring$ with large enough $\phi(m)$ to support our homomorphic algorithms.
@@ -29,8 +27,7 @@ The latter constraint maximizes the number of SIMD slots, thus reducing the amor
 
 We ran our algorithms with $p$ in the interval $[3,659]$.
 However, Table~\ref{table:comparison_circuit_results} contains the results with the best amortized running time and the results for small $p$'s, where the bivariate comparison circuits (ours and from~\cite{TLWRK20}) have a comparable running time to the univariate circuit.
-For the sorting and the array minimum applications (Tables~\ref{table:sorting_circuit_results} and~\ref{table:minimum_circuit_results}), we showed only the results with $p$ giving the best running time. 
-%%%%%%%%%%%%
+For the sorting and the array minimum applications (Tables~\ref{table:sorting_circuit_results} and~\ref{table:minimum_circuit_results}), we showed only the results with $p$ giving the best running time.
 
 \begin{table}[h]
   \centering
@@ -144,7 +141,7 @@ For the sorting and the array minimum applications (Tables~\ref{table:sorting_ci
     8       & 599     & 20        & 867.46       & 93    & 690 \\
     16      & 599     & 20        & 3652.23      & 391   & 3140\\
     32      & 599     & 20        & 14769.23     & 1579  & 13900 \\
-    64      & 604     & 2         & 60665.9      & 6487  & 60000 \\
+    64      & 604     & 10        & 60351.02     & 6453  & 60000 \\
     \midrule
     \multicolumn{6}{l}{32-bit integers ($d=3$, $\ell=2$, $k=4676$)} \\
     \cmidrule(lr){1-6}
@@ -181,12 +178,63 @@ For the sorting and the array minimum applications (Tables~\ref{table:sorting_ci
     8       & 1     & 825           & 20        & 506.24    & 193.96 \\
     16      & 1     & 839           & 20        & 1694.15   & 649.10 \\
     32      & 1     & 854           & 20        & 6440.27   & 2467.54 \\
-    64      & 1     & 884           & ??        & ?????.??  & ?????.?? \\
+    64      & 1     & 884           & 19        & 24984.11  & 9572.46 \\
     \bottomrule
   \end{tabular*}
   \caption{The running time needed to find the minimum of $N$ 8-bit or 32-bit integers with $p=17$, $m=41761$ and $n=41760$. The parameter $T$ is equal to the number of the tournament method stages. The minimal security level is 121 bits according to the LWE estimator~\cite{lwe_estimator}.}
   \label{table:minimum_circuit_results}
 \end{table}
+
+\subsection{Comparison to other HE schemes}
+    As mentioned in the introduction, there are three types of HE schemes suitable in different use cases including TFHE, CKKS and BGV/BFV.
+    Our algorithms are designed for BGV/BFV, which support SIMD packing and are the most efficient FHE schemes for exact computation in arithmetic circuits.
+    However, the amortized running time per data value of our comparison algorithms is comparable to the most efficient FHE schemes for binary circuits (TFHE) and approximate arithmetic over real numbers (CKKS). 
+
+    In Table~\ref{table:other_he_schemes}, our implementation of the less-than function is compared to the implementations of this function in TFHE \cite{AC:CGGI17} and CKKS \cite{EPRINT:CheKimKim19}.
+
+    Chilloti et al. \cite{AC:CGGI17} constructed a deterministic weighted automata that can compute the maximum function using the TFHE scheme.
+    The same automata can compute the less-than function without any performance loss. 
+    In this case, the running time of the less-than function of two $n_b$-bit integers takes $170 n_b$ microseconds on a hardware similar to ours and with the encryption parameters supporting at least 110 bits of security.
+    Note that TFHE keeps the ciphertext noise on the same level such that one can perform indefinite number of consecutive comparisons.
+    In our work, we do not reduce the noise even though it is possible by increasing encryption parameters and performing a so-called "bootstrapping" function.
+
+    Cheon et al. \cite{EPRINT:CheKimKim19} designed a polynomial approximation of the less-than function over real numbers.
+    Since the precision of this approximation depends on the ciphertext noise which cannot be reduced in CKKS, only a few consecutive comparisons are possible to perform correctly unlike in TFHE and BGV/BFV.
+    Nevertheless, the number of SIMD slots in CKKS is always $n/2$, which significantly reduces the amortized running time per value.
+    Since the implementation in \cite{EPRINT:CheKimKim19} exploits CPU parallelization with 8 threads and ours avoid multi-threading, we put an estimated running time of \cite{EPRINT:CheKimKim19} for one core in Table~\ref{table:other_he_schemes}.
+    The encryption parameters of the CKKS scheme are set to a security level of 128 bits.
+    
+    \todo{Be more concrete in the below paragraph once you finish experiments}
+    As shown in Table~\ref{table:other_he_schemes}, our algorithm for the less-than function demonstrates a similar performance as the TFHE-based work and outperforms the CKKS-based algorithms.
+    This means that in use cases that involve arithmetic and non-arithmetic functions (e.g. artificial neural networks) one might need only an arithmetic-circuit-friendly HE scheme (i.e. BGV/BFV) instead of combining it with an HE scheme efficient for a non-arithmetic part of the computation (i.e. TFHE).
+
+    \begin{table}[h]
+      \centering
+      \begin{tabular*}{.9\textwidth}{@{\extracolsep{\fill} } c c c c}
+        \toprule
+        Bit length  & FHE scheme  & \makecell{Total \\ time, s}    & \makecell{Amortized time \\ per slot, ms} \\
+        \midrule
+        \multirow{3}{*}{8}  & TFHE              & ?1.36     & ?1.36 \\
+                            & CKKS              & ?31x8     & ?0.47x8 \\
+                            & BGV(this paper)   & ?     & ? \\
+        \midrule
+        \multirow{3}{*}{10}  & TFHE              & ?1.70     & ?1.70 \\
+                            & CKKS              & ?47x8     & ?0.72x8 \\
+                            & BGV(this paper)   & ?     & ? \\
+        \midrule
+        \multirow{3}{*}{12}  & TFHE              & ?2.04     & ?2.04 \\
+                            & CKKS              & ?80x8     & ?1.22x8 \\
+                            & BGV(this paper)   & ?     & ? \\
+        \midrule
+        \multirow{3}{*}{16}  & TFHE              & ?2.72     & ?2.72 \\
+                            & CKKS              & ?94x8     & ?1.43x8 \\
+                            & BGV(this paper)   & ?     & ? \\ 
+        \bottomrule
+      \end{tabular*}
+      \caption{Total and amortized running time of the maximum function implemented with different HE schemes including TFHE, CKKS and BGV. Note that TFHE does not support SIMD packing, which implies that the total and amortized running time of this scheme are the same in Table~\ref{table:other_he_schemes}.}
+      \label{table:other_he_schemes}
+    \end{table}
+    
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "main"
