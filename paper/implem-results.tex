@@ -195,8 +195,7 @@ For the sorting and the array minimum applications (Tables~\ref{table:sorting_ci
     Chilloti et al. \cite{AC:CGGI17} constructed a deterministic weighted automata that can compute the maximum function using the TFHE scheme.
     The same automata can compute the less-than function without any performance loss. 
     In this case, the running time of the less-than function of two $n_b$-bit integers takes $170 n_b$ microseconds on a hardware similar to ours and with the encryption parameters supporting at least 110 bits of security.
-    Note that TFHE keeps the ciphertext noise on the same level such that one can perform indefinite number of consecutive comparisons.
-    In our work, we do not reduce the noise even though it is possible by increasing encryption parameters and performing a so-called "bootstrapping" function.
+    Note that this running time is achieved in the leveled mode of TFHE, i.e. without bootstrapping.
 
     Cheon et al. \cite{EPRINT:CheKimKim19} designed a polynomial approximation of the less-than function over real numbers.
     Since the precision of this approximation depends on the ciphertext noise which cannot be reduced in CKKS, only a few consecutive comparisons are possible to perform correctly unlike in TFHE and BGV/BFV.
