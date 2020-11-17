@@ -188,7 +188,7 @@ For the sorting and the array minimum applications (Tables~\ref{table:sorting_ci
 \subsection{Comparison to other HE schemes}
     As mentioned in the introduction, there are three types of HE schemes suitable in different use cases including TFHE, CKKS and BGV/BFV.
     Our algorithms are designed for BGV/BFV, which support SIMD packing and are the most efficient FHE schemes for exact computation in arithmetic circuits.
-    However, the amortized running time per data value of our comparison algorithms is comparable to the most efficient FHE schemes for binary circuits (TFHE) and approximate arithmetic over real numbers (CKKS). 
+    However, the amortized running time per data value of our comparison algorithms is comparable to efficient FHE schemes for binary circuits (TFHE) and HE supporting approximate arithmetic over real numbers (CKKS). 
 
     In Table~\ref{table:other_he_schemes}, our implementation of the less-than function is compared to the implementations of this function in TFHE \cite{AC:CGGI17} and CKKS \cite{EPRINT:CheKimKim19}.
 
@@ -230,7 +230,7 @@ For the sorting and the array minimum applications (Tables~\ref{table:sorting_ci
                             & BGV(this paper)   & ?     & ? \\ 
         \bottomrule
       \end{tabular*}
-      \caption{Total and amortized running time of the maximum function implemented with different HE schemes including TFHE, CKKS and BGV. Note that TFHE does not support SIMD packing, which implies that the total and amortized running time of this scheme are the same in Table~\ref{table:other_he_schemes}.}
+      \caption{Total and amortized running time of the maximum function implemented with different HE schemes including TFHE, CKKS and BGV. Note that TFHE does not support SIMD packing, which implies that the total and amortized running time of this scheme are the same.}
       \label{table:other_he_schemes}
     \end{table}
     

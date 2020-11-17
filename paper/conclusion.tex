@@ -1,0 +1,14 @@
+In this work, we constucted more efficient homomorphic circuits of comparison operations for the BGV and BFV FHE schemes.
+Our results are based on structural properties of comparison functions over finite fields.
+We proved that less-than functions of two input variables $x$ and $y$ can be represented either by bivariate polynomials or univariate polynomials (in variable $z = x - y$) with multiple zero coefficients, which simplifies computation.
+Moreover, our computation of the univariate less-than functions yields the output of the equality function almost for free, which allowed us to speed up the lexicographic order of vectors over finite fields and thus comparison of large integers encoded by these vectors.
+
+The implementation of our circuits in HElib is faster than the state-of-the-art work~\cite{TLWRK20} by more than a factor of 3.
+Furthermore, the running time of our circuits is comparable to implementations of comparison algorithms in TFHE, which is believed to be the most efficient FHE scheme for non-arithmetic homomorphic computations.
+As a side contribution, we applied our comparison algorithms to the tasks of sorting and array minimum search.
+In both cases we achieved the best running time present in the literature.
+For instance, our sorting algorithm can sort 4676 batches of 64 32-bit integers in about 25 hours, which results in an amortized time equal to about 19 seconds per batch.
+Our minimum circuit can find minimal elements of 2610 batches of 64 32-bit integers in approximately 7 hours. 
+The amortized time is 9.5 seconds per batch.
+
+We hope that this work will draw attention to the study of arithmetic circuits over finite fields representing non-arithmetic functions over integers, thus leading to practically efficient homomorphic implementations of useful algorithms.
