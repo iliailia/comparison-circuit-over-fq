@@ -1,7 +1,8 @@
 We implemented the lexicographic order algorithm described in Section~\ref{sec:background} using the implementation of the BGV scheme~\cite{BGV12} in the HElib library~\cite{HElib}.
 For a fair comparison with the prior work, we also implemented the algorithm of Tan et al.~\cite{TLWRK20}.
 The code will be publicly available.
-For experiments, we used an ordinary commodity laptop equipped with an Intel Dual-Core i5-7267U CPU (running at 3.1 GHz) and 8 GB of RAM without multi-threading.
+For experiments, we used an ordinary commodity laptop equipped with an Intel Dual-Core i5-7267U CPU (running at 3.1 GHz) and 8 GB of RAM.
+Multi-threading was turned off.
 
 To compare our algorithms with the state of the art, we ran the lexicographic order algorithm to compute the less-than function on 64-bit integers.
 The results of these experiments are presented in Table~\ref{table:comparison_circuit_results}.
@@ -21,54 +22,54 @@ In the tables presented below, the following notation is used:
 In all the experiments, the encryption parameters of BGV are chosen according to the following strategy.
 The plaintext modulus $p$ is a prime number such that SIMD slots are isomorphic to a finite field.
 Next, we choose the order $m$ of $\intring$ with large enough $\phi(m)$ to support our homomorphic algorithms.
-In addition, $m$ is chosen to be a prime number such that $p$ has a small order modulo $m$.
-The former constraint makes sure that the slot permutation group $\mathcal{H}$ is cyclic, which results in a better performance (for more details, see \cite[Appendix C.3]{GHS12}).
+In addition, $m$ is chosen to be a prime number or a product of a few primes such that $p$ has a small order modulo $m$.
+The former constraint makes sure that the slot permutation group $\mathcal{H}$ is cyclic or a product of a few cyclic groups, which results in a better performance (for more details, see \cite[Appendix C.3]{GHS12}).
 The latter constraint maximizes the number of SIMD slots, thus reducing the amortized running time of our algorithms.
 
-We ran our algorithms with $p$ in the interval $[3,659]$.
-However, Table~\ref{table:comparison_circuit_results} contains the results with the best amortized running time and the results for small $p$'s, where the bivariate comparison circuits (ours and from~\cite{TLWRK20}) have a comparable running time to the univariate circuit.
+We ran our algorithms with $p$ taken in the interval $[3,659]$.
+However, Table~\ref{table:comparison_circuit_results} contains the results with the best possible amortized running time and the best results for small $p$'s, where the bivariate comparison circuits (ours and from~\cite{TLWRK20}) have a comparable running time to the univariate circuit.
 For the sorting and the array minimum applications (Tables~\ref{table:sorting_circuit_results} and~\ref{table:minimum_circuit_results}), we showed only the results with $p$ giving the best running time.
 
 \begin{table}[h]
   \centering
-  \begin{tabular*}{.9\textwidth}{@{\extracolsep{\fill} } c c c c c c c}
+  \begin{tabular*}{.9\textwidth}{@{\extracolsep{\fill} } c c c c c c c c}
     \toprule
-    $(p,m,n)$ & Type & $(d,\ell)$   &  $\log_2 q$    & $k$ & Total time, s & \makecell{Amortized time \\ per slot, ms} \\
+    $(p,m,n)$ & Type & $(d,\ell)$   &  $\log_2 q$ & $\lambda$    & $k$ & Total time, s & \makecell{Amortized time \\ per slot, ms} \\
     \cmidrule(lr){1-1}\cmidrule(lr){2-7}
     %$(3,34511,34510)$  & U               & $(1,64)$  & $>320$ & $31$   & 5.18   & 167 \\
     %$(3,34511,34510)$  & U               & $(2,32)$  & $>310$ & $63$   & 7.84   & 124 \\
     %$(3,34511,34510)$  & U               & $(4,16)$  & $>310$ & $126$  & 10.11  & 80 \\
     %$(3,34511,34510)$  & U               & $(8,8)$   & $>360$ & $253$  & 16.43  & 65 \\
-    $(3,34511,34510)$  & U               & $(16,4)$  & $>450$ & $507$  & 29.16  & 58 \\
+    $(3,34511,34510)$  & U               & $(16,4)$  & $472$ & $189$ & $507$  & 28.45  & 56 \\
     %$(3,34511,34510)$  & \cite{TLWRK20}  & $(1,41)$  & $>320$ & $49$   & 7.10   & 145 \\
     %$(3,34511,34510)$  & \cite{TLWRK20}  & $(2,21)$  & $>320$ & $96$   & 14.80  & 154 \\
     %$(3,34511,34510)$  & \cite{TLWRK20}  & $(4,11)$  & $>320$ & $184$  & 20.60  & 112 \\
     %$(3,34511,34510)$  & \cite{TLWRK20}  & $(5,9)$   & $>320$ & $225$  & 23.67  & 105 \\
-    $(3,34511,34510)$  & \cite{TLWRK20}  & $(6,7)$   & $>310$ & $290$  & 27.37  & 94 \\
+    $(3,34511,34510)$  & \cite{TLWRK20}  & $(6,7)$   & $323$ & $298$ & $290$  & 26.24  & 90 \\
     %$(3,34511,34510)$  & \cite{TLWRK20}  & $(11,4)$  & $>380$ & $507$  & 48.25  & 95 \\
     %$(3,34511,34510)$  & B               & $(1,41)$  & $>320$ & $49$   & 6.36   & 130 \\
     %$(3,34511,34510)$  & B               & $(2,21)$  & $>310$ & $96$   & 12.33  & 128 \\
     %$(3,34511,34510)$  & B               & $(4,11)$  & $>310$ & $184$  & 16.69  & 91 \\
     %$(3,34511,34510)$  & B               & $(5,9)$   & $>320$ & $225$  & 18.57  & 83 \\
     %$(3,34511,34510)$  & B               & $(6,7)$   & $>310$ & $290$  & 20.51  & 71 \\
-    $(3,34511,34510)$  & B               & $(11,4)$  & $>380$ & $507$  & 34.95  & 69 \\
+    $(3,34511,34510)$  & B               & $(11,4)$  & $385$ & $226$ & $507$  & 35.45  & 70 \\
     %$(5,19531,19530)$  & U               & $(1,41)$  & $>330$ & $68$   & 3.04   & 45 \\
     %$(5,19531,19530)$  & U               & $(2,21)$  & $>330$ & $132$  & 4.38   & 33 \\
     %$(5,19531,19530)$  & U               & $(3,14)$  & $>320$ & $199$  & 5.17   & 26 \\
     %$(5,19531,19530)$  & U               & $(4,11)$  & $>320$ & $253$  & 6.11   & 24 \\
     %$(5,19531,19530)$  & U               & $(6,7)$   & $>340$ & $398$  & 8.71   & 22 \\
-    $(5,19531,19530)$  & U               & $(7,6)$   & $>350$ & $465$  & 10.09  & 22 \\
+    $(5,19531,19530)$  & U               & $(7,6)$   & $354$ & $141$ & $465$  & 9.89  & 21 \\
     %$(5,19531,19530)$  & \cite{TLWRK20}  & $(1,28)$  & $>290$ & $99$   & 4.68   & 47 \\
     %$(5,19531,19530)$  & \cite{TLWRK20}  & $(4,7)$   & $>295$ & $398$  & 14.33  & 36 \\
-    $(5,19531,19530)$  & \cite{TLWRK20}  & $(7,4)$   & $>310$ & $697$  & 25.33  & 36 \\
+    $(5,19531,19530)$  & \cite{TLWRK20}  & $(7,4)$   & $324$ & $155$ & $697$  & 24.97  & 36 \\
     %$(5,19531,19530)$  & B               & $(1,28)$  & $>290$ & $99$   & 3.09   & 31 \\
     %$(5,19531,19530)$  & B               & $(2,14)$  & $>290$ & $199$  & 5.72   & 29 \\
     %$(5,19531,19530)$  & B               & $(4,7)$   & $>295$ & $398$  & 8.98   & 23 \\
-    $(5,19531,19530)$  & B               & $(7,4)$   & $>300$ & $697$  & 14.73  & 21 \\
+    $(5,19531,19530)$  & B               & $(7,4)$   & $324$ & $155$ & $697$  & 14.50  & 21 \\
     %$(7,14009,14008)$  & U               & $(1,32)$  & $>330$ & $25$   & 1.88   & 75 \\
     %$(7,14009,14008)$  & U               & $(2,16)$  & $>330$ & $51$   & 3.69   & 72 \\
     %$(7,14009,14008)$  & U               & $(4,8)$   & $>310$ & $103$  & 5.21   & 51 \\
-    $(7,14009,14008)$  & U               & $(8,4)$   & $>340$ & $206$  & 9.24   & 45 \\
+    $(7,14009,14008)$  & U               & $(8,4)$   & $342$ & $102$ & $206$  & 9.11   & 44 \\
     %$(7,14009,14008)$  & B               & $(1,23)$  & $>330$ & $35$   & 1.88   & 54 \\
     %$(7,14009,14008)$  & B               & $(2,12)$  & $>330$ & $68$   & 3.67   & 54 \\
     %$(7,14009,14008)$  & B               & $(4,6)$   & $>320$ & $137$  & 5.34   & 39 \\
@@ -77,12 +78,12 @@ For the sorting and the array minimum applications (Tables~\ref{table:sorting_ci
     %$(7,20197,19116)$  & U               & $(1,32)$  & $>350$ & $66$   & 5.22   & 79 \\
     %$(7,20197,19116)$  & U               & $(2,16)$  & $>350$ & $132$  & 6.81   & 52 \\
     %$(7,20197,19116)$  & U               & $(4,8)$   & $>350$ & $265$  & 9.27   & 35 \\
-    $(7,20197,19116)$  & U               & $(8,4)$   & $>380$ & $531$  & 15.70  & 30 \\
+    $(7,20197,19116)$  & U               & $(8,4)$   & $406$ & $110$ & $531$  & 16.53  & 31 \\
     %$(7,20197,19116)$  & B               & $(1,23)$  & $>350$ & $92$   & 6.55   & 71 \\
     %$(7,20197,19116)$  & B               & $(2,12)$  & $>320$ & $177$  & 10.11  & 57 \\
     %$(7,20197,19116)$  & B               & $(3,8)$   & $>320$ & $265$  & 12.33  & 47 \\
     %$(7,20197,19116)$  & B               & $(4,6)$   & $>320$ & $354$  & 15.37  & 43 \\
-    $(7,20197,19116)$  & B               & $(6,4)$   & $>340$ & $531$  & 21.45  & 40 \\
+    $(7,20197,19116)$  & B               & $(6,4)$   & $354$ & $137$ & $531$  & 21.35  & 40 \\
     %$(7,20197,19116)$  & B               & $(8,3)$   & $>380$ & $708$  & 29.67  & 42 \\
 
     %$(11,15797,15796)$ & U               & $(1,25)$  & $>360$ & $57$   & ?   & ? \\
@@ -111,23 +112,28 @@ For the sorting and the array minimum applications (Tables~\ref{table:sorting_ci
 
     %$(131,17293,17292)$ & U              & $(1,11)$  & $>465$ & $524$  & 6.57   & 13 \\
     %$(131,17293,17292)$ & U              & $(2,6)$   & $>465$ & $960$  & 11.81  & 12 \\
-    $(131,17293,17292)$ & U               & $(3,4)$   & $>430$ & $1441$ & 15.80  & 11 \\
+    $(131,17293,17292)$ & U               & $(3,4)$   & $431$ & $96$ & $1441$ & 16.07  & 11 \\
 
     %$(167,28057,28056)$ & U              & $(1,11)$  & $>520$ & $850$  & 12.38  & 15 \\
     %$(167,28057,28056)$ & U              & $(2,6)$   & $>520$ & $1558$ & 22.36  & 14 \\
-    $(167,28057,28056)$ & U              & $(3,4)$   & $>490$ & $2338$ & 30.49  & 13 \\
+    $(167,28057,28056)$ & U              & $(3,4)$   & $494$ & $146$ & $2338$ & 30.69  & 13 \\
 
     %$(173,30103,30102)$ & U              & $(1,10)$  & $>520$ & $1003$ & 13.36  & 13 \\
-    $(173,30103,30102)$ & U               & $(2,5)$   & $>520$ & $2006$ & 23.92  & 12 \\
+    $(173,30103,30102)$ & U               & $(2,5)$   & $521$ & $148$ & $2006$ & 24.57  & 12 \\
     %$(173,30103,30102)$ & U              & $(3,4)$   & $>490$ & $2508$ & 32.60  & 13 \\
 
     %$(401,23029,23028)$ & U              & $(1,9)$   & $>570$ & $852$  & 14.50  & 17 \\
     %$(401,23029,23028)$ & U              & $(3,3)$   & $>540$ & $2558$ & 35.15  & 14 \\
     \bottomrule
   \end{tabular*}
-  \caption{The running time of our lexicographic order algorithms and the algorithm of Tan et al.~\cite{TLWRK20} to compare 64-bit integers. The second column (Type) indicates which comparison circuit is used: univariate (U), bivariate (B) or bivaraite from~\cite{TLWRK20}. The total time is averaged over 10 trials.\todo{do more trials}\todo{Security level?}}
+  \caption{The running time of our lexicographic order algorithms and the algorithm of Tan et al.~\cite{TLWRK20} to compare 64-bit integers with encryption parameters supporting $\lambda$ bits of security. The second column (Type) indicates which comparison circuit is used: the univariate (U), bivariate (B) or bivariate one from~\cite{TLWRK20}. The total time is averaged over 50 trials.}
   \label{table:comparison_circuit_results}
 \end{table}
+
+As shown in Table~\ref{table:comparison_circuit_results}, our lexicographic order circuits have a better running time than the prior work of Tan et al.~\cite{TLWRK20} for any plaintext modulus $p$.
+In particular, our bivatiate circuit is up to 42\% faster than the bivaraite circuit of Tan et al. for small $p$.
+The best running time per integer was achieved by our univariate circuit, which outperforms any bivariate circuit for any $p > 5$ at the cost of larger encryption parameters.
+For $p=131$, the univariate circuit takes only 11 milliseconds to compare two 64-bit integers, which is more than 3 times faster than the circuit of Tan et al.
 
 \begin{table}[h]
   \centering
@@ -149,7 +155,7 @@ For the sorting and the array minimum applications (Tables~\ref{table:sorting_ci
     8       & 671     & 20        & 1356.19      & 290   & 944 \\
     16      & 671     & 20        & 5700.12      & 1219  & 4280 \\
     32      & 684     & 20        & 23017.03     & 4922  & 18600 \\
-    64      & 684     & 1         & 89828.9      & 19211 & 49700 \\
+    64      & 684     & 10        & 89972.27     & 19241 & 49700 \\
     \bottomrule
   \end{tabular*}
   \caption{The running time needed to sort $N$ 8-bit or 32-bit integers with $p=167$, $m=28057$ and $n=28056$. The minimal security level is 92 bits according to the LWE estimator~\cite{lwe_estimator}. Note that the amortized timing per slot from~\cite{CDSS15} is obtained with the LTV scheme~\cite{STOC:LopTroVai12}, which was attacked by Albrecht et al.~\cite{C:AlbBaiDuc16}.\todo{Why use $p=17$ ? For instance best timings for $N=2$ were obtained with $p=131$}}
@@ -178,7 +184,7 @@ For the sorting and the array minimum applications (Tables~\ref{table:sorting_ci
     8       & 1     & 825           & 20        & 506.24    & 193.96 \\
     16      & 1     & 839           & 20        & 1694.15   & 649.10 \\
     32      & 1     & 854           & 20        & 6440.27   & 2467.54 \\
-    64      & 1     & 884           & 19        & 24984.11  & 9572.46 \\
+    64      & 1     & 884           & 20        & 24986.04  & 9573.20 \\
     \bottomrule
   \end{tabular*}
   \caption{The running time needed to find the minimum of $N$ 8-bit or 32-bit integers with $p=17$, $m=41761$ and $n=41760$. The parameter $T$ is equal to the number of the tournament method stages. The minimal security level is 121 bits according to the LWE estimator~\cite{lwe_estimator}.}
@@ -194,7 +200,7 @@ For the sorting and the array minimum applications (Tables~\ref{table:sorting_ci
 
     Chilloti et al. \cite{AC:CGGI17} constructed a deterministic weighted automata that can compute the maximum function using the TFHE scheme.
     The same automata can compute the less-than function without any performance loss. 
-    In this case, the running time of the less-than function of two $n_b$-bit integers takes $170 n_b$ microseconds on a hardware similar to ours and with the encryption parameters supporting at least 110 bits of security.
+    In this case, the running time of the less-than function of two $n_b$-bit integers takes $170 n_b$ microseconds on a hardware similar to ours and with the encryption parameters supporting at least 110 bits of security.\todo{check with relation to the result of Daniele}
     Note that this running time is achieved in the leveled mode of TFHE, i.e. without bootstrapping.
 
     Cheon et al. \cite{EPRINT:CheKimKim19} designed a polynomial approximation of the less-than function over real numbers.
@@ -202,35 +208,38 @@ For the sorting and the array minimum applications (Tables~\ref{table:sorting_ci
     Nevertheless, the number of SIMD slots in CKKS is always $n/2$, which significantly reduces the amortized running time per value.
     Since the implementation in \cite{EPRINT:CheKimKim19} exploits CPU parallelization with 8 threads and ours avoid multi-threading, we put an estimated running time of \cite{EPRINT:CheKimKim19} for one core in Table~\ref{table:other_he_schemes}.
     The encryption parameters of the CKKS scheme are set to a security level of 128 bits.
+
+    Our implementation runs with $p=131$, $m=17293$ ($\phi(m)=17292$), which corresponds to 5764 integers of 8-16 bits encoded into one ciphertext.
+    The encryption parameters corresponds to a security level of 134 bits.
     
-    \todo{Be more concrete in the below paragraph once you finish experiments}
-    As shown in Table~\ref{table:other_he_schemes}, our algorithm for the less-than function demonstrates a similar performance as the TFHE-based work and outperforms the CKKS-based algorithms.
-    This means that in use cases that involve arithmetic and non-arithmetic functions (e.g. artificial neural networks) one might need only an arithmetic-circuit-friendly HE scheme (i.e. BGV/BFV) instead of combining it with an HE scheme efficient for a non-arithmetic part of the computation (i.e. TFHE).
+    As shown in Table~\ref{table:other_he_schemes}, our algorithm for the less-than function demonstrates a similar performance as the TFHE-based work and outperforms the CKKS-based algorithms by a factor 3-7 depending on the input size.
+    
+    This means that in use cases that involve arithmetic and non-arithmetic functions (e.g. artificial neural networks) one might resort to only an HE scheme supporting exact arithmetic circuits (i.e. BGV/BFV) instead of combining it with an HE scheme efficient for a non-arithmetic part of the computation (i.e. TFHE).
 
     \begin{table}[h]
       \centering
       \begin{tabular*}{.9\textwidth}{@{\extracolsep{\fill} } c c c c}
         \toprule
-        Bit length  & FHE scheme  & \makecell{Total \\ time, s}    & \makecell{Amortized time \\ per slot, ms} \\
+        Bit length  & FHE scheme & \makecell{Total \\ time, s}    & \makecell{Amortized time \\ per slot, ms} \\
         \midrule
-        \multirow{3}{*}{8}  & TFHE              & ?1.36     & ?1.36 \\
-                            & CKKS              & ?31x8     & ?0.47x8 \\
-                            & BGV(this paper)   & ?     & ? \\
+        \multirow{3}{*}{8}  & TFHE              & 0.001     & 1.36 \\
+                            & CKKS              & ?248     & ?3.76 \\
+                            & BGV(this paper)   & 7.09      & 1.23 \\
         \midrule
-        \multirow{3}{*}{10}  & TFHE              & ?1.70     & ?1.70 \\
-                            & CKKS              & ?47x8     & ?0.72x8 \\
-                            & BGV(this paper)   & ?     & ? \\
+        \multirow{3}{*}{10}  & TFHE             & 0.002     & 1.70 \\
+                             & CKKS             & ?376     & ?5.76 \\
+                             & BGV(this paper)  & 7.09      & 1.23 \\
         \midrule
-        \multirow{3}{*}{12}  & TFHE              & ?2.04     & ?2.04 \\
-                            & CKKS              & ?80x8     & ?1.22x8 \\
-                            & BGV(this paper)   & ?     & ? \\
+        \multirow{3}{*}{12}  & TFHE            & 0.002     & 2.04 \\
+                             & CKKS            & ?640     & ?9.76 \\
+                             & BGV(this paper)  & 7.09      & 1.23 \\
         \midrule
-        \multirow{3}{*}{16}  & TFHE              & ?2.72     & ?2.72 \\
-                            & CKKS              & ?94x8     & ?1.43x8 \\
-                            & BGV(this paper)   & ?     & ? \\ 
+        \multirow{3}{*}{16}  & TFHE            & 0.003     & 2.72 \\
+                             & CKKS            & ?752     & ?11.44 \\
+                             & BGV(this paper)   & 12.11     & 2.10 \\ 
         \bottomrule
       \end{tabular*}
-      \caption{Total and amortized running time of the maximum function implemented with different HE schemes including TFHE, CKKS and BGV. Note that TFHE does not support SIMD packing, which implies that the total and amortized running time of this scheme are the same.}
+      \caption{Total and amortized running time of the maximum function implemented with different HE schemes including TFHE, CKKS and BGV. Encryption parameters of each scheme support the security level $\lambda$.Note that TFHE does not support SIMD packing, which implies that the total and amortized running time of this scheme are the same. The encryption parameters of each scheme are set to support the following security levels: 110 bits for TFHE, 128 bits for CKKS and 134 bits for BGV.}
       \label{table:other_he_schemes}
     \end{table}
     
