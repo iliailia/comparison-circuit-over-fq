@@ -1,3 +1,71 @@
+@Article{KL15,
+author = {Kim, Miran and Lauter, Kristin},
+title = {{Private Genome Analysis Through Homomorphic Encryption}},
+year = {2015},
+month = {December},
+abstract = {The rapid development of genome sequencing technology allows researchers to access large genome datasets. However, outsourcing the data processing to the cloud poses high risks for personal privacy. The aim of this paper is to give a practical solution for this problem using homomorphic encryption. In our approach, all the computations can be performed in an untrusted cloud without requiring the decryption key or any interaction with the data owner, which preserves the privacy of genome data.
+
+In this paper, we present evaluation algorithms for secure computation of the minor allele frequencies and chi-squared statistic in a genome-wide association studies setting. We also describe how to privately compute the Hamming distance and approximate Edit distance between encrypted DNA sequences. Finally, we compare performance details of using two practical homomorphic encryption schemes - the BGV scheme by Gentry, Halevi and Smart and the YASHE scheme by Bos, Lauter, Loftus and Naehrig. Such an approach with the YASHE scheme analyzes data from 400 people within about 2 seconds and picks a variant associated with disease from 311 spots. For another task, using the BGV scheme, it took about 65 seconds to securely compute the approximate Edit distance for DNA sequences of size 5K and figure out the differences between them.},
+publisher = {BioMed Central Ltd},
+url = {https://www.microsoft.com/en-us/research/publication/private-genome-analysis-through-homomorphic-encryption/},
+journal = {BMC medical informatics and decision making},
+volume = {15},
+edition = {BMC medical informatics and decision making},
+}
+
+@InProceedings{BCIV17,
+author="Bos, Joppe W.
+and Castryck, Wouter
+and Iliashenko, Ilia
+and Vercauteren, Frederik",
+editor="Joye, Marc
+and Nitaj, Abderrahmane",
+title="Privacy-Friendly Forecasting for the Smart Grid Using Homomorphic Encryption and the Group Method of Data Handling",
+booktitle="Progress in Cryptology - AFRICACRYPT 2017",
+year="2017",
+publisher="Springer International Publishing",
+address="Cham",
+pages="184--201",
+abstract="While the smart grid has the potential to have a positive impact on the sustainability and efficiency of the electricity market, it also poses some serious challenges with respect to the privacy of the consumer. One of the traditional use-cases of this privacy sensitive data is the usage for forecast prediction. In this paper we show how to compute the forecast prediction such that the supplier does not learn any individual consumer usage information. This is achieved by using the Fan-Vercauteren somewhat homomorphic encryption scheme. Typical prediction algorithms are based on artificial neural networks that require the computation of an activation function which is complicated to compute homomorphically. We investigate a different approach and show that Ivakhnenko's group method of data handling is suitable for homomorphic computation.",
+isbn="978-3-319-57339-7"
+}
+
+
+@InProceedings{BMMP18,
+author="Bourse, Florian
+and Minelli, Michele
+and Minihold, Matthias
+and Paillier, Pascal",
+editor="Shacham, Hovav
+and Boldyreva, Alexandra",
+title={{Fast Homomorphic Evaluation of Deep Discretized Neural Networks}},
+booktitle="Advances in Cryptology -- CRYPTO 2018",
+year="2018",
+publisher="Springer International Publishing",
+address="Cham",
+pages="483--512",
+abstract="The rise of machine learning as a service multiplies scenarios where one faces a privacy dilemma: either sensitive user data must be revealed to the entity that evaluates the cognitive model (e.g., in the Cloud), or the model itself must be revealed to the user so that the evaluation can take place locally. Fully Homomorphic Encryption (FHE) offers an elegant way to reconcile these conflicting interests in the Cloud-based scenario and also preserve non-interactivity. However, due to the inefficiency of existing FHE schemes, most applications prefer to use Somewhat Homomorphic Encryption (SHE), where the complexity of the computation to be performed has to be known in advance, and the efficiency of the scheme depends on this global complexity.",
+isbn="978-3-319-96878-0"
+}
+
+
+@InProceedings{ACS20,
+author="Aubry, Pascal
+and Carpov, Sergiu
+and Sirdey, Renaud",
+editor="Jarecki, Stanislaw",
+title={{Faster Homomorphic Encryption is not Enough: Improved Heuristic for Multiplicative Depth Minimization of Boolean Circuits}},
+booktitle="Topics in Cryptology -- CT-RSA 2020",
+year="2020",
+publisher="Springer International Publishing",
+address="Cham",
+pages="345--363",
+abstract="In somewhat homomorphic encryption schemes (e.g. B/FV, BGV) the size of ciphertexts and the execution performance of homomorphic operations depends heavily on the multiplicative depth. The multiplicative depth is the maximal number of consecutive multiplications for which the homomorphic encryption scheme was parameterized.",
+isbn="978-3-030-40186-3"
+}
+
+
+
 @InProceedings{CGGI16,
 author="Chillotti, Ilaria
 and Gama, Nicolas
