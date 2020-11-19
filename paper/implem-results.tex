@@ -28,7 +28,7 @@ The latter constraint maximizes the number of SIMD slots, thus reducing the amor
 
 We ran our algorithms with $p$ taken in the interval $[3,659]$.
 However, Table~\ref{table:comparison_circuit_results} contains the results with the best possible amortized running time and the best results for small $p$'s, where the bivariate comparison circuits (ours and from~\cite{TLWRK20}) have a comparable running time to the univariate circuit.
-For the sorting and the array minimum applications (Tables~\ref{table:sorting_circuit_results} and~\ref{table:minimum_circuit_results}), we showed only the results with $p$ giving the best running time.
+For the sorting and the array minimum applications (Tables~\ref{table:sorting_circuit_results} and~\ref{table:minimum_circuit_results}), we showed only the results with $p$ and $m$ supporting reasonable security levels and giving the best running time for arrays of length $N=64$.
 
 \begin{table}[h]
   \centering
@@ -162,6 +162,10 @@ For $p=131$, the univariate circuit takes only 11 milliseconds to compare two 64
   \label{table:sorting_circuit_results}
 \end{table}
 
+Table~\ref{table:sorting_circuit_results} illustrates that our homomorphic sorting implementation achieves the best running time in the existing literature.
+Note that the best result~\cite{CDSS15} in this area is based on an SHE scheme that was successfully attacked by Albrecht et al.~\cite{C:AlbBaiDuc16}.
+Hence, this result is hard to compare directly to our work.
+
 \begin{table}[h]
   \centering
   \begin{tabular*}{.9\textwidth}{@{\extracolsep{\fill} } c c c c c c}
@@ -190,6 +194,12 @@ For $p=131$, the univariate circuit takes only 11 milliseconds to compare two 64
   \caption{The running time needed to find the minimum of $N$ 8-bit or 32-bit integers with $p=17$, $m=41761$ and $n=41760$. The parameter $T$ is equal to the number of the tournament method stages. The minimal security level is 121 bits according to the LWE estimator~\cite{lwe_estimator}. \todo{Why use $p=17$ ? For instance best timings for $N=2$ were obtained with $p=131$.}}
   \label{table:minimum_circuit_results}
 \end{table}
+
+The existing works that use homomorphic array minimum/maximum function~\cite{TMP15,PoPETS:SFR20} are based on the techniques described in Section~\ref{sec:min/max}.
+Hence, our improvement of comparison circuits automatically results in a better performance of the array minimum.  
+For example, Togan et al.~\cite{TMP15} needed 346.9 seconds to find the maximums of 960 arrays of 16 8-bit integers, which is 361 milliseconds per array.
+Our work can perform this task in 74 milliseconds, see Table~\ref{table:minimum_circuit_results}.
+To find the minimum of 64 32-bit integers, our minimum algorithm requires about 9.5 seconds.
 
 \subsection{Comparison to other HE schemes}
     As mentioned in the introduction, there are three types of HE schemes suitable in different use cases including TFHE, CKKS and BGV/BFV.
