@@ -1,0 +1,154 @@
+\section{Proof of Theorem \ref{thm:less_than_total_degree}}
+\label{proof_thm_less_than_total_degree}
+To prove this statement we will need the following Lemma.
+
+  \begin{lemma}\label{lem:difference_to_p-1}
+    For all $(a,b)\in\Z^2$ we have:
+    \[
+      (a - b)^{p-1} = \sum_{i=0}^{p-1} a^i b^{p-1-i} \mod p.
+    \]
+  \end{lemma}
+  \begin{proof}
+    Using the binomial theorem we obtain
+    \[
+      (a - b)^{p-1} = \sum_{i=0}^{p-1} \binom{p-1}{i} a^i (-b)^{p-1-i}.
+    \]
+    Computing the binomial coefficient modulo $p$
+    \begin{align*}
+      \binom{p-1}{i} & = \frac{(p-1)!}{i! (p-1-i)!} \\
+      & = \frac{(p-1)(p-2)\dots(i+1)}{1 \cdot 2 \dots (p-(1+i))} = (-1)^{p-1-i} \mod p\,,
+    \end{align*}
+    we prove the lemma.
+  \end{proof}
+
+  \begin{lemma}\label{lem:sum_poly}
+    Let $P(x)$ be a polynomial of degree $d$ less than $p-1$.
+    For any prime number $p > 2$, it holds
+    \[
+      \sum_{a=0}^{p-1} P(a) = 0 \mod p.
+    \]
+  \end{lemma}
+  \begin{proof}
+    It is enough to prove that the sum $\sum_{a=0}^{p-1} a^n = 0 \mod p$ for any $0 \leq n < p-1$. The case $n=0$ is straightforward, now let us assume $n>0$. Let $g$ be a primitive element of $\F_p$.
+    Since $p > 2$, we have $g \ne 1$.
+    Thus, we can rewrite the above sum as follows.
+    \begin{align}
+      \sum_{i=1}^{p-1} g^{in} = \frac{g^{pn} - g^n}{g^n - 1}.
+    \end{align}
+    Since $g^{pn} \equiv g^n \mod p$, the sum turns into zero modulo $p$.
+  \end{proof}
+
+  We can now start the proof of Theorem \ref{thm:less_than_total_degree}:
+  
+  \begin{proof}[Theorem \ref{thm:less_than_total_degree}]
+    Assume that all computations are done modulo $p$.
+    Using Lemma~\ref{lem:difference_to_p-1}, we obtain
+    \begin{align*}
+      P_{\LT_\S}(x,y) &=  \sum_{a = 0}^{p-2} \left(1-\sum_{i=0}^{p-1} x^i a^{p-1-i}\right) \sum_{b=a+1}^{p-1} \left(1-\sum_{j=0}^{p-1} y^j b^{p-1-j}\right)\\
+    \end{align*}
+    Let us expand this expression distributively.
+    \begin{align*}
+      \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} 1 - \sum_{i=0}^{p-1} x^i a^{p-1-i} - \sum_{i=0}^{p-1} y^i b^{p-1-i} + \sum_{i=0}^{p-1} \sum_{j=0}^{p-1} x^i y^j a^{p-1-i} b^{p-1-j}.
+    \end{align*}
+    Let us separately compute polynomial coefficients.
+    The constant term is equal to
+    \begin{align*}
+      \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} 1 - a^{p-1} - b^{p-1} + a^{p-1} b^{p-1} = \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} 1 - a^{p-1} - 1 + a^{p-1} = 0 
+    \end{align*}
+    The coefficients by $x^i$ with $i > 0$ can be computed as follows
+    \begin{align*}
+      \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} \left(-a^{p-1-i}\right) + a^{p-1-i} = 0.
+    \end{align*}
+    Next, we compute the coefficients by $y^i$ with $i > 0$.
+    \begin{align*}
+      -\sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} b^{p-1-i} - a^{p-1} b^{p-1-i} &= -\sum_{b=1}^{p-1} b^{p-1-i} - \sum_{a = 1}^{p-2} \sum_{b=a+1}^{p-1} b^{p-1-i} - b^{p-1-i} \\
+      &= -\sum_{b=1}^{p-1} b^{p-1-i}.
+    \end{align*}
+    If $i = p-1$, this sum is equal to $1$.
+    According to Lemma~\ref{lem:sum_poly}, it is $0$ if $i \ne 0 \mod (p-1)$.
+    
+    To compute coefficients by $x^i y^j$ with $i, j > 0$, we will use Faulhaber's formula below
+    \begin{align*}
+      \sum_{k=1}^n k^e = \frac{1}{e+1} \sum_{i=1}^{e+1} (-1)^{\delta_{ie}} \binom{e+1}{i} B_{e+1-i} \cdot n^i\,,
+    \end{align*}
+    where $\delta_{ie}$ is the Kronecker delta and $B_{i}$ is the $i$th Bernoulli number.
+    This implies that there exist a polynomial $P(x) \in \F_p[X]$ of degree $e+1$ such that
+    \begin{align}\label{eq:faulhaber}
+      \sum_{k=1}^n k^e = P(n).
+    \end{align}
+    Note that $P(0) = 0$.
+    The coefficient by $x^i y^j$ for some positive $i$ and $j$ is equal to
+    \begin{align*}
+      \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} a^{p-1-i} b^{p-1-j} = \sum_{b = 1}^{p-1} b^{p-1-j} \sum_{a=0}^{b-1} a^{p-1-i}.
+    \end{align*}
+    According to~(\ref{eq:faulhaber}), it follows that there exist a polynomial $P(x)$ of degree $p-i$ such that $\sum_{a=0}^{b-1} a^{p-1-i} = P(b)$.
+    Since $Q(x) = x^{p-1-j} P(x)$ has degree $2p-1-i-j$, Lemma~\ref{lem:sum_poly} implies that if $i+j > p$, then
+    \begin{align*}
+      \sum_{b = 1}^{p-1} b^{p-1-j} \sum_{a=0}^{b-1} a^{p-1-i} = \sum_{b=1}^{p-1} Q(b) = 0.
+    \end{align*}
+    Thus, the total degree of $P_{\LT_\S}$ is at most $p$.
+
+    In addition, we consider the case when $i = j$.
+    Let us consider the following sum
+    \begin{align*}
+      \sum_{a=0}^{p-1} a^{p-1-i} \sum_{b=0}^{p-1} b^{p-1-i} = 0.
+    \end{align*}
+    We can rewrite it as follows
+    \begin{align*}
+      \sum_{a=0}^{p-1} a^{p-1-i} \sum_{b=0}^{p-1} b^{p-1-i} = 2\sum_{a=0}^{p-2} a^{p-1-i} \sum_{b=a+1}^{p-1} b^{p-1-i} + \sum_{a=0}^{p-1} a^{2(p-1-i)}.
+    \end{align*}
+    If $i \ne (p-1)/2$, then the last sum is zero.
+    Thus, the coefficient by $x^i y^i$ is equal to $\sum_{a=0}^{p-2} a^{p-1-i} \sum_{b=a+1}^{p-1} b^{p-1-i} = 0$.
+    If $i = (p-1)/2$, then following the above argument, this coefficient is equal to $-(p-1)/2$.
+  \end{proof}
+
+\section{Decomposition of $f$ for $3\leq 3 \leq 7$}
+\label{app:decomposition-f}
+We remember that we note $Y = y(x-y)$.
+\paragraph{p=3}
+$$f(x,y) = 2$$
+
+$f$ is constant and can thus be computed without any homomorphic multiplication.
+
+\paragraph{p=5}
+$$f(x,y) = 4x^2 + 4x + Y$$
+
+2 homomorphic multiplications to compute $x^2$ and $Y$.
+
+\paragraph{p=7}
+$$f(x,y) = 1 + 4x(x+1) + 6[x(x+1)]^2 + (x^2+3x)Y + 6Y^2$$
+
+Which can be computed with only 4 homomorphic multiplications (indicated in bold) when rewritten as:
+
+$$f(x,y) = 1 + 2(\bm{x}^2+x)\bm{\cdot}[2 + 3(x^2+x)] + \bm{Y}\bm{\cdot}[(x^2+3x) + 6Y].$$
+
+
+\section{Proof of Lemma \ref{lem:univariate}}
+\label{app:proof-lem-univariate}
+   Let $z = x-y$.
+    Thus we can rewrite $Q_{\LT_\S}$ as the univariate indicator function $\chi_{\F_p^-}$, namely
+    \begin{align*}
+      Q_{\LT_\S}(x,y) = \chi_{\F_p^-}(z) = \sum_{a=-\frac{p-1}{2}}^{-1} 1 - (z - a)^{p-1}.
+    \end{align*}
+    Thanks to Lemma~\ref{lem:difference_to_p-1}, we can expand $(z-a)^{p-1}$ and obtain
+    \begin{align*}
+      \sum_{a=-\frac{p-1}{2}}^{-1} 1 - \sum_{i=0}^{p-1} z^i a^{p-1-i}
+      = \sum_{i=1}^{p-1} z^i \sum_{a=-\frac{p-1}{2}}^{-1} (-a^{p-1-i}).
+    \end{align*}
+    If $i$ is even, then the $i$th coefficient is equal to
+    \begin{align*}
+      -\sum_{a=-\frac{p-1}{2}}^{-1} a^{p-1-i} &= -\sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i} = -\frac{\sum_{a=-\frac{p-1}{2}}^{\frac{p-1}{2}} a^{p-1-i}}{2}.
+    \end{align*}
+    This coefficient is equal to $0$ for any even $0<i < p-1$ as $\sum_{a=0}^{p-1} a^{p-1-i} = 0$ in this case.
+    The $(p-1)$-th coefficient is equal to $-(p-1)/2 = (p+1)/2 \bmod p$.
+    If $i$ is odd, then we can rewrite the $i$th coefficient in the following way
+    \begin{align*}
+      -\sum_{a=-\frac{p-1}{2}}^{-1} a^{p-1-i} &= \sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i},
+    \end{align*}
+    which finishes the proof.
+ 
+
+%%%Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
