@@ -2,7 +2,8 @@
 *.blg
 *.log
 *.out
-*.pdf
+main.pdf
+main_pets.pdf
 *.gz
 *.sublime-project
 *.sublime-workspace
@@ -10,6 +11,7 @@
 *.aux
 *.fls
 *.fdb_latexmk
+*.idx
 code/comparison_circuit
 code/sorting_circuit
 *.cmake
