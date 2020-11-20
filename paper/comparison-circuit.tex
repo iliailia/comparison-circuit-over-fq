@@ -64,11 +64,11 @@ Unfortunately, the comparison function is not as simple and we have to rely on L
       \label{eq:dec-f}
       f(x,y) = f(x,0) + y(x-y)f_1(x,y) = f_0(x) + y(x-y)f_1(x,y).
     \end{equation}   
-    This decomposition can be applied recursively to $f_1$, so that there exists $(p-1)/2$ bivariate polynomials $f_i$ over $\mathbb{F}_p$ for $0\leq i \leq (p-3)/2$ such that:
+    This decomposition can be applied recursively to $f_1$, so that there exists $(p-1)/2$ polynomials $f_i$ over $\mathbb{F}_p$, $0\leq i \leq (p-3)/2$, such that:
 
     \begin{equation}
       \label{eq:decomposition-f-final}
-      f_0(x,y) = f_0(x) + f_1(x)Y + f_2(x)Y^2 + \cdots + f_{(p-3)/2}(x)Y^{(p-3)/2}
+      f_0(x,y) = f_0(x) + f_1(x)Y + f_2(x)Y^2 + \cdots + f_{(p-3)/2}(x)Y^{(p-3)/2},
     \end{equation}
     with $Y=y(x-y)$ and $\deg (f_{i}(x)) = p-3 - 2i$.
 
