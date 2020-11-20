@@ -26,6 +26,13 @@ In addition, $m$ is chosen to be a prime number or a product of a few primes suc
 The former constraint makes sure that the slot permutation group $\mathcal{H}$ is cyclic or a product of a few cyclic groups, which results in a better performance (for more details, see \cite[Appendix C.3]{GHS12}).
 The latter constraint maximizes the number of SIMD slots, thus reducing the amortized running time of our algorithms.
 
+%%%%%%%%
+Every input integer is encoded into exactly one ciphertext.
+First, it is decomposed into a vector of $l$ digits over $\F_p^d$ (see Section~\ref{sec:comparison_of_large_integers}).
+Then each digit occupies one SIMD slot.
+Thus, each ciphertext encrypts exactly $k = \#slots/l$ integers. 
+%%%%%%%%
+
 We ran our algorithms with $p$ taken in the interval $[3,659]$.
 However, Table~\ref{table:comparison_circuit_results} contains the results with the best possible amortized running time and the best results for small $p$'s, where the bivariate comparison circuits (ours and from~\cite{TLWRK20}) have a comparable running time to the univariate circuit.
 For the sorting and the array minimum applications (Tables~\ref{table:sorting_circuit_results} and~\ref{table:minimum_circuit_results}), we showed only the results with $p$ and $m$ supporting reasonable security levels and giving the best running time for arrays of length $N=64$.
@@ -223,7 +230,6 @@ To find the minimum of 64 32-bit integers, our minimum algorithm requires about 
     The encryption parameters of the CKKS scheme are set to a security level of 128 bits.
 
     Our implementation runs with $p=131$, $m=17293$ ($\phi(m)=17292$), which corresponds to 5764 integers of 8-16 bits or 2882 20-bit integers encoded into one ciphertext.
-    \todo{Explain how we encode integers?}
     The encryption parameters corresponds to a security level of 126 bits.
     
     As shown in Table~\ref{table:other_he_schemes}, our algorithm for the less-than function demonstrates a similar performance as the TFHE-based implementation and is up to 2 times faster than the CKKS-based work.
@@ -252,7 +258,7 @@ To find the minimum of 64 32-bit integers, our minimum algorithm requires about 
                              & BGV(this paper)   & 8.66     &  3.01\\ 
         \bottomrule
       \end{tabular*}
-      \caption{Total and amortized running time of the maximum function implemented with different HE schemes including TFHE, CKKS and BGV. Note that TFHE does not support SIMD packing, which implies that the total and amortized running time of this scheme are the same. The encryption parameters of each scheme are set to support the following security levels: 110 bits for TFHE, 128 bits for CKKS and 126 bits for BGV.
+      \caption{Total and amortized running time of the less-than function implemented with different HE schemes including TFHE, CKKS and BGV. Note that TFHE does not support SIMD packing, which implies that the total and amortized running time of this scheme are the same. The encryption parameters of each scheme are set to support the following security levels: 110 bits for TFHE, 128 bits for CKKS and 126 bits for BGV.
       \newline *TFHE timings are estimated from~\cite{AC:CGGI17}.}
       \label{table:other_he_schemes}
     \end{table}

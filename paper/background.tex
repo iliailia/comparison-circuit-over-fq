@@ -99,7 +99,7 @@ The order of the set $\S$ defines a polynomial function in $\F_{p^d}$, which can
   This function requires $d'$ evaluations of $\LT_{\F_{p}}$ which has degree at most $p-1$, $d'-1$ evaluations of $\EQ_{\F_{p}}$ which has also degree $p-1$ and $2d'-1$ additional multiplications.
   Thus, if we ignore the complexity of digit extraction, the total complexity of comparing elements of $\F_{p}^{d'}$ in terms of multiplications is $O(d'(p-1))$.
 
-\subsubsection{Comparison of large integers}
+\subsubsection{Comparison of large integers}\label{sec:comparison_of_large_integers}
 When the size of the integers to compare exceeds the size of the field $p^d$, we can reapply the same trick by decomposing them in base $p^{d'}$ and then compare their vector of digits using the lexicographical order $\bm{<}$ on $\left(\F_{p}^{d'}\right)^k$, for some $d' \le d$.
 
 In this way, we represent an integer $a = a_0 + a_1p^{d'} + a_2p^{2d'}+\ldots a_{k-1}p^{(k-1)d'}$ by the vector $\va=(\bm{a}_0,\bm{a}_1,\ldots,\bm{a}_{k-1}) \in \left(\F_{p}^{d'}\right)^k$ of its digits of length $k$. The comparison of two integers $a$ and $b$ is thus equivalent to the comparison of their vector of digits $\va=(\bm{a}_0,\bm{a}_1,\ldots,\bm{a}_{k-1})$ and $\vb=(\bm{b}_0,\bm{b}_1,\ldots,\bm{b}_{k-1})$ using the lexicographical order $\bm{<}$ on $\left(\F_{p}^{d'}\right)^k$ defined as follows
