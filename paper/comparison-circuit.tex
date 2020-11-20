@@ -60,16 +60,16 @@ Unfortunately, the comparison function is not as simple and we have to rely on L
        f(z,z) = f(z,0) = f(p-1,z).
     \end{equation}
     As a consequence, when $p>3$ there exists a bivariate polynomials $f_1$ of total degree $p-5$ over $\F_p$ such that:
-    \begin{equation}
+    \begin{align}
       \label{eq:dec-f}
-      f(x,y) = f(x,0) + y(x-y)f_1(x,y) = f_0(x) + y(x-y)f_1(x,y).
-    \end{equation}   
+      f(x,y) &= f(x,0) + y(x-y)f_1(x,y) \\
+      &= f_0(x) + y(x-y)f_1(x,y).
+    \end{align}   
     This decomposition can be applied recursively to $f_1$, so that there exists $(p-1)/2$ polynomials $f_i$ over $\mathbb{F}_p$, $0\leq i \leq (p-3)/2$, such that:
 
-    \begin{equation}
-      \label{eq:decomposition-f-final}
-      f_0(x,y) = f_0(x) + f_1(x)Y + f_2(x)Y^2 + \cdots + f_{(p-3)/2}(x)Y^{(p-3)/2},
-    \end{equation}
+    \begin{align}\label{eq:decomposition-f-final}
+      f_0(x,y) = \sum_{i=0}^{(p-3)/2} f_i(x)Y^i,
+    \end{align}
     with $Y=y(x-y)$ and $\deg (f_{i}(x)) = p-3 - 2i$.
 
     % or equivalently a bivariate polynomials $f'_1$ of total degree $p-5$ over $\F_p$ such that:
@@ -267,8 +267,9 @@ The linear complexity for evaluating the bivariate circuit comes from the fact t
   \begin{lemma}\label{lem:univariate}
     For an odd prime $p$ and $\S = [0, (p-1)/2]$, the $\LT_\S$ function can be interpolated by the following polynomial over $\F_p$
     \begin{align}\label{eq:univariate_circuit}
-      Q_{\LT_\S}(x,y) = \frac{p+1}{2} (x-y)^{p-1} + \sum_{i=1, \text{odd}}^{p-2} (x-y)^i \sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i}.
+      Q_{\LT_\S}(x,y) = \frac{p+1}{2} (x-y)^{p-1} + \sum_{i=1, \text{odd}}^{p-2} c_i (x-y)^i.
     \end{align}
+    where $c_i = \sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i}$.
   \end{lemma}
   \begin{proof}
     See Appendix \ref{app:proof-lem-univariate}

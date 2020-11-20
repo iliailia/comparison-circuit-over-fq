@@ -1,4 +1,4 @@
-\subsubsection{Notations}
+\subsection{Notations}
 Vectors will be written in column form and denoted by boldface lower-case letters. The vector containing only $1$'s in its coordinates is denoted by $\1$. We write $\0$ for the zero vector. The set of integers $\{\ell,\dots,k\}$ is denoted by $[\ell,k]$.
 
 For a positive integer $t$, let $\texttt{wt}(t)$ be the Hamming weight of its binary expansion. We denote the set of residue classes modulo $p$ by $\Z_p$ and the class representatives of $\Z_p$ are taken from the half-open interval $[-p/2, p/2)$.
@@ -12,7 +12,7 @@ For any $x,y \in \S$, we can define the less-than and the equality functions as 
     1, & \text{if } x < y; \\
     0, & \text{if } x \ge y, \\
   \end{cases}
-  \qquad
+  \\
   \EQ_\S(x,y) = 
   \begin{cases}
     1, & \text{if } x = y; \\
@@ -28,16 +28,16 @@ The map defined by $\princhar: x \mapsto x^{p^d-1}$ from $\F_{p^d}$ to the binar
 \end{align*}
 Moreover, note that since:
 \begin{align}\label{eq:exp_frob}
-  a^{p^d-1} = a^{(p-1)(p^{d-1} + \dots + 1)} = \prod_{i=0}^{d-1} (a^{p-1})^{p^i},
+  a^{p^d-1} = a^{(p-1)(p^{d-1} + \dots + 1)} = \prod_{i=0}^{d-1} \left(a^{p-1}\right)^{p^i},
 \end{align}
 $\chi$ can be computed with Frobenius maps ($x \mapsto x^p$) and multiplications.
 
-Every function from $\F_{p^d}^l$ to $\F_{p^d}$ can be interpolated by a unique polynomial which can be defined with Lagrange interpolation and the help of the principal character. 
+Every function from $\F_{p^d}^l$ to $\F_{p^d}$ can be interpolated by a unique polynomial that can be defined with Lagrange interpolation and the help of the principal character. 
 \begin{lemma}\label{lem:interpolation}
   Every function $f: \F_{p^d}^l \rightarrow \F_{p^d}$ is a polynomial function represented by a unique polynomial $P_f(X_1,\dots,X_{l})$ of degree at most $p^d - 1$ in each variable.
   In particular,
   \begin{align*}
-    P_f(X_1,\dots,X_{l}) = \sum_{a_1,\dots,a_l \in \F_{p^d}} f(a_1,\dots,a_l) \prod_{i=1}^{l} \left(1 - \princhar(X_i - a_i)\right)\,.
+    P_f(X_1,\dots,X_{l}) = \sum_{\va \in \F^l_{p^d}} f(\va) \prod_{i=1}^{l} \left(1 - \princhar(X_i - a_i)\right)\,.
   \end{align*}
 \end{lemma}
 
@@ -64,29 +64,33 @@ The order of the set $\S$ defines a polynomial function in $\F_{p^d}$, which can
   In particular, this lemma implies that for any $i \in [0,d'-1]$ there exist $\alpha_i \in \F_{p^d}$ such that $L_{\alpha_i}(a) = a_i$ for any $a \in \F_p^{d'}$.
   This implies that we can construct the following system of equations over $\F_{p^d}$ 
   \begin{align*}
-    \begin{pmatrix}
+    \mX \mA
+    =
+    \mI_{d}
+  \end{align*}
+  where
+  \begin{align*}
+  \mX &= \begin{pmatrix}
       1       & 1       & \dots   & 1             \\
       X       & X^p     & \dots   & X^{p^{d-1}}   \\
       \vdots  & \vdots  & \ddots  & \vdots        \\
       X^{d-1}     & X^{(d-1)p}    & \dots   & X^{(d-1)p^{d-1}}  \\
     \end{pmatrix}
-    \begin{pmatrix}
+    \\
+    \mA &= \begin{pmatrix}
       \alpha_0      & \alpha_1      & \dots   & \alpha_{d-1}      \\
       \alpha_0^{p}  & \alpha_1^{p}  & \dots   & \alpha_{d-1}^{p}  \\
       \vdots        & \vdots        & \ddots  & \vdots            \\
       \alpha_0^{p^{d-1}}  & \alpha_1^{p^{d-1}}  & \dots   & \alpha_{d-1}^{p^{d-1}}  \\
     \end{pmatrix}
-    =
-    \mX \mA
-    =
-    \mI_{d}
   \end{align*}
-  where $\mI_d \in \F_{p^d}^{d \times d}$ is the identity matrix.
+  and $\mI_d \in \F_{p^d}^{d \times d}$ is the identity matrix.
   Hence, the $i$th column of $\inv{\mX}$ contain all the powers $\alpha_i, \alpha_i^p, \dots, \alpha_i^{p^{d-1}}$, which define the linear map $L_{\alpha_i}$.
 
   Therefore, instead of comparing $a$ and $b\in\S$ directly as elements of $\mathbb{F}_{p^d}$, we can compare their vector of coefficients $\bm{a} = (a_0,a_1,\ldots,a_{d'-1})$ and $\bm{b} = (b_0,b_1,\ldots,b_{d'-1}) \in \F_p^{d'}$ using the lexicographical order $\bm{<}$ on $\F_{p}^{d'}$ defined by:
    \begin{align*}
-      \bm{a} \bm{<} \bm{b} \Leftrightarrow \exists i\in[0,d'-1] \text{ such that } a_i < b_i \text{ and } \forall j > i ~~ a_j = b_j\,,
+      \bm{a} \bm{<} \bm{b} \Leftrightarrow \exists i\in[0,d'-1] \text{ such that } & a_i < b_i \text{ and } \\
+       & a_j = b_j ~~ \forall j > i \,,
     \end{align*}
     which results in the following circuit
     \begin{align*}
@@ -100,14 +104,15 @@ When the size of the integers to compare exceeds the size of the field $p^d$, we
 
 In this way, we represent an integer $a = a_0 + a_1p^{d'} + a_2p^{2d'}+\ldots a_{k-1}p^{(k-1)d'}$ by the vector $\va=(\bm{a}_0,\bm{a}_1,\ldots,\bm{a}_{k-1}) \in \left(\F_{p}^{d'}\right)^k$ of its digits of length $k$. The comparison of two integers $a$ and $b$ is thus equivalent to the comparison of their vector of digits $\va=(\bm{a}_0,\bm{a}_1,\ldots,\bm{a}_{k-1})$ and $\vb=(\bm{b}_0,\bm{b}_1,\ldots,\bm{b}_{k-1})$ using the lexicographical order $\bm{<}$ on $\left(\F_{p}^{d'}\right)^k$ defined as follows
     \begin{align*}
-      \va \bm{<} \vb \Leftrightarrow \exists i\in[0,k-1] \text{ such that } \bm{a}_i < \bm{b}_i \text{ and } \forall j > i ~~ \bm{a}_j = \bm{b}_j\,.
+      \va \bm{<} \vb \Leftrightarrow \exists i\in[0,k-1] \text{ such that } & \bm{a}_i < \bm{b}_i \text{ and } \\
+      & \bm{a}_j = \bm{b}_j ~~ \forall j > i\,.
     \end{align*}
   As done in~\cite{TLWRK20}, we can employ $\EQ_{\F_{p}^{d'}}$ and $\LT_{\F_{p}^{d'}}$ to compute $\LT(\va, \vb)$ which evaluates the lexicographical order of $\va$ and $\vb$ as follows:
   \begin{align*}
     \LT(\va, \vb) = \sum_{i=0}^{k-1} \LT_{\F_{p}^{d'}}(\bm{a}_{i}, \bm{b}_{i}) \prod_{j=i+1}^{k-1} \EQ_{\F_{p}^{d'}}(\bm{a}_{j}, \bm{b}_{j}).
   \end{align*}
   Notice that the multiplicative depth of this function depends essentially of the products of the equality functions.
-  In fact, these products compare subvectors $\va_i = (\bm{a}_i, \bm{a}_{i+1},\dots,\bm{a}_{k-1})$ and $\vb_i = (\bm{b}_i, \bm{b}_{i+1},\dots \bm{b}_{k-1})$ for $i \in [1,k-1]$.
+  In fact, these products compare subvectors $\va_i = (\bm{a}_i, \bm{a}_{i+1},\dots,\bm{a}_{k-1})$ and $\vb_i = (\bm{b}_i, \bm{b}_{i+1},\dots,\bm{b}_{k-1})$ for $i \in [1,k-1]$.
   Thus, we can rewrite $\LT$ as:
   \begin{align}\label{eq:general_lex_order}
     \LT(\va, \vb) = \sum_{i=0}^{k-1} \LT_{\F_{p}^{d'}}(\bm{a}_{i},\bm{b}_{i}) \EQ_{\F_{p}^{d'}}(\va_{i+1}, \vb_{i+1}) 
@@ -142,7 +147,8 @@ Let $\mathcal{K} = \Q(\zeta_{m})$ be the cyclotomic number field constructed by 
 The ring of integers of $\mathcal{K}$, denoted by $\intring$, is isomorphic to $\Z[X]/\ideal{\Phi_m(X)}$ where $\Phi_m(X)$ is the $m$-th cyclotomic polynomial. Let $p>1$ be a prime number coprime to $m$, then $\Phi_m(X)$ splits modulo $p$ into $\ell$ irreducible factors of same degree $d$: $\Phi_m(X) = F_1(X)\cdots F_\ell(X) \bmod p$. The degree $d$ is actually the order of $p$ modulo $m$, and $\ell = n/d$. As noticed in \cite{SV14}, the \ac{CRT} states that in this case the following ring isomorphism holds:
 
 \begin{align}\label{eq:crt}
-  \intring_p = \Z_p[X]/(\Phi_m(X)) \cong \Z_p[X]/(F_1(X)) \times \ldots \times \Z_p[X]/(F_{\ell}(X))
+  \intring_p &= \Z_p[X]/(\Phi_m(X)) \nonumber \\ 
+  & \cong \Z_p[X]/(F_1(X)) \times \ldots \times \Z_p[X]/(F_{\ell}(X))
 \end{align}
 
 For each $i \in [1,\ell]$ the quotient ring $\Z_p[X]/(F_i(X))$ is isomorphic to the finite field $\F_{p^d}$. Hence, the isomorphism in~(\ref{eq:crt}) can be rewritten as:
@@ -261,10 +267,10 @@ Since $\Mul$ is much more expensive than $\MulPlain$, the multiplicative depth o
 
 \begin{table}[t!]
   \centering
-  \begin{tabular*}{.5\textwidth}{@{\extracolsep{\fill} } c c c }
+  \begin{tabular*}{6.5cm}{ p{2cm} p{2cm} p{2cm} }
     \toprule
     Operation	& Time			& Noise \\
-    \cmidrule(lr){1-1}\cmidrule(lr){2-3}
+    \midrule
     $\Add$		& cheap			& cheap 	\\
     $\AddPlain$	& cheap			& cheap \\
     $\Mul$		& expensive		& expensive 	\\

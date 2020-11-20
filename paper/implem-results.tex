@@ -15,7 +15,7 @@ In the tables presented below, the following notation is used:
   \item $m$: the cyclotomic order of the ring $\intring$;
   \item $n$: the degree of the ring $\intring$;
   \item $d$: the dimension of a slot subspace used for digit encoding;
-  \item $\ell$: the dimension of digit vectors encoding input integers over $\F_p^d$;
+  \item $l$: the dimension of digit vectors encoding input integers over $\F_p^d$;
   \item $k$: the number of input integers encoded in one ciphertext.
 \end{itemize}
 
@@ -30,12 +30,12 @@ We ran our algorithms with $p$ taken in the interval $[3,659]$.
 However, Table~\ref{table:comparison_circuit_results} contains the results with the best possible amortized running time and the best results for small $p$'s, where the bivariate comparison circuits (ours and from~\cite{TLWRK20}) have a comparable running time to the univariate circuit.
 For the sorting and the array minimum applications (Tables~\ref{table:sorting_circuit_results} and~\ref{table:minimum_circuit_results}), we showed only the results with $p$ and $m$ supporting reasonable security levels and giving the best running time for arrays of length $N=64$.
 
-\begin{table}[h]
+\begin{table*}[h]
   \centering
-  \begin{tabular*}{.9\textwidth}{@{\extracolsep{\fill} } c c c c c c c c}
+  \begin{tabular*}{.9\textwidth}{@{\extracolsep{\fill} } p{3.0cm} p{0.5cm} p{1.0cm} p{1.0cm} p{1.0cm} p{1.0cm} p{2.0cm} p{2.0cm}}
     \toprule
-    $(p,m,n)$ & Type & $(d,\ell)$   &  $\log_2 q$ & $\lambda$    & $k$ & Total time, s & \makecell{Amortized time \\ per slot, ms} \\
-    \cmidrule(lr){1-1}\cmidrule(lr){2-7}
+    $(p,m,n)$ & Type & $(d,l)$   &  $\log_2 q$ & $\lambda$    & $k$ & Total time, s & Amortized time per slot, ms \\
+    \cmidrule(lr){1-1}\cmidrule(lr){2-8}
     %$(3,34511,34510)$  & U               & $(1,64)$  & $>320$ & $31$   & 5.18   & 167 \\
     %$(3,34511,34510)$  & U               & $(2,32)$  & $>310$ & $63$   & 7.84   & 124 \\
     %$(3,34511,34510)$  & U               & $(4,16)$  & $>310$ & $126$  & 10.11  & 80 \\
@@ -128,7 +128,7 @@ For the sorting and the array minimum applications (Tables~\ref{table:sorting_ci
   \end{tabular*}
   \caption{The running time of our lexicographic order algorithms and the algorithm of Tan et al.~\cite{TLWRK20} to compare 64-bit integers with encryption parameters supporting $\lambda$ bits of security. The second column (Type) indicates which comparison circuit is used: the univariate (U), bivariate (B) or bivariate one from~\cite{TLWRK20}. The total time is averaged over 50 trials.}
   \label{table:comparison_circuit_results}
-\end{table}
+\end{table*}
 
 As shown in Table~\ref{table:comparison_circuit_results}, our lexicographic order circuits have a better running time than the prior work of Tan et al.~\cite{TLWRK20} for any plaintext modulus $p$.
 In particular, our bivatiate circuit is up to 42\% faster than the bivaraite circuit of Tan et al. for small $p$.
@@ -137,11 +137,11 @@ For $p=131$, the univariate circuit takes only 11 milliseconds to compare two 64
 
 \begin{table}[h]
   \centering
-  \begin{tabular*}{.9\textwidth}{@{\extracolsep{\fill} } c c c c c c}
+  \begin{tabular*}{.45\textwidth}{ p{0.3cm} p{0.7cm} p{0.8cm} p{1cm} p{1.3cm} p{1.5cm}}
     \toprule
-    $N$     & $\log_2 q$    & \#Trials  & \makecell{Avg. total \\ time, s}    & \makecell{Amortized time \\ per slot, ms} & \makecell{Amortized time \\ per slot, ms \cite{CDSS15}} \\
+    $N$     & $\log_2 q$    & \#Trials  & Average total time, s & Amortized time per slot, ms & Amortized time per slot, ms~\cite{CDSS15} \\
     \midrule
-    \multicolumn{6}{l}{8-bit integers ($d=2$, $\ell=1$, $k=9352$)} \\
+    \multicolumn{6}{l}{8-bit integers ($d=2$, $l=1$, $k=9352$)} \\
     \cmidrule(lr){1-6}
     4       & 589     & 32        & 186.28       & 20    & 140 \\
     8       & 599     & 20        & 867.46       & 93    & 690 \\
@@ -149,7 +149,7 @@ For $p=131$, the univariate circuit takes only 11 milliseconds to compare two 64
     32      & 599     & 20        & 14769.23     & 1579  & 13900 \\
     64      & 604     & 10        & 60351.02     & 6453  & 60000 \\
     \midrule
-    \multicolumn{6}{l}{32-bit integers ($d=3$, $\ell=2$, $k=4676$)} \\
+    \multicolumn{6}{l}{32-bit integers ($d=3$, $l=2$, $k=4676$)} \\
     \cmidrule(lr){1-6}
     4       & 659     & 20        & 299.17       & 64    & 200 \\
     8       & 671     & 20        & 1356.19      & 290   & 944 \\
@@ -168,11 +168,11 @@ Hence, this result is hard to compare directly to our work.
 
 \begin{table}[h]
   \centering
-  \begin{tabular*}{.9\textwidth}{@{\extracolsep{\fill} } c c c c c c}
+  \begin{tabular*}{.45\textwidth}{ p{0.2cm} p{0.2cm} p{0.8cm} p{0.9cm} p{1.5cm} p{2.0cm}}
     \toprule
-    $N$     & $T$   & $\log_2 q$    & \#Trials  & \makecell{Avg. total \\ time, s}    & \makecell{Amortized time \\ per slot, ms} \\
+    $N$     & $T$   & $\log_2 q$    & \#Trials  & Average total time, s    & Amortized time per slot, ms \\
     \midrule
-    \multicolumn{5}{l}{8-bit integers ($d=3$, $\ell=1$, $k=5220$)} \\
+    \multicolumn{6}{l}{8-bit integers ($d=3$, $l=1$, $k=5220$)} \\
     \cmidrule(lr){1-6}
     2       & 1     & 232           & 20        & 12.35     & 2.37 \\
     4       & 2     & 406           & 20        & 50.55     & 9.68 \\
@@ -181,7 +181,7 @@ Hence, this result is hard to compare directly to our work.
     32      & 3     & 825           & 20        & 883.68    & 169.29 \\
     64      & 3     & 854           & 20        & 2111.56   & 404.51 \\
     \midrule
-    \multicolumn{5}{l}{32-bit integers ($d=6$, $\ell=2$, $k=2610$)} \\
+    \multicolumn{6}{l}{32-bit integers ($d=6$, $l=2$, $k=2610$)} \\
     \cmidrule(lr){1-6}
     2       & 1     & 406           & 20        & 37.71     & 14.54 \\
     4       & 2     & 753           & 20        & 157.80    & 60.46 \\
@@ -191,7 +191,7 @@ Hence, this result is hard to compare directly to our work.
     64      & 1     & 884           & 20        & 24986.04  & 9573.20 \\
     \bottomrule
   \end{tabular*}
-  \caption{The running time needed to find the minimum of $N$ 8-bit or 32-bit integers with $p=17$, $m=41761$ and $n=41760$. The parameter $T$ is equal to the number of the tournament method stages. The minimal security level is 121 bits according to the LWE estimator~\cite{lwe_estimator}. \todo{Why use $p=17$ ? For instance best timings for $N=2$ were obtained with $p=131$.}}
+  \caption{The running time needed to find the minimum of $N$ 8-bit or 32-bit integers with $p=17$, $m=41761$ and $n=41760$. The parameter $T$ is equal to the number of the tournament method stages. The minimal security level is 121 bits according to the LWE estimator~\cite{lwe_estimator}.}
   \label{table:minimum_circuit_results}
 \end{table}
 
@@ -223,6 +223,7 @@ To find the minimum of 64 32-bit integers, our minimum algorithm requires about 
     The encryption parameters of the CKKS scheme are set to a security level of 128 bits.
 
     Our implementation runs with $p=131$, $m=17293$ ($\phi(m)=17292$), which corresponds to 5764 integers of 8-16 bits or 2882 20-bit integers encoded into one ciphertext.
+    \todo{Explain how we encode integers?}
     The encryption parameters corresponds to a security level of 126 bits.
     
     As shown in Table~\ref{table:other_he_schemes}, our algorithm for the less-than function demonstrates a similar performance as the TFHE-based implementation and is up to 2 times faster than the CKKS-based work.
@@ -230,28 +231,29 @@ To find the minimum of 64 32-bit integers, our minimum algorithm requires about 
 
     \begin{table}[h]
       \centering
-      \begin{tabular*}{.9\textwidth}{@{\extracolsep{\fill} } c c c c}
+      \begin{tabular*}{.45\textwidth}{ p{1.2cm} p{2.1cm} p{1.0cm} p{2cm}}
         \toprule
-        Bit length  & FHE scheme & \makecell{Total \\ time, s}    & \makecell{Amortized time \\ per slot, ms} \\
+        Bit length  & FHE scheme & Total time, s    & Amortized time per slot, ms \\
         \midrule
-        \multirow{3}{*}{8}  & TFHE              & 0.001     & 1.36 \\
+        \multirow{3}{*}{8}  & TFHE              & 0.001*     & 1.36* \\
                             & CKKS              & 89.61     & 1.37 \\
                             & BGV(this paper)   & 7.09      & 1.23 \\
         \midrule
-        \multirow{3}{*}{12}  & TFHE             & 0.002     & 2.04 \\
+        \multirow{3}{*}{12}  & TFHE             & 0.002*     & 2.04* \\
                              & CKKS             & 127.54    & 1.95 \\
                              & BGV(this paper)  & 7.09      & 1.23 \\
         \midrule
-        \multirow{3}{*}{16}  & TFHE            & 0.003     & 2.72 \\
+        \multirow{3}{*}{16}  & TFHE            & 0.003*     & 2.72* \\
                              & CKKS            & 296.96     & 4.53 \\
                              & BGV(this paper)  & 12.11      & 2.10 \\
         \midrule
-        \multirow{3}{*}{20}  & TFHE            & 0.003      & 3.4 \\
+        \multirow{3}{*}{20}  & TFHE            & 0.003*      & 3.4* \\
                              & CKKS            & 373.76     & 5.70 \\
                              & BGV(this paper)   & 8.66     &  3.01\\ 
         \bottomrule
       \end{tabular*}
-      \caption{Total and amortized running time of the maximum function implemented with different HE schemes including TFHE, CKKS and BGV. Note that TFHE does not support SIMD packing, which implies that the total and amortized running time of this scheme are the same. The encryption parameters of each scheme are set to support the following security levels: 110 bits for TFHE, 128 bits for CKKS and 126 bits for BGV.}
+      \caption{Total and amortized running time of the maximum function implemented with different HE schemes including TFHE, CKKS and BGV. Note that TFHE does not support SIMD packing, which implies that the total and amortized running time of this scheme are the same. The encryption parameters of each scheme are set to support the following security levels: 110 bits for TFHE, 128 bits for CKKS and 126 bits for BGV.
+      \newline *TFHE timings are estimated from~\cite{AC:CGGI17}.}
       \label{table:other_he_schemes}
     \end{table}
     

@@ -467,7 +467,7 @@ void Comparator::extract_mod_p(vector<Ctxt>& mod_p_coefs, const Ctxt& ctxt_x) co
 
 	for(long iCoef = 0; iCoef < m_slotDeg; iCoef++)
 	{
-		cout << "Extract coefficient " << iCoef << endl;
+		//cout << "Extract coefficient " << iCoef << endl;
 		Ctxt mod_p_ctxt = ctxt_x;
 
 		mod_p_ctxt.multByConstant(m_extraction_const[iCoef][0], m_extraction_const_size[iCoef][0]);
@@ -1075,7 +1075,7 @@ void Comparator::less_than_bivar(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt&
 {
   HELIB_NTIMER_START(ComparisonCircuitBivar);
 
-  // uncomment if you want to compare with Tan et al.
+  //uncomment to compare with the circuit of Tan et al.
   //less_than_bivar_tan(ctxt_res, ctxt_x, ctxt_y);
   //return;
 
@@ -1148,7 +1148,7 @@ void Comparator::is_zero(Ctxt& ctxt_res, const Ctxt& ctxt_z, long pow) const
   ctxt_res = ctxt_z;
 
   //compute mapTo01: (z_i)^{p^d-1}
-  cout << "Mapping to 0 and 1" << endl;
+  //cout << "Mapping to 0 and 1" << endl;
   mapTo01_subfield(ctxt_res, pow);
 
   if(m_verbose)
@@ -1157,7 +1157,7 @@ void Comparator::is_zero(Ctxt& ctxt_res, const Ctxt& ctxt_z, long pow) const
     cout << endl;
   }
 
-  cout << "Computing NOT" << endl;
+  //cout << "Computing NOT" << endl;
   //compute 1 - mapTo01(z_i)
   ctxt_res.negate();
   ctxt_res.addConstant(ZZ(1));
@@ -1181,7 +1181,7 @@ void Comparator::compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y)
 	// bivariate circuit
 	if (!m_isUnivar)
 	{
-		cout << "Extraction" << endl;
+		//cout << "Extraction" << endl;
 		// extract mod p coefficients
 		vector<Ctxt> ctxt_x_p;
 		extract_mod_p(ctxt_x_p, ctxt_x);
@@ -1209,7 +1209,7 @@ void Comparator::compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y)
 		    }
 		}
 
-		cout << "Compute the less-than function modulo p" << endl;
+		//cout << "Compute the less-than function modulo p" << endl;
 		for (long iCoef = 0; iCoef < m_slotDeg; iCoef++)
 		{
 			Ctxt ctxt_tmp = Ctxt(ctxt_x.getPubKey());
@@ -1217,11 +1217,11 @@ void Comparator::compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y)
 			ctxt_less_p.push_back(ctxt_tmp);
 		}
 
-		cout << "Compute the equality function modulo p" << endl;
+		//cout << "Compute the equality function modulo p" << endl;
 		for (long iCoef = 0; iCoef < m_slotDeg; iCoef++)
 		{
 			// Subtraction z = x - y
-			cout << "Subtraction" << endl;
+			//cout << "Subtraction" << endl;
 			Ctxt ctxt_z = ctxt_x_p[iCoef];
 			ctxt_z -= ctxt_y_p[iCoef];
 			Ctxt ctxt_tmp = Ctxt(ctxt_z.getPubKey());
@@ -1232,7 +1232,7 @@ void Comparator::compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y)
 	else // univariate circuit
 	{
 		// Subtraction z = x - y
-		cout << "Subtraction" << endl;
+		//cout << "Subtraction" << endl;
 		Ctxt ctxt_z = ctxt_x;
 		ctxt_z -= ctxt_y;
 
@@ -1243,7 +1243,7 @@ void Comparator::compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y)
 		}
 
 		// extract mod p coefficients
-		cout << "Extraction" << endl;
+		//cout << "Extraction" << endl;
 		vector<Ctxt> ctxt_z_p;
 		extract_mod_p(ctxt_z_p, ctxt_z);
 
@@ -1257,14 +1257,14 @@ void Comparator::compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y)
 		    }
 		}
 
-		cout << "Compute the less-than and equality functions modulo p" << endl;
+		//cout << "Compute the less-than and equality functions modulo p" << endl;
 		for (long iCoef = 0; iCoef < m_slotDeg; iCoef++)
 		{
 			Ctxt ctxt_tmp = Ctxt(ctxt_z.getPubKey());
 			Ctxt ctxt_tmp_eq = Ctxt(ctxt_z.getPubKey());
 
 			// compute polynomial function for 'z < 0'
-			cout << "Compute univariate comparison polynomial" << endl;
+			//cout << "Compute univariate comparison polynomial" << endl;
 			evaluate_univar_less_poly(ctxt_tmp, ctxt_tmp_eq, ctxt_z_p[iCoef]);
 
 			if(m_verbose)
@@ -1276,7 +1276,7 @@ void Comparator::compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y)
 
 			ctxt_less_p.push_back(ctxt_tmp);
 
-			cout << "Computing NOT" << endl;
+			//cout << "Computing NOT" << endl;
 			//compute 1 - mapTo01(r_i*(x_i - y_i))
 			ctxt_tmp_eq.negate();
 			ctxt_tmp_eq.addConstant(ZZ(1));
@@ -1292,7 +1292,7 @@ void Comparator::compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y)
 		}	
 	}
 
-	cout << "Compare digits" << endl;
+	//cout << "Compare digits" << endl;
 	Ctxt ctxt_less = ctxt_less_p[m_slotDeg-1];
 	Ctxt ctxt_eq = ctxt_eq_p[m_slotDeg-1];
 
@@ -1324,7 +1324,7 @@ void Comparator::compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y)
 
 
 	//compute running products: prod_i 1 - (x_i - y_i)^{p^d-1}
-	cout << "Rotating and multiplying slots with equalities" << endl;
+	//cout << "Rotating and multiplying slots with equalities" << endl;
 	shift_and_mul(ctxt_eq, 0);
 
 	if(m_verbose)
@@ -1334,7 +1334,7 @@ void Comparator::compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y)
 	}
 
 	//Remove the least significant digit and shift to the left
-	cout << "Remove the least significant digit" << endl;
+	//cout << "Remove the least significant digit" << endl;
 	batch_shift_for_mul(ctxt_eq, 0, -1);
 
 	if(m_verbose)
@@ -1343,7 +1343,7 @@ void Comparator::compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y)
 		cout << endl;
 	}
 
-	cout << "Final result" << endl;
+	//cout << "Final result" << endl;
 
 	ctxt_res = ctxt_eq;
 	ctxt_res.multiplyBy(ctxt_less);
@@ -1486,16 +1486,16 @@ void Comparator::min_max(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_x, con
 	ctxt_max = ctxt_x;
 	ctxt_max -= ctxt_tmp;
 
-	cout << "Minimum" << endl;
 	if(m_verbose)
 	{
+		cout << "Minimum" << endl;
 		print_decrypted(ctxt_min);
 		cout << endl;
 	}
 
-	cout << "Maximum" << endl;
 	if(m_verbose)
 	{
+		cout << "Maximum" << endl;
 		print_decrypted(ctxt_max);
 		cout << endl;
 	}
@@ -1540,6 +1540,7 @@ void Comparator::array_min(Ctxt& ctxt_res, const vector<Ctxt>& ctxt_in, long dep
 		{
 			if(i != cur_len -  1 - i)
 			{
+				cout << "Comparing ciphertexts " << i << " and " << cur_len -  1 - i << endl;
 				min_max(ctxt_res_vec[i], ctxt_res_vec[cur_len -  1 - i], ctxt_res_vec[i], ctxt_res_vec[cur_len -  1 - i]);
 			}
 		}
@@ -1550,27 +1551,138 @@ void Comparator::array_min(Ctxt& ctxt_res, const vector<Ctxt>& ctxt_in, long dep
 
 	if(cur_len > 1)
 	{
-		// create a table with all pairwise comparisons and compute the Hamming weight of every row
-		vector<Ctxt> ham_weights;
-		get_sorting_index(ham_weights, ctxt_res_vec);
+		// plaintext modulus
+  		long p = m_context.zMStar.getP();
+		// multiplications in the equality circuit
+		long eq_mul_num = static_cast<long>(floor(log2(p-1))) + weight(ZZ(p-1)) - 1;
+		long eq_depth = static_cast<long>(ceil(log2(p-1)));
+		long prod_depth = static_cast<long>(ceil(log2(cur_len-1)));
 
-		cout << "Computing the minimum" << endl;
-		ctxt_res = Ctxt(m_pk);
-		for(size_t i = 0; i < ctxt_res_vec.size(); i++)
+		if ((((cur_len - 2 > eq_mul_num) && (eq_depth == prod_depth)) || (eq_depth < prod_depth)) && cur_len <= p)
 		{
-			//compare the Hamming weight of the jth row with i
-			Ctxt tmp_prod = ham_weights[i];
-			tmp_prod.addConstant(ZZX(-(cur_len-1)));
-			mapTo01_subfield(tmp_prod, 1);
-			tmp_prod.negate();
-			tmp_prod.addConstant(ZZX(1));
+			cout << "Computing minimum via equality" << endl;
+			cout << "Mult. of equality: " << eq_mul_num << endl;
+			cout << "Depth of equality: " << eq_depth << endl;
+			cout << "Depth of product: " << prod_depth << endl;
+			// create a table with all pairwise comparisons and compute the Hamming weight of every row
+			vector<Ctxt> ham_weights;
+			get_sorting_index(ham_weights, ctxt_res_vec);
 
-			//multiply by the jth input ciphertext
-			tmp_prod.multiplyBy(ctxt_res_vec[i]);
-			if(i == 0)
-				ctxt_res = tmp_prod;
-			else
+			cout << "Computing the minimum" << endl;
+			ctxt_res = Ctxt(m_pk);
+			for(size_t i = 0; i < ctxt_res_vec.size(); i++)
+			{
+				//compare the Hamming weight of the jth row with i
+				Ctxt tmp_prod = ham_weights[i];
+				tmp_prod.addConstant(ZZX(-(cur_len-1)));
+				mapTo01_subfield(tmp_prod, 1);
+				tmp_prod.negate();
+				tmp_prod.addConstant(ZZX(1));
+
+				//multiply by the jth input ciphertext
+				tmp_prod.multiplyBy(ctxt_res_vec[i]);
+				if(i == 0)
+					ctxt_res = tmp_prod;
+				else
+					ctxt_res += tmp_prod;
+			}
+		}
+		else 
+		{
+			cout << "Computing minimum via punctured products" << endl;
+			cout << "Mult. of equality: " << eq_mul_num << endl;
+			cout << "Depth of equality: " << eq_depth << endl;
+			cout << "Depth of product: " << prod_depth << endl;
+			vector<vector<Ctxt>> ctxt_products;
+			// compute the product of every row
+			for(size_t i = 0; i < ctxt_res_vec.size(); i++)
+			{
+				vector<Ctxt> ctxt_vec;
+				ctxt_products.push_back(ctxt_vec);
+			}
+
+			cout << "Computing the comparison table" << endl;
+			for (size_t i = 0; i < ctxt_res_vec.size() - 1; i++)
+			{
+				cout << "Computing Row " << i << endl;
+				for(size_t j = i + 1; j < ctxt_res_vec.size(); j++)
+				{
+					cout << "Computing Column " << j << endl;
+					// compute upper diagonal entries of the comparison table and multiply them
+					Ctxt comp_col = Ctxt(m_pk);
+					compare(comp_col, ctxt_res_vec[i], ctxt_res_vec[j]);
+
+					if (ctxt_products[i].empty())
+					{
+						ctxt_products[i].push_back(comp_col);
+					}
+					else
+					{
+						long wt = weight(ZZ(j));
+						int len_i = ctxt_products[i].size();
+						if (wt > len_i)
+						{
+							ctxt_products[i].push_back(comp_col);
+						}
+						else
+						{
+							ctxt_products[i][len_i - 1].multiplyBy(comp_col);
+							for (int k = len_i - 2; k >= (wt-1); k--)
+							{
+								ctxt_products[i][k].multiplyBy(ctxt_products[i][k+1]);
+								ctxt_products[i].pop_back();	
+							}
+						}
+					}
+					
+					// compute lower diagonal entries of the comparison table by transposition and logical negation of upper diagonal entries
+					//NOT the result to multiply to the jth row
+					comp_col.negate();
+					comp_col.addConstant(ZZ(1));
+
+					if (ctxt_products[j].empty())
+					{
+						ctxt_products[j].push_back(comp_col);
+					}
+					else
+					{
+						long wt = weight(ZZ(i+1));
+						int len_j = ctxt_products[j].size();
+						if (wt > len_j)
+						{
+							ctxt_products[j].push_back(comp_col);
+						}
+						else
+						{
+							ctxt_products[j][len_j - 1].multiplyBy(comp_col);
+							for (int k = len_j - 2; k >= (wt-1); k--)
+							{
+								ctxt_products[j][k].multiplyBy(ctxt_products[j][k+1]);
+								ctxt_products[j].pop_back();	
+							}
+						}
+					}
+				}
+			}
+
+			cout << "Computing the minimum" << endl;
+			ctxt_res = Ctxt(m_pk);
+			for(size_t i = 0; i < ctxt_res_vec.size(); i++)
+			{
+				int len_i = ctxt_products[i].size();
+				for (int k = len_i - 2; k >= 0; k--)
+				{
+					ctxt_products[i][k].multiplyBy(ctxt_products[i][k+1]);
+					ctxt_products[i].pop_back();	
+				}
+				Ctxt tmp_prod = ctxt_products[i][0];
+
+				//multiply by the ith input ciphertext
+				tmp_prod.multiplyBy(ctxt_res_vec[i]);
+
+				//add to the result
 				ctxt_res += tmp_prod;
+			}
 		}
 	}
 	else

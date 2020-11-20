@@ -31,7 +31,7 @@ using namespace helib;
 // argv[4] - the bitsize of the ciphertext modulus in ciphertexts (HElib increases it to fit the moduli chain). The modulus used for public-key generation
 // argv[5] - the length of vectors to be compared
 // argv[6] - the number of values to be sorted
-// argv[7] - the number of consecutive comparisons
+// argv[7] - the number of tournament stages
 // argv[8] - the number of experiment repetitions
 // argv[9] - print debug info (y/n)
 

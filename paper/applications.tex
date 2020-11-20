@@ -47,7 +47,7 @@
 \label{sec:min/max}
 
 	Another application of our comparison algorithm is concerned with the minimum (or maximum) function of an array.
-	To find the minimum of an input array, at least $n-1$ calls of the pairwise minimum function are required~\cite[Chapter 9]{CLR09}, which can be achieved by \emph{the tournament method}.
+	To find the minimum of an input array, at least $n-1$ calls of the pairwise minimum function are required~\cite[Chapter 9]{CLR09}, which can be achieved by \emph{the tournament method}.\todo{mention the work of Togan}
 	In this method, one reduces the size of the input array in $\ceil{\log n}$ iterations.
 	In each iteration, the input array is divided into pairs. 
 	If the array length is odd, one element is stashed for the next iteration. 
@@ -111,8 +111,8 @@
 	\end{align}
 	Here, the multiplicative depth is reduced to 
 	\begin{align*}
-		\ell \cdot d(\min(x,y)) + d(\LT(x,y)) + d(\EQ(x,y)) + 1 =
-		(\ell + 2) \cdot \ceil{\log (p-1)} + 1
+		\ell \cdot d(\min(x,y)) + d(\LT(x,y)) + d(\EQ(x,y)) + 1 \\
+		= (\ell + 2) \cdot \ceil{\log (p-1)} + 1
 	\end{align*}
 	which is independent of the array length $n$.
 	If $M(\EQ(x,y))$ and $M(\LT(x,y))$ is the number of multiplications in the equality function $\EQ$ and the less-than function $\LT$, respectively, the multiplicative complexity is equal to 

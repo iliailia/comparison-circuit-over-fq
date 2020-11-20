@@ -1,6 +1,9 @@
-\documentclass{llncs}
+\documentclass[USenglish,oneside,twocolumn]{article}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% General %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[utf8]{inputenc}%(only for the pdftex engine)
+%\RequirePackage[no-math]{fontspec}%(only for the luatex or the xetex engine)
+\usepackage[big]{dgruyter_NEW}
+
 \usepackage[dvipsnames]{xcolor}
 \usepackage{array}
 \usepackage{nameref}
@@ -19,7 +22,7 @@
 %\usepackage[latin1]{inputenc}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% References %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage[colorlinks=true,linkcolor=black,filecolor=magenta,urlcolor=black,citecolor=blue]{hyperref}  
+%\usepackage[colorlinks=true,linkcolor=black,filecolor=magenta,urlcolor=black,citecolor=blue]{hyperref}  
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Maths %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{bm}
@@ -55,14 +58,57 @@
 \newcommand{\fieldchar}{p} %characteristic of a finite field
 \newcommand{\princhar}{\chi} %principal character of a finite field
 \DeclareMathOperator{\ReLU}{ReLU}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\title{Comparison circuit over $\F_\fieldcard$; Faster homomorphic comparison operations for BGV and BFV}
-\date{}
-\author{}
+%%%%%%%%%%%%%%%%%%%% Theorems %%%%%%%%%%%%%%%%%%%%%%%%
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
+\newtheorem{remark}{Remark} 
+\DOI{foobar}
 
+\cclogo{\includegraphics{by-nc-nd.pdf}}
+  
 \begin{document}
+ 
+
+  %\author*[1]{Ilia Iliashenko}
+
+  %\author[2]{Vincent Zucca}
+
+  %\affil[1]{Affil, E-mail: email@email.edu}
+
+  %\affil[2]{Affil, E-mail: email@email.edu}
+
+  %\affil[3]{Affil, E-mail: email@email.edu}
+
+  %\affil[4]{Affil, E-mail: email@email.edu}
+
+  \title{Faster homomorphic comparison operations for BGV and BFV}
+
+  \runningtitle{Faster homomorphic comparison operations for BGV and BFV}
+
+  %\subtitle{...}
+
+  \begin{abstract}
+{Please put abstract here.}
+\end{abstract}
+  \keywords{keywords, keywords}
+%  \classification[PACS]{}
+ % \communicated{...}
+ % \dedication{...}
+
+  \journalname{Proceedings on Privacy Enhancing Technologies}
+\DOI{Editor to enter DOI}
+  \startpage{1}
+  \received{..}
+  \revised{..}
+  \accepted{..}
+
+  \journalyear{..}
+  \journalvolume{..}
+  \journalissue{..}
+ 
+
 \maketitle
 
 \section{Introduction}
@@ -104,7 +150,4 @@
 
 \end{document}
 
-%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: t
-%%% End:
+\end{document}
