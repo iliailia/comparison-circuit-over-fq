@@ -213,11 +213,12 @@ To find the minimum of 64 32-bit integers, our minimum algorithm requires about 
     Our algorithms are designed for BGV/BFV, which support SIMD packing and are the most efficient FHE schemes for exact computation in arithmetic circuits.
     However, the amortized running time per data value of our comparison algorithms is comparable to efficient FHE schemes for binary circuits (TFHE) and HE supporting approximate arithmetic over real numbers (CKKS). 
 
-    In Table~\ref{table:other_he_schemes}, our implementation of the less-than function is compared to the implementations of this function in TFHE \cite{AC:CGGI17} and CKKS \cite{EPRINT:CheKimKim19}.
+    In Table~\ref{table:other_he_schemes}, our implementation of the less-than function is compared to the implementations of this function in TFHE \cite{AC:CGGI17,JC:CGGI20} and CKKS \cite{EPRINT:CheKimKim19}.
 
-    Chilloti et al. \cite{AC:CGGI17} constructed a deterministic weighted automata that can compute the maximum function using the TFHE scheme.
+    Chilloti et al. \cite{AC:CGGI17,JC:CGGI20} constructed a deterministic weighted automata that can compute the maximum function using the TFHE scheme.
     The same automata can compute the less-than function without any performance loss. 
-    In this case, the running time of the less-than function of two $n_b$-bit integers takes $170 n_b$ microseconds on a hardware similar to ours and with the encryption parameters supporting at least 110 bits of security.\todo{check with relation to the result of Daniele}
+    In this case, the running time of the less-than function of two $n_b$-bit integers takes $170 n_b$ microseconds on a hardware similar to ours and with the encryption parameters supporting at least 152 bits of security.
+    This security level might be lowered by a recent attack of Espitau et al.~\cite{EPRINT:EJK20}.
     Note that this running time is achieved in the leveled mode of TFHE, i.e. without bootstrapping.
     Unfortunately, we could not manage to run the code of this implementation on our machine.
 
@@ -258,8 +259,8 @@ To find the minimum of 64 32-bit integers, our minimum algorithm requires about 
                              & BGV(this paper)   & 8.66     &  3.01\\ 
         \bottomrule
       \end{tabular*}
-      \caption{\textbf{Comparison with other HE schemes.} Total and amortized running time of the less-than function implemented with different HE schemes including TFHE, CKKS and BGV. Note that TFHE does not support SIMD packing, which implies that the total and amortized running time of this scheme are the same. The encryption parameters of each scheme are set to support the following security levels: 110 bits for TFHE, 128 bits for CKKS and 126 bits for BGV.
-      \newline *TFHE timings are estimated from~\cite{AC:CGGI17}.}
+      \caption{\textbf{Comparison with other HE schemes.} Total and amortized running time of the less-than function implemented with different HE schemes including TFHE, CKKS and BGV. Note that TFHE does not support SIMD packing, which implies that the total and amortized running time of this scheme are the same. The encryption parameters of each scheme are set to support the following security levels: 152 bits for TFHE (might be smaller due to~\cite{EPRINT:EJK20}), 128 bits for CKKS and 126 bits for BGV.
+      \newline *TFHE timings are estimated from~\cite{JC:CGGI20}.}
       \label{table:other_he_schemes}
     \end{table}
     
