@@ -322,10 +322,14 @@ The linear complexity for evaluating the bivariate circuit comes from the fact t
   \begin{align*}
     \max_\S(x,y) &= \frac{p+1}{2} (x+y) - \sum_{i=1}^{\frac{p-1}{2}} z^{2i} \sum_{a=1}^{\frac{p-1}{2}} a^{p-2i}.
   \end{align*}
-  \todo{create a remark here} This yields a simple polynomial for the ReLU function.
-  \begin{align*}
-    \ReLU_\S(x) = \max_\S(x,0) &= \frac{p+1}{2} x - \sum_{i=1}^{\frac{p-1}{2}} x^{2i} \sum_{a=1}^{\frac{p-1}{2}} a^{p-2i}.
-  \end{align*}
+  \begin{remark}
+    Maximum and minimum functions are a basic building block in the neural network design.
+    For example, one of the most popular activation functions in neural networks is the rectifier, or ReLU.
+    The above formula for $\max_\S$ yields the following simple polynomial for the ReLU function
+    \begin{align*}
+      \ReLU_\S(x) = \max_\S(x,0) &= \frac{p+1}{2} x - \sum_{i=1}^{\frac{p-1}{2}} x^{2i} \sum_{a=1}^{\frac{p-1}{2}} a^{p-2i}.
+    \end{align*}
+  \end{remark}
 
 % \subsection{Lexicographic order}\label{subsec:lexicographic_order}
 %   Let $\vx=(x_0,x_1,\ldots,x_{\ell-1})$ and $\vy=(y_0,y_1,\ldots,y_{\ell-1}) \in \F_\fieldcard^\ell$ for the lexicographical order $<$ defined by the choice of $\S$:

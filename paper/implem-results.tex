@@ -133,7 +133,7 @@ For the sorting and the array minimum applications (Tables~\ref{table:sorting_ci
     %$(401,23029,23028)$ & U              & $(3,3)$   & $>540$ & $2558$ & 35.15  & 14 \\
     \bottomrule
   \end{tabular*}
-  \caption{The running time of our lexicographic order algorithms and the algorithm of Tan et al.~\cite{TLWRK20} to compare 64-bit integers with encryption parameters supporting $\lambda$ bits of security. The second column (Type) indicates which comparison circuit is used: the univariate (U), bivariate (B) or bivariate one from~\cite{TLWRK20}. The total time is averaged over 50 trials.}
+  \caption{\textbf{Less-than function.} The running time of our lexicographic order algorithms and the algorithm of Tan et al.~\cite{TLWRK20} to compare 64-bit integers with encryption parameters supporting $\lambda$ bits of security. The second column (Type) indicates which comparison circuit is used: the univariate (U), bivariate (B) or bivariate one from~\cite{TLWRK20}. The total time is averaged over 50 trials.}
   \label{table:comparison_circuit_results}
 \end{table*}
 
@@ -165,7 +165,7 @@ For $p=131$, the univariate circuit takes only 11 milliseconds to compare two 64
     64      & 684     & 10        & 89972.27     & 19241 & 49700 \\
     \bottomrule
   \end{tabular*}
-  \caption{The running time needed to sort $N$ 8-bit or 32-bit integers with $p=167$, $m=28057$ and $n=28056$. The minimal security level is 92 bits according to the LWE estimator~\cite{lwe_estimator}. Note that the amortized timing per slot from~\cite{CDSS15} is obtained with the LTV scheme~\cite{STOC:LopTroVai12}, which was attacked by Albrecht et al.~\cite{C:AlbBaiDuc16}.}
+  \caption{\textbf{Sorting.} The running time needed to sort $N$ 8-bit or 32-bit integers with $p=167$, $m=28057$ and $n=28056$. The minimal security level is 92 bits according to the LWE estimator~\cite{lwe_estimator}. Note that the amortized timing per slot from~\cite{CDSS15} is obtained with the LTV scheme~\cite{STOC:LopTroVai12}, which was attacked by Albrecht et al.~\cite{C:AlbBaiDuc16}.}
   \label{table:sorting_circuit_results}
 \end{table}
 
@@ -198,7 +198,7 @@ Hence, this result is hard to compare directly to our work.
     64      & 1     & 884           & 20        & 24986.04  & 9573.20 \\
     \bottomrule
   \end{tabular*}
-  \caption{The running time needed to find the minimum of $N$ 8-bit or 32-bit integers with $p=17$, $m=41761$ and $n=41760$. The parameter $T$ is equal to the number of the tournament method stages. The minimal security level is 121 bits according to the LWE estimator~\cite{lwe_estimator}.}
+  \caption{\textbf{Array minimum.} The running time needed to find the minimum of $N$ 8-bit or 32-bit integers with $p=17$, $m=41761$ and $n=41760$. The parameter $T$ is equal to the number of the tournament method stages. The minimal security level is 121 bits according to the LWE estimator~\cite{lwe_estimator}.}
   \label{table:minimum_circuit_results}
 \end{table}
 
@@ -258,7 +258,7 @@ To find the minimum of 64 32-bit integers, our minimum algorithm requires about 
                              & BGV(this paper)   & 8.66     &  3.01\\ 
         \bottomrule
       \end{tabular*}
-      \caption{Total and amortized running time of the less-than function implemented with different HE schemes including TFHE, CKKS and BGV. Note that TFHE does not support SIMD packing, which implies that the total and amortized running time of this scheme are the same. The encryption parameters of each scheme are set to support the following security levels: 110 bits for TFHE, 128 bits for CKKS and 126 bits for BGV.
+      \caption{\textbf{Comparison with other HE schemes.} Total and amortized running time of the less-than function implemented with different HE schemes including TFHE, CKKS and BGV. Note that TFHE does not support SIMD packing, which implies that the total and amortized running time of this scheme are the same. The encryption parameters of each scheme are set to support the following security levels: 110 bits for TFHE, 128 bits for CKKS and 126 bits for BGV.
       \newline *TFHE timings are estimated from~\cite{AC:CGGI17}.}
       \label{table:other_he_schemes}
     \end{table}
