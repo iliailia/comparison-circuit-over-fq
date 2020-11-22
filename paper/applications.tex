@@ -46,8 +46,8 @@
 \subsection{Min/max of an array}
 \label{sec:min/max}
 
-	Another application of our comparison algorithm is concerned with the minimum (or maximum) function of an array.
-	To find the minimum of an input array, at least $n-1$ calls of the pairwise minimum function are required~\cite[Chapter 9]{CLR09}, which can be achieved by \emph{the tournament method}.\todo{mention the work of Togan}
+	Another application of our comparison algorithms is concerned with the minimum (or maximum) function of an array.
+	To find the minimum of an input array with $n$ elements, at least $n-1$ calls of the pairwise minimum function are required~\cite[Chapter 9]{CLR09}, which can be achieved by \emph{the tournament method}.
 	In this method, one reduces the size of the input array in $\ceil{\log n}$ iterations.
 	In each iteration, the input array is divided into pairs. 
 	If the array length is odd, one element is stashed for the next iteration. 
@@ -97,7 +97,7 @@
 		\label{fig:minimum_tournament}
 	\end{figure}
 	Unfortunately, the tournament method has a big multiplicative complexity, namely $\ceil{\log n} \cdot d(\min(x,y))$.
-	In the HE world, this enforces us to use either impractical encryption parameters or a slow bootstrapping function.
+	In the HE world, this enforces us to use either impractical encryption parameters~\cite{TMP15} or a slow bootstrapping function.
 
 	To reduce the depth, we can combine the tournament method and direct sorting.
 	First, we perform $\ell$ iterations of the tournament algorithm, which leaves us with an array $\va' = (a'_0, \dots, a'_{n'-1})$ of length $n' = \ceil{n/2^\ell}$ containing the minimum.
