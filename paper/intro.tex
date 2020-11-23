@@ -1,39 +1,73 @@
-\ac{FHE} gives the ability to perform any kind of computations directly over encrypted data. 
-It is therefore a natural candidate for privacy-preserving outsourced storage and computation technics. 
-Since Gentry's breakthrough in 2009, it has received a worldwide attention which has resulted in numerous improvements. 
-As a result, \ac{FHE} can now be used in practice in many practical scenarii, e.g. genome analysis~\cite{KL15}, energy forecasting~\cite{BCIV17}, image recognition~\cite{BMMP18} and secure messaging~\cite{SP:ACLS18}.\todo{more citations?} 
-In addition, FHE is currently going through a standardization process \cite{HomomorphicEncryptionSecurityStandard}.
-
-The different homomorphic encryption schemes can be classified into three main categories:
-
-\begin{itemize}
-\item The schemes encrypting their input bit-wise meaning that each bit of the input is encrypted into a different ciphertext. 
-From there, the operations are carried over each bit separately. 
-Examples of such schemes include FHEW \cite{DM15} and TFHE \cite{CGGI16}. 
-These schemes are believed to be the most efficient ones in practice if the metric considered is the \emph{total running time}.\todo{mention bootstrapping}
+\ac{FHE} gives the ability to perform any kind of computations directly on encrypted data. 
+It is therefore a natural candidate for privacy-preserving outsourced storage and computation techniques. 
+Since Gentry's breakthrough in 2009~\cite{STOC:Gentry09}, FHE has received a worldwide attention which has resulted in numerous improvements. 
+As a result, \ac{FHE} can now be used in practice in many practical scenarios, e.g. genome analysis~\cite{KL15}, energy forecasting~\cite{BCIV17}, image recognition~\cite{BMMP18} and secure messaging~\cite{SP:ACLS18}.\todo{more citations?} 
+In addition, FHE is currently going through a standardization process~\cite{HomomorphicEncryptionSecurityStandard}.
   
-\item The second category corresponds to word-wise encryption schemes which allow to perform computations in an \ac{SIMD} fashion \cite{SV14}. These schemes allow, not only to encrypt words of more than one bit, but also to encrypt several of them in different slots such as the operations carried over a single ciphertext will be carried over each slot in a manner similar to \ac{SIMD}. Schemes with this features include BGV \cite{BGV12} and BFV \cite{FV12}. Although operations on these schemes are less efficient than for bit-wise encryption schemes, they become more efficient if one considers the number of slots on which the computation was performed. We refer to this metric as the \emph{amortized cost}.
-
-\item The CKKS scheme \cite{CKKS17}, which allows to perform computations over approximated numbers, forms the third category. It is similar to the second category in the sense that one can pack several numbers in parallel. It is actually the scheme which allows to pack the largest number of elements in a single ciphertext, and as a consequence it usually presents the best amortized cost. Unlike previous schemes it encodes complex, and thus real, numbers natively. However computations are not exact which means that the results are only valid up to a certain precision. 
+In practice, homomorphic encryption schemes can be classified into three main categories:
+\begin{itemize}
+	\item The schemes encrypting their input bit-wise meaning that each bit of the input is encrypted into a different ciphertext. 
+	From there, the operations are carried over each bit separately. 
+	Examples of such schemes include FHEW \cite{DM15} and TFHE \cite{CGGI16}. 
+	These schemes are believed to be the most efficient ones in practice if the metric considered is the \emph{total running time}.
+	\item The second category corresponds to word-wise encryption schemes that allow to pack multiple data values into one ciphertext and perform computations on these values in a \ac{SIMD} fashion \cite{SV14}. 
+	In particular, encrypted values are packed in different slots such that the operations carried over a single ciphertext are automatically carried over each slot independently. 
+	Schemes with these features include BGV~\cite{BGV12} and BFV~\cite{C:Brakerski12,FV12}. 
+	Although homomorphic operations in these schemes are less efficient than for bit-wise encryption schemes, their cost per SIMD slot can be better than of the binary-friendly schemes above. 
+	We refer to this perfomance metric as the \emph{amortized cost}.
+	\item The CKKS scheme~\cite{CKKS17}, which allows to perform computations over approximated numbers, forms the third category. 
+	It is similar to the second category in the sense that one can pack several numbers and compute on them in a SIMD fashion.
+	The CKKS scheme does not have the algebraic constraints that lower the packing capacity of BGV and BFV. 
+	Hence, it is usually possible to pack more elements in a single ciphertext in CKKS, thus resulting the best amortized cost. 
+	Unlike previous schemes, CKKS encodes complex, and thus real, numbers natively. 
+	However, homomorphic computations are not exact, which means that decrypted results are only valid up to a certain precision. 
 \end{itemize}
 
-Each category of schemes will be more efficient for a certain application. Thus, when comparing the efficiency of the different homomorphic schemes, one must take into account the considered use case.
+Each category of schemes is more efficient for a certain application. 
+Thus, when comparing the efficiency of different homomorphic schemes, one must take into account a given use case.
 
-It is commonly admitted that schemes of the first category are the most efficient ones for generic applications. Since they operate at the bit level they can compute every logical gate very efficiently. The total runnig time being in this case the sum of the times needed to evaluate each gate of the circuit. As so, in order to optimize the computations for a given application, the only possibility is to reduce the length of the critical computational path and parallelise as much as possible. However, as this becomes more and more difficult as the size of the circuit grows, one has is often reduce to optimize only some parts of the circuit by identifying some patterns \cite{ACS20}.
+It is commonly admitted that schemes of the first category are the most efficient ones for generic applications. 
+Since they operate at the bit level, they can compute every logical gate very efficiently. 
+The total running time being in this case the sum of the times needed to evaluate each gate of the circuit. 
+As a result, to optimize the computations for a given application, the only possibility is to reduce the length of the critical computational path and parallelize the related circuit as much as possible. 
+However, as this becomes more and more difficult as the size of the circuit grows, it is possible to optimize only some parts of the circuit by identifying some patterns~\cite{ACS20}.
+Another advantage of these schemes is that they have very fast so-called `bootstrapping' algorithms that `refresh' ciphertexts for further computation.
+This is very convenient in practice as one can set a standard set of encryption parameters without knowing what function should be computed. 
 
-On the other hand, schemes of the second category operate naturally on $p$-ary arithmetic circuits -- i.e. they are very efficient to evaluate polynomial functions over $\mathbb{F}_p$, for a prime $p$ -- but become much less efficient when considering other kind of computations. One advantage of these schemes is that one can use tools from number theory to evaluate more efficienty specific functions which allow to build relatively efficient $p$-ary circuits. Nonetheless, they remain in general less efficient than first category schemes but can become more efficient when one has to evaluate the same function on multiple inputs in parallel. 
+Schemes of the second category operate naturally on $p$-ary arithmetic circuits, i.e. they are very efficient to evaluate polynomial functions over $\F_p$, for a prime $p$.
+However, these schemes become much less efficient when considering other kinds of computations, e.g. comparison operations, step functions. 
+To alleviate this problem, one can use tools from number theory to evaluate specific functions with relatively efficient $p$-ary circuits. 
+Nonetheless, in general this techniques are too weak to outperform schemes of the first category.
+Bootstrapping algorithms of these schemes are quite heavy and usually avoided in practice. 
 
-CKKS, similarly to second category schemes, is very efficient when operating on arithmetic circuits. However, unlike other schemes which perform modular artihmetic, it performs computations on complex, and thus real, numbers. Although this is an important  advantage for many use cases which use complex/real numbers, it does not allow to simplify the evaluation of certain functions with number theoretic tools as for the second category. However, as explained above, since it offers the largest number of \ac{SIMD} slots, it usually presents the best amortized cost.
+CKKS, similarly to second category schemes, is very efficient when operating on arithmetic circuits. 
+However, unlike other schemes which perform modular arithmetic, it allows to perform computations on complex (and thus real) numbers. 
+Although this is an important advantage for many use cases, CKKS lacks simplification tools for evaluation of certain functions due to number-theoretic phenomena as for the second category. 
+However, since CKKS usually supports huge packing capacity, it usually presents the best amortized cost.
+The bootstrapping algorithm of CKKS is fundamentally different from the above schemes as it refreshes ciphertexts only partially and introduces additional loss of output precision.
+Therefore, the CKKS bootstrapping is usually avoided in practice. 
 
-Although \ac{FHE} now offers a relatively efficient alternative for secure computations, some functions remain difficult to evaluate efficiently and this, regardless the considered schemes. Step functions, which are required in many \ac{FHE} applications, form a good example of such functions because of their discontinuous nature. The difficulty to evaluate discontinuous functions comes from the hardness to evaluate a quite common and relatively simple function: the comparison function. Although, comparison is an elementary function which is required in many applications; from the simple \emph{Millionaires problem} of Yao \cite{Yao82}, to advance machine learning tasks such as \emph{genome analysis} as proposed in the iDASH competitions\footnote{http://www.humangenomeprivacy.org/2020/index.html}, it remains difficult to evaluate homomorphically.
+Although \ac{FHE} now offers a relatively efficient alternative for secure computation, some functions remain difficult to evaluate efficiently regardless a scheme. 
+Step functions, which are required in many practical applications, form a good example of such functions because of their discontinuous nature. 
+The difficulty to evaluate discontinuous functions comes from the hardness to evaluate a quite basic and relatively simple function: the comparison function. 
+Although comparison is an elementary operation required in many applications including the famous \emph{Millionaires problem} of Yao \cite{Yao82} or advance machine learning tasks of the iDASH competition\footnote{http://www.humangenomeprivacy.org/2020/index.html}, it remains difficult to evaluate homomorphically.
+
+By now, schemes of the first category look much more suitable for such non-arithmetic tasks, but they are hopelessly inefficient for evaluating arithmetic functions.
+Hence, one should resort to heavy conversion algorithms~\cite{JMC:BGGJ20} to leverage the properties of different schemes. 
 
 \subsection{Contributions}
-In this work we study the structure of the circuits corresponding to the comparison function for schemes belonging to the second aforementionned category such as BGV and BFV. For this category of schemes there exists essentially two approaches: either compare the two numbers $x$ and $y$ directly by evaluating a bivariate polynomial in $x$ and $y$, or study the sign of the difference $z=x-y$ by evaluating a univariate polynomial in $z$.
+In this work we study the structure of the circuits corresponding to comparison functions for the BGV and BFV schemes. 
+For theses schemes, there exists two approaches: either compare two numbers $x$ and $y$ directly by evaluating a bivariate polynomial in $x$ and $y$, or study the sign of the difference $z=x-y$ by evaluating a univariate polynomial in $z$.
 
-By exploiting the structure of these two polynomials, we show that it is possible to evaluate them more efficiently than what was proposed in the state-of-the-art. The benefit of our approach results in significant performance enhancement for both methods. Using our bivariate circuit we can compare two 64-bit integers with an amortized cost of 21ms which is a gain of $40\%$ when compared to the best previously reported results (See Table \ref{table:comparison_circuit_results}). On the other hand, with our univariate circuit we obtain even better results with an amortized cost of 11ms for 64-bit numbers -- which is, to the best of our knowledge, more than 3 times faster than previous reported results for this kind of scheme. 
-Note that we obtain the maximum of two 20-bit numbers with an amortized cost of 3ms which is is better by a factor 1.9 than what can be achieved with CKKS and is comparable to TFHE.
+By exploiting the structure of these two polynomials, we show that it is possible to evaluate them more efficiently than what was proposed in the state of the art. 
+The benefit of our approach results in significant performance enhancement for both methods. 
+On the one hand, our bivariate circuit can compare two 64-bit integers with an amortized cost of 21ms, which is a gain of $40\%$ with relation to the best previously reported results of Tan et al.~\cite{TLWRK20} (See Table \ref{table:comparison_circuit_results}). 
+On the other hand, our univariate circuit shows even better results with an amortized cost of 11ms for 64-bit numbers -- which is, to the best of our knowledge, more than 3 times faster than previously reported results for this kind of scheme~\cite{TLWRK20}. 
+Note that we can compare two 20-bit numbers with an amortized cost of 3ms, which is better by a factor 1.9 than what can be achieved with CKKS-based algorithms and is comparable to TFHE-based implementations.
 
-We also apply the result of our methods to simple popular computational tasks using comparisons: sorting $N$ numbers and computing minimum/maximum of an array. As a result, for $N=64$ we obtain an amortized cost of 6.5s to sort 8-bit integers and 19.2s for 32-bit integers which is faster than state-of-the-art by a factor 9 and 2.5 respectively (see Table \ref{table:sorting_circuit_results}). We can also obtain the minimum of $N=64$ 8-bit integers in about 35min, with an amortized cost of 404ms, and in about 7h, with an amortized cost of 9.57s, for 32-bit integers (see Table \ref{table:minimum_circuit_results}).
+We also apply our comparison methods to speed up popular computational tasks such as sorting and computing minimum/maximum of an array with $N$ elements. 
+For example, for $N=64$, we obtain an amortized cost of 6.5 seconds to sort 8-bit integers and 19.2 seconds for 32-bit integers, which is faster than the prior work by a factor 9 and 2.5 respectively (see Table \ref{table:sorting_circuit_results}). 
+For $N=64$, we can also obtain the minimum of 8-bit integers with an amortized running time of 404 ms and of 32-bit integers with an amortized time of 9.57 seconds (see Table \ref{table:minimum_circuit_results}).
 
 \subsection{Related Art}
 \label{sec:related-art}
