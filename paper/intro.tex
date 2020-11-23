@@ -1,7 +1,16 @@
-\ac{FHE} gives the ability to perform any kind of computations directly over encrypted data. It is therefore a natural candidate for privacy-preserving outsourced storage and computation technics. Since Gentry's breakthrough in 2009, it has received a worldwide attention which has resulted in numerous improvements. As so, \ac{FHE} can now be used in practice in many practical scenarii \cite{KL15,BCIV17,BMMP18} and is currently going through a standardization process \cite{HomomorphicEncryptionSecurityStandard}. The different homomorphic encryption schemes can be classified into three main categories:
+\ac{FHE} gives the ability to perform any kind of computations directly over encrypted data. 
+It is therefore a natural candidate for privacy-preserving outsourced storage and computation technics. 
+Since Gentry's breakthrough in 2009, it has received a worldwide attention which has resulted in numerous improvements. 
+As a result, \ac{FHE} can now be used in practice in many practical scenarii, e.g. genome analysis~\cite{KL15}, energy forecasting~\cite{BCIV17}, image recognition~\cite{BMMP18} and secure messaging~\cite{SP:ACLS18}.\todo{more citations?} 
+In addition, FHE is currently going through a standardization process \cite{HomomorphicEncryptionSecurityStandard}.
+
+The different homomorphic encryption schemes can be classified into three main categories:
 
 \begin{itemize}
-\item The schemes encrypting their input bit-wise meaning that each bit of the input is encrypted into a different ciphertext. From there, the operations are carried over each bit separately. Examples of such schemes include FHEW \cite{DM15} and TFHE \cite{CGGI16}. These schemes are the most efficient ones in practice if the metric considered is the \emph{total running time}.
+\item The schemes encrypting their input bit-wise meaning that each bit of the input is encrypted into a different ciphertext. 
+From there, the operations are carried over each bit separately. 
+Examples of such schemes include FHEW \cite{DM15} and TFHE \cite{CGGI16}. 
+These schemes are believed to be the most efficient ones in practice if the metric considered is the \emph{total running time}.\todo{mention bootstrapping}
   
 \item The second category corresponds to word-wise encryption schemes which allow to perform computations in an \ac{SIMD} fashion \cite{SV14}. These schemes allow, not only to encrypt words of more than one bit, but also to encrypt several of them in different slots such as the operations carried over a single ciphertext will be carried over each slot in a manner similar to \ac{SIMD}. Schemes with this features include BGV \cite{BGV12} and BFV \cite{FV12}. Although operations on these schemes are less efficient than for bit-wise encryption schemes, they become more efficient if one considers the number of slots on which the computation was performed. We refer to this metric as the \emph{amortized cost}.
 

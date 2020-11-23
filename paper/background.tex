@@ -3,6 +3,8 @@ Vectors will be written in column form and denoted by boldface lower-case letter
 
 For a positive integer $t$, let $\texttt{wt}(t)$ be the Hamming weight of its binary expansion. We denote the set of residue classes modulo $p$ by $\Z_p$ and the class representatives of $\Z_p$ are taken from the half-open interval $[-p/2, p/2)$.
 
+While evaluating polynomials in variables $X_1, X_2, \dots, X_n$, we refer to multiplication of expressions containing these variables as \emph{non-scalar}.
+
 \subsection{Comparison of integers with finite fields operations}
 Let $\S$ be a totally ordered set with a binary relation $<$.
 For any $x,y \in \S$, we can define the less-than and the equality functions as follows.
@@ -72,9 +74,9 @@ The order of the set $\S$ defines a polynomial function in $\F_{p^d}$, which can
   \begin{align*}
   \mX &= \begin{pmatrix}
       1       & 1       & \dots   & 1             \\
-      X       & X^p     & \dots   & X^{p^{d-1}}   \\
+      x       & x^p     & \dots   & x^{p^{d-1}}   \\
       \vdots  & \vdots  & \ddots  & \vdots        \\
-      X^{d-1}     & X^{(d-1)p}    & \dots   & X^{(d-1)p^{d-1}}  \\
+      x^{d-1}     & x^{(d-1)p}    & \dots   & x^{(d-1)p^{d-1}}  \\
     \end{pmatrix}
     \\
     \mA &= \begin{pmatrix}
@@ -164,7 +166,13 @@ Using multiplication, we can easily define a projection map $\proj_i$ on $\intri
 In particular, $\proj_i(a) = a g_i$, where $g_i \in \intring_t$ encodes $(0 \dots, 1, \dots, 0)$.
 We can generalize this projection for any $I \subseteq \{1,\dots,\ell\}$ to $\proj_I(a) = a g_I$ with $g_I \in \intring_p$ encoding $1$ in the SIMD slots indexed by $I$.\newline
 
-The field $\numfield = \Q(\zeta_{m})$ is a Galois extension and its Galois group $\mathcal{G} = \Gal{(\numfield/\Q)}$ is isomorphic to $\Z_m^\times$  through: $i \mapsto (\sigma_i: X \mapsto X^i)$ where $i \in \Z_m^\times$. The automorphism $\sigma_p$ corresponding to $p$ is called \emph{the Frobenius automorphism} and generates the Galois group $\Gal{(\F_{p^d}/\F_p)}$ of each slot. This means that $\mathcal{F} = <\sigma_p>\subset \mathcal{G}$ partitions the roots of $\Phi_m$  into $\ell$ sets $X_i$ of $d$ elements, each set corresponding to the roots of a factor $F_i$. Therefore the group $\mathcal{H} = \mathcal{G}/\mathcal{F}$ acts transitively on a set of representative $\bar{X}_i$ of each $X_i$ and thus maps a root $\bar{X}_i$ of $F_i$ to a root $\bar{X}_j$ of $F_j$ for $i\neq j$. In other words the elements of $\mathcal{H}$ permute the SIMD slots. However, the order of $\mathcal{H}$ is $n/d = \ell$, which is less than $\ell!$, the number of all possible permutations of the $\ell$ SIMD slots. Nonetheless, it was shown in~\cite{GHS12} that every permutation of SIMD slots can be realized by combination of automorphisms from $\mathcal{H}$, projection maps and additions.\newline
+The field $\numfield = \Q(\zeta_{m})$ is a Galois extension and its Galois group $\mathcal{G} = \Gal{(\numfield/\Q)}$ is isomorphic to $\Z_m^\times$  through: $i \mapsto (\sigma_i: X \mapsto X^i)$ where $i \in \Z_m^\times$. 
+The automorphism $\sigma_p$ corresponding to $p$ is called \emph{the Frobenius automorphism} and generates the Galois group $\Gal{(\F_{p^d}/\F_p)}$ of each slot. 
+This means that $\mathcal{F} = \ideal{\sigma_p} \subset \mathcal{G}$ partitions the roots of $\Phi_m$  into $\ell$ sets $S_i$ of $d$ elements, each set corresponding to the roots of a factor $F_i$ over $\C$. 
+Therefore, the group $\mathcal{H} = \mathcal{G}/\mathcal{F}$ acts transitively on a set of representatives $\bar{S}_i$ of each $S_i$ and thus maps $\bar{S}_i$ to $\bar{S}_j$. 
+In other words, the elements of $\mathcal{H}$ permute the SIMD slots. 
+However, the order of $\mathcal{H}$ is $n/d = \ell$, which is less than $\ell!$, the number of all possible permutations of the $\ell$ SIMD slots. 
+Nonetheless, it was shown in~\cite{GHS12} that every permutation of SIMD slots can be realized by combination of automorphisms from $\mathcal{H}$, projection maps and additions.\newline
 
 In this work we will focus on SIMD schemes allowing to perform \emph{exact} computations over encrypted datas. Such schemes include $\BGV$~\cite{BGV12} and $\FV$~\cite{FV12} and have the ring $\intring_p$, for $p\geq 2$, as plaintext space.
 

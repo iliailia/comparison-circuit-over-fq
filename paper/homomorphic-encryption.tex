@@ -97,7 +97,8 @@ The moderate operations are less important, but if there are many of them in a c
 The cheap operations are the least important and can be omitted in the cost analysis.
 
 It is worth to note that there are two multiplication functions $\Mul$ (ciphertext-ciphertext multiplication) and $\MulPlain$ (ciphertext-plaintext multiplication).
-Since $\Mul$ is much more expensive than $\MulPlain$, the multiplicative depth of a homomorphic circuit is usually calculated with relation to the number of $\Mul$'s.
+The former one corresponds to non-scalar multiplication of two expressions containing input values, while the latter is related to the product of an expression with input values and an unenecrypted finite field element. 
+Since $\Mul$ is much more expensive than $\MulPlain$, the multiplicative depth of a homomorphic circuit is usually calculated with relation to the number of $\Mul$'s, or non-scalar multiplications.
 
 \begin{table}[t!]
   \centering

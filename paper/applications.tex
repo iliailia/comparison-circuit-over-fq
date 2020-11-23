@@ -15,7 +15,7 @@
 	It is easy to see that the Hamming weight of the $i$th row of $\mL$ is unique and equal to the array index of $a_i$ after sorting $\va$ in the descending order.
 	For example, the zero weight indicates that there are no elements of $\va$ bigger than $a_i$; thus, $a_i$ is the first value of $\va$ after sorting, or the maximum element of $\va$.
 
-	To arrange $\va$ in the right order, we extract its elements by comparing the current array index $i$ with the Hamming weights of the comparison matrix rows ($\wt(\mL[j])$).  
+	To arrange $\va$ in the right order, we extract its elements by comparing the current array index $i$ with the Hamming weights of the comparison matrix rows $\wt(\mL[j])$.  
 	\begin{align*}
 		a'_i = \sum_{j=0}^{n-1} \EQ(i,\wt\left(\mL[j]\right)) \cdot a_j.
 	\end{align*}
@@ -111,15 +111,15 @@
 	\end{align}
 	Here, the multiplicative depth is reduced to 
 	\begin{align*}
-		\ell \cdot d(\min(x,y)) + d(\LT(x,y)) + d(\EQ(x,y)) + 1 \\
+		\ell \cdot d(\min(x,y)) + d(\LT) + d(\EQ) + 1 \\
 		= (\ell + 2) \cdot \ceil{\log (p-1)} + 1
 	\end{align*}
 	which is independent of the array length $n$.
-	If $M(\EQ(x,y))$ and $M(\LT(x,y))$ is the number of multiplications in the equality function $\EQ$ and the less-than function $\LT$, respectively, the multiplicative complexity is equal to 
+	If $M(\EQ)$ and $M(\LT)$ is the number of multiplications in the equality function $\EQ$ and the less-than function $\LT$, respectively, the multiplicative complexity is equal to 
 	\begin{align*}
-		n (1 + M(\EQ(x,y))) + \frac{n(n-1)}{2} \cdot  M(\LT(x,y)).
+		n (1 + M(\EQ)) + \frac{n(n-1)}{2} \cdot  M(\LT).
 	\end{align*}
-	Shaul et al.~\cite{PoPETS:SFR20} proposed another circuit for the minimum function that exploits the fact that the comparison table row related to the minimal element contains only $1$ except for the main diagonal element.
+	Shaul et al.~\cite{PoPETS:SFR20} proposed another circuit for the array minimum function that exploits the fact that the comparison table row related to the minimal element contains only $1$ except for the main diagonal element.
 	In other words, the product of $\prod_{j=1, j \ne i}^{n} \mL_{ij} = 1$ if and only if $a'_i = \min(\va')$.
 	Hence, the minimal element is equal to
 	\begin{align}\label{eq:shaul_minimum}
@@ -127,12 +127,12 @@
 	\end{align}
 	The resulting depth of this circuit amounts to
 	\begin{align*}
-		\ell \cdot d(\min(x,y)) + d(\LT(x,y)) + \ceil{\log (n-1)} + 1 \\
+		\ell \cdot d(\min) + d(\LT) + \ceil{\log (n-1)} + 1 \\
 		= (\ell + 1) \cdot \ceil{\log (p-1)} + \ceil{\log (n-1)} + 1. 
 	\end{align*}
 	This circuit requires the following number of multiplications 
 	\begin{align*}
-		n (n-1) + \frac{n(n-1)}{2} \cdot M(\LT(x,y)) .
+		n (n-1) + \frac{n(n-1)}{2} \cdot M(\LT) .
 	\end{align*}
 	This implies that for small enough $n$, Shaul's circuit~(\ref{eq:shaul_minimum}) has smaller depth or smaller multiplication complexity than the circuit in~(\ref{eq:our_minimum}).
 	Furthermore, Shaul's circuit is correct even if $n > p$, whereas (\ref{eq:our_minimum}) requires $n \le p$ such that $\wt(\mL[i])$ are computed correctly.

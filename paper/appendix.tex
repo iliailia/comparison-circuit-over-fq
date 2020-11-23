@@ -23,7 +23,7 @@ To prove this statement we will need the following Lemma.
   \end{proof}
 
   \begin{lemma}\label{lem:sum_poly}
-    Let $P(x)$ be a polynomial of degree $d$ less than $p-1$.
+    Let $P(X)$ be a polynomial of degree $d$ less than $p-1$.
     For any prime number $p > 2$, it holds
     \[
       \sum_{a=0}^{p-1} P(a) = 0 \mod p.
@@ -38,19 +38,17 @@ To prove this statement we will need the following Lemma.
     \end{align}
     Since $g^{pn} \equiv g^n \mod p$, the sum turns into zero modulo $p$.
   \end{proof}
-
-  We can now start the proof of Theorem \ref{thm:less_than_total_degree}:
-  
+  Now, We have all the ingredients to prove Theorem \ref{thm:less_than_total_degree}.
   \begin{proof}[Theorem \ref{thm:less_than_total_degree}]
     Assume that all computations are done modulo $p$.
-    Using Lemma~\ref{lem:difference_to_p-1}, we obtain that $P_{\LT_\S}(x,y)$ is equal to
+    Using Lemma~\ref{lem:difference_to_p-1}, we obtain that $P_{\LT_\S}(X,Y)$ is equal to
     \begin{align*}
-      \sum_{a = 0}^{p-2} \left(1-\sum_{i=0}^{p-1} x^i a^{p-1-i}\right) \sum_{b=a+1}^{p-1} \left(1-\sum_{j=0}^{p-1} y^j b^{p-1-j}\right)
+      \sum_{a = 0}^{p-2} \left(1-\sum_{i=0}^{p-1} X^i a^{p-1-i}\right) \sum_{b=a+1}^{p-1} \left(1-\sum_{j=0}^{p-1} Y^j b^{p-1-j}\right)
     \end{align*}
     Let us expand this expression distributively.
     \begin{align*}
-      \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} 1 - \sum_{i=0}^{p-1} x^i a^{p-1-i} - \sum_{i=0}^{p-1} y^i b^{p-1-i} \\
-      + \sum_{i=0}^{p-1} \sum_{j=0}^{p-1} x^i y^j a^{p-1-i} b^{p-1-j}.
+      \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} 1 - \sum_{i=0}^{p-1} X^i a^{p-1-i} - \sum_{i=0}^{p-1} Y^i b^{p-1-i} \\
+      + \sum_{i=0}^{p-1} \sum_{j=0}^{p-1} X^i Y^j a^{p-1-i} b^{p-1-j}.
     \end{align*}
     Let us separately compute polynomial coefficients.
     The constant term is equal to
@@ -58,11 +56,11 @@ To prove this statement we will need the following Lemma.
       \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} 1 - a^{p-1} - b^{p-1} + a^{p-1} b^{p-1} \\
       = \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} 1 - a^{p-1} - 1 + a^{p-1} = 0 
     \end{align*}
-    The coefficients by $x^i$ with $i > 0$ can be computed as follows
+    The coefficients by $X^i$ with $i > 0$ can be computed as follows
     \begin{align*}
       \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} \left(-a^{p-1-i}\right) + a^{p-1-i} = 0.
     \end{align*}
-    Next, we compute the coefficients by $y^i$ with $i > 0$.
+    Next, we compute the coefficients by $Y^i$ with $i > 0$.
     \begin{align*}
       -\sum_{a = 0}^{p-2} &\sum_{b=a+1}^{p-1} b^{p-1-i} - a^{p-1} b^{p-1-i} \\
       &= -\sum_{b=1}^{p-1} b^{p-1-i} - \sum_{a = 1}^{p-2} \sum_{b=a+1}^{p-1} b^{p-1-i} - b^{p-1-i} \\
@@ -71,26 +69,26 @@ To prove this statement we will need the following Lemma.
     If $i = p-1$, this sum is equal to $1$.
     According to Lemma~\ref{lem:sum_poly}, it is $0$ if $i \ne 0 \mod (p-1)$.
     
-    To compute coefficients by $x^i y^j$ with $i, j > 0$, we will use Faulhaber's formula below
+    To compute coefficients by $X^i Y^j$ with $i, j > 0$, we will use Faulhaber's formula below
     \begin{align*}
       \sum_{k=1}^n k^e = \frac{1}{e+1} \sum_{i=1}^{e+1} (-1)^{\delta_{ie}} \binom{e+1}{i} B_{e+1-i} \cdot n^i\,,
     \end{align*}
     where $\delta_{ie}$ is the Kronecker delta and $B_{i}$ is the $i$th Bernoulli number.
-    This implies that there exist a polynomial $P(x) \in \F_p[X]$ of degree $e+1$ such that
+    This implies that there exist a polynomial $P(X) \in \F_p[X]$ of degree $e+1$ such that
     \begin{align}\label{eq:faulhaber}
       \sum_{k=1}^n k^e = P(n).
     \end{align}
     Note that $P(0) = 0$.
-    The coefficient by $x^i y^j$ for some positive $i$ and $j$ is equal to
+    The coefficient by $X^i Y^j$ for some positive $i$ and $j$ is equal to
     \begin{align*}
       \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} a^{p-1-i} b^{p-1-j} = \sum_{b = 1}^{p-1} b^{p-1-j} \sum_{a=0}^{b-1} a^{p-1-i}.
     \end{align*}
-    According to~(\ref{eq:faulhaber}), it follows that there exist a polynomial $P(x)$ of degree $p-i$ such that $\sum_{a=0}^{b-1} a^{p-1-i} = P(b)$.
-    Since $Q(x) = x^{p-1-j} P(x)$ has degree $2p-1-i-j$, Lemma~\ref{lem:sum_poly} implies that if $i+j > p$, then
+    According to~(\ref{eq:faulhaber}), it follows that there exist a polynomial $P(X)$ of degree $p-i$ such that $\sum_{a=0}^{b-1} a^{p-1-i} = P(b)$.
+    Since $Q(X) = X^{p-1-j} P(X)$ has degree $2p-1-i-j$, Lemma~\ref{lem:sum_poly} implies that if $i+j > p$, then
     \begin{align*}
       \sum_{b = 1}^{p-1} b^{p-1-j} \sum_{a=0}^{b-1} a^{p-1-i} = \sum_{b=1}^{p-1} Q(b) = 0.
     \end{align*}
-    Thus, the total degree of $P_{\LT_\S}$ is at most $p$.
+    Thus, the total degree of $P_{\LT_\S}(X,Y)$ is at most $p$.
 
     In addition, we consider the case when $i = j$.
     Let us consider the following sum
@@ -103,41 +101,42 @@ To prove this statement we will need the following Lemma.
       &= 2\sum_{a=0}^{p-2} a^{p-1-i} \sum_{b=a+1}^{p-1} b^{p-1-i} + \sum_{a=0}^{p-1} a^{2(p-1-i)}.
     \end{align*}
     If $i \ne (p-1)/2$, then the last sum is zero.
-    Thus, the coefficient by $x^i y^i$ is equal to $\sum_{a=0}^{p-2} a^{p-1-i} \sum_{b=a+1}^{p-1} b^{p-1-i} = 0$.
+    Thus, the coefficient by $X^i Y^i$ is equal to $\sum_{a=0}^{p-2} a^{p-1-i} \sum_{b=a+1}^{p-1} b^{p-1-i} = 0$.
     If $i = (p-1)/2$, then following the above argument, this coefficient is equal to $-(p-1)/2$.
   \end{proof}
 
-\section{Decomposition of $f(x,y)$ for $3\leq p \leq 7$}
+\section{Decomposition of $f(X,Y)$ for $3\leq p \leq 7$}
 \label{app:decomposition-f}
-Let $Y = y(x-y)$.
-\paragraph{p=3}
-$$f(x,y) = 2$$
+Let $Z = Y(X-Y)$.
 
-$f$ is constant and can thus be computed without any homomorphic multiplication.
+\textbf{p=3.}
+$$f(X,Y) = 2.$$
 
-\paragraph{p=5}
-$$f(x,y) = 4x^2 + 4x + Y$$
+Since the polynomial $f(X,Y)$ is constant, it can be computed without any homomorphic multiplication.
 
-2 homomorphic multiplications to compute $x^2$ and $Y$.
+\textbf{p=5.}
+$$f(X,Y) = 4X^2 + 4X + Z.$$
 
-\paragraph{p=7}
-$$f(x,y) = 1 + 4x(x+1) + 6[x(x+1)]^2 + (x^2+3x)Y + 6Y^2$$
+Two homomorphic multiplications ($\Mul$) are needed to compute $X^2$ and $Z$.
 
-Which can be computed with only 4 homomorphic multiplications (indicated in bold) when rewritten as:
+\textbf{p=7.}
+$$f(X,Y) = 1 + 4X(X+1) + 6[X(X+1)]^2 + (X^2+3X)Z + 6Z^2$$
 
-$$f(x,y) = 1 + 2(\bm{x}^2+x)\bm{\cdot}[2 + 3(x^2+x)] + \bm{Y}\bm{\cdot}[(x^2+3x) + 6Y].$$
+In this case, four homomorphic multiplications ($\Mul$) are needed (indicated in bold) when rewritten as follows
+
+$$f(X,Y) = 1 + 2(\bm{X}^2+X)\bm{\cdot}[2 + 3(X^2+X)] + \bm{Z}\bm{\cdot}[(X^2+3X) + 6Z].$$
 
 \section{Proof of Lemma \ref{lem:univariate}}
 \label{app:proof-lem-univariate}
-   Let $z = x-y$.
-    Thus we can rewrite $Q_{\LT_\S}$ as the univariate indicator function $\chi_{\F_p^-}$, namely
+   Let $Z = X-Y$.
+    Thus we can rewrite $Q_{\LT_\S}(X,Y)$ as the univariate function $\chi_{\F_p^-}$, namely
     \begin{align*}
-      Q_{\LT_\S}(x,y) = \chi_{\F_p^-}(z) = \sum_{a=-\frac{p-1}{2}}^{-1} 1 - (z - a)^{p-1}.
+      Q_{\LT_\S}(X,Y) = \chi_{\F_p^-}(Z) = \sum_{a=-\frac{p-1}{2}}^{-1} 1 - (Z - a)^{p-1}.
     \end{align*}
-    Thanks to Lemma~\ref{lem:difference_to_p-1}, we can expand $(z-a)^{p-1}$ and obtain
+    Thanks to Lemma~\ref{lem:difference_to_p-1}, we can expand $(Z-a)^{p-1}$ and obtain
     \begin{align*}
-      \sum_{a=-\frac{p-1}{2}}^{-1} 1 - \sum_{i=0}^{p-1} z^i a^{p-1-i}
-      = \sum_{i=1}^{p-1} z^i \sum_{a=-\frac{p-1}{2}}^{-1} (-a^{p-1-i}).
+      \sum_{a=-\frac{p-1}{2}}^{-1} 1 - \sum_{i=0}^{p-1} Z^i a^{p-1-i}
+      = \sum_{i=1}^{p-1} Z^i \sum_{a=-\frac{p-1}{2}}^{-1} (-a^{p-1-i}).
     \end{align*}
     If $i$ is even, then the $i$th coefficient is equal to
     \begin{align*}
