@@ -307,7 +307,7 @@ According to Lemma~\ref{lem:interpolation}, $\chi_{\F_p^-}(z)$ is equal to
   
   \begin{remark}
     A careful reader can notice that the leading term of~(\ref{eq:univariate_circuit}) is equal to $(X-Y)^{p-1}$, which is the heaviest part of the equality circuit $\EQ_\S(X,Y)$.
-    Thus, we can get $\EQ_\S(X,Y)$ almost for free (at the cost of one $\SubPlain$) after evaluating $\LT_\S(X,Y)$, thus saving $O(\log (p-1))$ non-scalar multiplications.
+    Thus, we can get $\EQ_\S(X,Y)$ almost for free (at the cost of one homomorphic subtraction) after evaluating $\LT_\S(X,Y)$, thus saving $O(\log (p-1))$ non-scalar multiplications.
 
     This feature of our circuit allows to compute all the equality operations while comparing large integers using the less-than function $\LT$ from~(\ref{eq:general_lex_order}).
     This saves $O((d'-1)(k-1) \log (p-1))$ homomorphic multiplications, thus leading to a better running time.
