@@ -1,7 +1,8 @@
 \subsection{Notations}
-  Vectors will be written in column form and denoted by boldface lower-case letters. The vector containing only $1$'s in its coordinates is denoted by $\1$. We write $\0$ for the zero vector. The set of integers $\{\ell,\dots,k\}$ is denoted by $[\ell,k]$.
+  Vectors will be written in column form and denoted by boldface lower-case letters. 
+  The set of integers $\{\ell,\ldots,k\}$ is denoted by $[\ell,k]$.
 
-  For a positive integer $t$, let $\texttt{wt}(t)$ be the Hamming weight of its binary expansion. We denote the set of residue classes modulo $p$ by $\Z_p$ and the class representatives of $\Z_p$ are taken from the half-open interval $[-p/2, p/2)$.
+  For a non-negative integer $a$, let $\texttt{wt}(a)$ be the Hamming weight of its binary expansion. We denote the set of residue classes modulo $p$ by $\Z_p$ and the class representatives of $\Z_p$ are taken from the half-open interval $[-p/2, p/2)$.
 
 \subsection{Comparison of integers with finite fields operations}
   Let $\S$ be a totally ordered set with a binary relation $<$.
@@ -19,26 +20,26 @@
       0, & \text{if } x \neq y. \\
     \end{cases}
   \end{align*}
-  In our case, $\S$ is a set of consecutive integers.
+  %In our case, $\S$ is a set of consecutive integers.
 
 \subsubsection{Functions over finite fields}\label{subsec:funcff}
 The map defined by $\princhar: x \mapsto x^{p^d-1}$ from $\F_{p^d}$ to the binary set $\{0,1\}$ is called the \emph{principal character}. 
 According to Euler's theorem, it returns $1$ if $x$ is non-zero and $0$ otherwise. 
-It can thus be used to compute the equality function:
-\begin{align*}
-  \EQ_{\F_{p^d}}(x,y) = 1 - \princhar (x-y).
-\end{align*}
+%It can thus be used to compute the equality function:
+%\begin{align*}
+%  \EQ_{\F_{p^d}}(x,y) = 1 - \princhar (x-y).
+%\end{align*}
 %Moreover, note that since:
 %\begin{align}\label{eq:exp_frob}
 %  a^{p^d-1} = a^{(p-1)(p^{d-1} + \dots + 1)} = \prod_{i=0}^{d-1} \left(a^{p-1}\right)^{p^i},
 %\end{align}
 %$\chi$ can be computed with Frobenius maps ($x \mapsto x^p$) and multiplications.
-With the help of the equality function, every function from $\F_{p^d}^l$ to $\F_{p^d}$ can be interpolated by a unique polynomial according to the following well-know lemma. 
+With the help of the principal character, every function from $\F_{p^d}^l$ to $\F_{p^d}$ can be interpolated by a unique polynomial according to the following well-know lemma. 
 \begin{lemma}\label{lem:interpolation}
   Every function $f: \F_{p^d}^l \rightarrow \F_{p^d}$ is a polynomial function represented by a unique polynomial $P_f(X_1,\dots,X_{l})$ of degree at most $p^d - 1$ in each variable.
   In particular,
   \begin{align*}
-    P_f(X_1,\dots,X_{l}) = \sum_{\va \in \F^l_{p^d}} f(\va) \prod_{i=1}^{l} \EQ_{\F_{p^d}}(X_i,a_i) %\left(1 - \princhar(X_i - a_i)\right)\,.
+    P_f(X_1,\dots,X_{l}) = \sum_{\va \in \F^l_{p^d}} f(\va) \prod_{i=1}^{l} \left(1 - \princhar(X_i - a_i)\right)\,.
   \end{align*}
   where $a_i$ is the $i$th coordinate of vector $\va$. 
 \end{lemma}
@@ -59,7 +60,7 @@ With the help of the equality function, every function from $\F_{p^d}^l$ to $\F_
   Hence, the total degree of the interpolation polynomial is at least $p^d-1$, 
   which might be prohibitive in practice.
 
-  Tan et al.~\cite{TLWRK20} proposed an alternative approach based on the extraction of coefficients $a_i, b_i \in \F_p$ thanks to the following lemma (see \cite[Theorem 2.24]{LN86} for the proof).
+  Tan et al.~\cite{TLWRK20} proposed an alternative approach based on the extraction of coefficients $a_i, b_i \in \F_p$ thanks to the following result from the theory of finite fields (see \cite[Theorem 2.24]{LN86} for the proof).
   \begin{lemma}\label{lem:extraction}
     The linear transformations from $\F_{p^d}$ to $\F_p$ are exactly the mappings $L_{\alpha}(x) = \Tr_{\F_{p^d}/\F_p}(\alpha x)$ for some $\alpha \in \F_{p^d}$ and all $x \in \F_{p^d}$.
     Furthermore, $L_{\alpha} \ne L_{\beta}$ if $\alpha \ne \beta$.
@@ -154,16 +155,15 @@ The ring of integers of $\mathcal{K}$, denoted by $\intring$, is isomorphic to $
 Let $p>1$ be a prime number coprime to $m$, then $\Phi_m(X)$ splits modulo $p$ into $\ell$ irreducible factors of same degree $d$, i.e. $\Phi_m(X) = F_1(X)\cdots F_\ell(X) \bmod p$. 
 The degree $d$ is actually the order of $p$ modulo $m$, and $\ell = n/d$. 
 The \ac{CRT} states that in this case the following ring isomorphism holds:
-\begin{align}\label{eq:crt}
+\begin{align*}
   \intring_p &= \Z_p[X]/\ideal{\Phi_m(X)} \nonumber \\ 
   & \cong \Z_p[X]/\ideal{F_1(X)} \times \ldots \times \Z_p[X]/\ideal{F_{\ell}(X)}
-\end{align}
+\end{align*}
 For each $i \in [1,\ell]$ the quotient ring $\Z_p[X]/\ideal{F_i(X)}$ is isomorphic to the finite field $\F_{p^d}$. 
 Hence, the above isomorphism can be rewritten as $\intring_p \cong \F_{p^d}^\ell$.
 We call every copy of $\F_{p^d}$ in this direct product a \emph{slot}. 
 Therefore, every element of $\intring_p$ contains $\ell$ slots, which implies that an array of $\ell$ independent $\F_{p^d}$-elements can be encoded as a unique element of $\intring_p$. 
-We enumerate the slots according to the enumeration of the polynomials $F_i(X)$'s. 
-Namely, the slot isomorphic to $\Z_p[X]/\ideal{F_i(X)}$ is referred to as the \emph{$i$th} slot.
+The slot isomorphic to $\Z_p[X]/\ideal{F_i(X)}$ is referred to as the \emph{$i$th} slot.
 
 Additions and multiplications of $\intring_p$-elements results in the corresponding coefficient-wise operations of their respective slots. 
 In other words, each ring operation on $\intring_p$ is applied to every slot in parallel, which resembles the Single-Instruction Multiple-Data (SIMD) instructions used in parallel computing.
@@ -193,8 +193,8 @@ Assume that the plaintext space $\intring_p$ has $\slots$ SIMD slots, i.e. $\int
 % For a vector $\va \in \F^k_{p^d}$, we denote the plaintext encoding of $\va$ by $\pt(\va)$. 
 The basic part of any HE schemes consists of key generation, encryption and decryption algorithms.
 
-$\KeyGen(1^\lambda, 1^L) \rightarrow (\sk, \pk)$. Given $\lambda$ and $L$, this function generates the secret key $\sk$ and the public key $\pk$.
-Note that the public key contains special key-switching keys that help to transform ciphertexts encrypted under other secret keys back to ciphertexts encrypted under $\sk$. 
+$\KeyGen(1^\lambda, 1^L) \rightarrow (\sk, \pk)$. Given $\lambda$ and $L$, this function outputs the secret key $\sk$ and the public key $\pk$.
+%Note that the public key contains special key-switching keys that help to transform ciphertexts encrypted under other secret keys back to ciphertexts encrypted under $\sk$. 
 
 $\Encrypt(\pt \in \intring_p, \pk) \rightarrow \ct$. The encryption algorithm takes a plaintext $\pt$ and the public key $\pk$ and outputs a ciphertext $\ct$.
 
@@ -205,11 +205,9 @@ For freshly encrypted ciphertexts, the decryption correctness means that $\Decry
 \subsubsection{Homomorphic operations}
 
 Homomorphic arithmetic operations are addition and multiplication.
-
 The addition (multiplication) algorithm takes two input ciphertexts $\ct_1$ and $\ct_2$ encrypting plaintexts $\pt_1$ and $\pt_2$ respectively.
 It outputs a ciphertext $\ct$ that encrypts the sum (product) of these plaintexts in the ring $\intring_p$.
 It implies that homomorphic addition sums (multiplies) respective SIMD slots of $\pt_1$ and $\pt_2$.
-
 It is also possible to define similar operations between ciphertexts and plaintexts.  
 
 %As shown in Section~\ref{subsec:crt}, the projection map $\proj_I$ can select the SIMD slots indexed by a set $I \subseteq \{0,\dots,\slots-1\}$ and set the rest to zero.
@@ -249,7 +247,7 @@ It is also possible to define similar operations between ciphertexts and plainte
 %  \floor{\log_2 (p-1)} + \wt(p-1) + d - 2.
 %\end{align} 
 
-Note that every homomorphic ciphertext contains a special component called \emph{noise} that is removed during decryption.
+Every homomorphic ciphertext contains a special component called \emph{noise} that is removed during decryption.
 However, the decryption function can deal only with noise of small enough magnitude; otherwise, this function fails.
 This noise bound is defined by encryption parameters in a way that larger parameters result in a larger bound.
 The ciphertext noise increases after every homomorphic operation and, therefore, approaches its maximal possible bound.

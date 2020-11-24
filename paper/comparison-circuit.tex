@@ -1,26 +1,34 @@
-As explained in Section \ref{sec:background}, the comparison of elements over $\mathbb{F}_{p^d}$ boils down to their comparison over $\mathbb{F}_p$. 
-In this section we study the structure of the comparison circuit over $\mathbb{F}_p$. 
-Let $\S$ is restricted to $[0,p-1]$ in which case we have for any $(x,y)\in\S^2\subseteq \F_p^2$:
+%As explained in Section \ref{sec:background}, comparing elements over $\mathbb{F}_{p^d}$ boils down to their comparison over $\mathbb{F}_p$. 
+In this section, we study the structure of basic comparison circuits over $\mathbb{F}_p$ used in Section~\ref{sec:background} to compare integers, namely $\LT_{\F_p}$ and $\EQ_{\F_p}$. 
 
-$$ \EQ_{\S}(x,y) = 1 - (x-y)^{p-1}. $$
+%Let $\S$ be a subset of $[0,p-1]$ such that $\S$ can be embedded canonically embedded into $\F_p$.
+For any $(x,y)\in \F_p^2$ the equality function is equal to
+\begin{align*}
+  \EQ_{\F_p}(x,y) = 1 - (x-y)^{p-1}.
+\end{align*}
+Unfortunately, $\LT_{\F_p}$ is not that simple and we have to rely on Lagrange interpolation (Lemma~\ref{lem:interpolation}) to compute it. 
+Yet, there are two different ways to evaluate it.
+The first method (as done in \cite{TLWRK20}) directly interpolates $\LT_{\F_p}$ as a bivariate function over $\F_{p}$.
+The second approach (as done in \cite{AINA:NGEG17} and \cite{PoPETS:SFR20}) interpolates a univariate polynomial of $\LT_{\F_p}(z, 0)$ with $z = x - y$.
+%In this case, $x,y$ must belong to the set $[0, (p-1)/2]$. 
+%However, these works evaluated $\LT_{\F_p}$ without exploiting its structure. 
+In this section, we show how to exploit the structure of these polynomials to speed-up their evaluation.
 
-Unfortunately, the comparison function is not as simple and we have to rely on Lagrange interpolation (Lemma 1) to compute it. 
-Yet, there are two different ways to evaluate it: either interpolate $\LT_\S$ as a bivariate function over $S^2$ -- i.e. compute $\LT_\S(x,y)$ -- as done in \cite{TLWRK20}, or transform it as a simple univariate function in $z = x - y$ -- i.e. compute $\LT_S (z, 0)$ -- as done in \cite{AINA:NGEG17} and \cite{PoPETS:SFR20}. 
-However, all these works have evaluated $\LT_\S$ without exploiting its structure. 
-In this section we study this structure for both the bivariate and univariate cases and we show how to exploit it in order to speed-up their evaluation.
-
-\subsection{Bivariate interpolation of $\LT_\S$.}
+\subsection{Bivariate interpolation of $\LT_{\F_p}$.}
 
   The less-than function can be interpolated using Lemma~\ref{lem:interpolation} and the following truth table
-  $$\begin{array}{c|m{1em}m{1em}m{1em}cc}
-      < & 0 & 1 & 2 & \cdots & p-1 \\
-      \hline
-      0 & 0 & 1 & 1 & \cdots & 1 \\
-      1 & 0 & 0 & 1 & \cdots & 1 \\
-      2 & 0 & 0 & 0 & \cdots & 1 \\
-      \vdots & \vdots & \vdots & \vdots & \ddots & \vdots \\
-      p-1 & 0 & 0 & 0 & \cdots & 0 \\
-    \end{array}$$
+  \begin{table}
+    \centering
+    \begin{tabular}{c|ccccc}
+        $<$ & 0 & 1 & 2 & $\cdots$ & $p-1$ \\
+        \hline
+        0 & 0 & 1 & 1 & $\cdots$ & 1 \\
+        1 & 0 & 0 & 1 & $\cdots$ & 1 \\
+        2 & 0 & 0 & 0 & $\cdots$ & 1 \\
+        $\vdots$ & $\vdots$ & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ \\
+        $p-1$ & 0 & 0 & 0 & $\cdots$ & 0 \\
+    \end{tabular}
+  \end{table}
     
   In particular, the interpolation polynomial of $\LT_\S$ over $\F_p$ is equal to
   \begin{align}\label{eq:less_than_function}
