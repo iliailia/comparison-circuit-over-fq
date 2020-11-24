@@ -1,35 +1,48 @@
-\begin{itemize}
-\item \cite{CDSS15}: depth optimized sorting algorithm for HE. Reduce the depth from $\mathcal{O}(l\log^2(N))$ of Batcher network to $\mathcal{O}(\log(N) + \log(l))$ for sorting $N$ $l$-bits integers.
+Since comparison is a common function required in many applications, its homomorphic evaluation has been the object of several works.
+Since inputs are encrypted, one cannot stop the comparison whenever one meets the first difference between most significant bits. As a consequence homomorphic comparison has a complexity which corresponds to the worst-case complexity in the plain domain. However, the actual efficiency of homomorphic comparison depends on the type of scheme considered.
 
-\item \cite{EGNS15}: sorting algorithm for HE. Conclusion: average case in the encrypted domain corresponds to the worst-case in plain domain, better use sorting networks.
+For bit-wise homomorphic encryption scheme, Chillotti and al. showed that one could compare two $d$-bit integers by evaluating a deterministic weighted automata built made of $5d~\texttt{CMux}$ gates. Using TFHE, evaluating a \texttt{CMux} gate takes around $34$ µs on a classical laptop, meaning that one can compare homomorphically two $d$-bit numbers in around $170d$ µs. Note that these estimations correspond to the fastest (leveled) version of TFHE which does not use bootstrapping. If one wants to use the bootstrapped version then the best method requires to evaluate $7d~\texttt{Mux}$ gates, where each gates takes around $13$ ms to be evaluated, which makes a total of $91d$ ms.
 
-\item \cite{CKK15,CKK16} (conference and journal extended version) bit wise comparison using SIMD. Algorithm to compute running products.
+Schemes from the second category can use \ac{SIMD} techniques to batch several plaintexts into a single ciphertext \cite{SV14}. Therefore a natural idea would be to pack the bits of the inputs into a single ciphertext. In \cite{CKK15,CKK16}, Cheon et al. studied comparisons in this context using the bivariate approach. Some of the algorithmic tools they have used -- e.g. computation of running sums and products -- are optimal in the homomorphic setting and have laid the ground for future works in this direction.
+Some works have tried to exploit the other feature of these schemes by encoding words modulo a prime $p$ with $p\geq 2$ instead of bits. In \cite{NGEG17}, Narumanchi et al. compare the efficiency of performing comparisons with the univariate approach using integer-wise with bit-wise arithmetic without using batching technique. They concluded that bit-wise methods were more efficient because in this case one can compare $d$-bit numbers with a circuit of depth of $\mathcal{O}(\log d)$ instead of $\mathcal{O}(d)$ in the case of integer arithmetic. This comes from the fact that the integer arithmetic circuit requires to evaluate a Lagrange polynomial of degree $p-1 \geq 2^d$.
+In \cite{KLLW18}, Kim et al. noticed that when using batching technique one could take advantage of the nature of $\mathbb{F}_{p^d}$, which corresponds to the plaintext space of each slot, to evaluate the Frobenius automorphism $x \mapsto x^{p}$ without consuming any depth level. This allowed them to reduce the depth of the equality circuit $\texttt{EQ}(x,y) = 1 - (x-y)^{p^{d}-1}$ from $\lceil d\log_2(p) \rceil$ to $\lceil \log_2(d)\rceil + \lceil\log_2(p-1)\rceil$.
+Tan et al. proposed a method to perform digit-wise comparison using \ac{SIMD} with the bivariate approach \cite{TLWRK20}. Their idea consists in decomposing the integers to compare into digits of size $p^r$ encoded into a subfield of $\mathbb{F}_{p^d}$, with $r | d$, in order to reduce the degree of the Lagrange polynomial used to interpolate the comparison function. Then one can compute the comparison of the inputs by combining the results of the comparison of each digits using the lexicographical order. Note that their evaluation of the lexicographical order makes intensive use of the efficient equality circuit of \cite{KLLW18}. Overall, they have used their method to compare integers up to 64-bit while reporting, to the best of our knowledge, the current best timings for performing comparisons with BGV scheme. Finally in \cite{PoPETS:SFR20}, Shaul et al. used the univariate approach to evaluate the comparison polynomial in the context of top-$k$ selection with non-binary circuits. However they did not use the decomposition method of \cite{TLWRK20} which leads to relatively poor performance.
+Note that all these works did not study the structure of the comparison polynomial neither in the bivariate case nor the univariate case. Unlike aforementioned works, \cite{JMC:KMNN19} studies the polynomial expressions of $\max$, $\argmax$ and other non-arithmetic functions over non-binary fields. However their results do not allow to evaluate these functions very efficiently, as an example their homomorphic circuit to evaluate $\max$ has a quadratic complexity in $p$.
 
-\item \cite{KLLW18} equality circuit over non-binary fields. Use the Frobenius automorphism to reduce the depth. 
+The situation for CKKS is quite different since complex/real numbers are directly encoded into the scheme. Therefore, one does not need to use any finite field encoding but on the other hand one cannot take advantage of the properties resulting of these encoding, such as Frobenius automorphism, neither. Nonetheless the approximated nature of the computations in CKKS makes it suitable to use iterative methods converging to the function one wants to evaluate. In \cite{BMSZ20}, the authors used Newton iteration to evaluate the sign function while independently \cite{AC:CKKLL19,EPRINT:CheKimKim19} studied the efficiency of these methods in a more general context. Using the methods of \cite{EPRINT:CheKimKim19}, one can compare 20-bit numbers with an amortized cost of $5.7$ ms, which is comparable, although slower, to TFHE. However, in order to obtain these timings one has to use already quite large parameters (dimension $2^{17}$ and ciphertext modulus up to $2200$ bits). Since the cost of the operations increases quasi-linearly with the dimension, while the number of slots only increases linearly, increasing the dimension would affect significantly the timings. Therefore it would be interesting to know whether these methods can be used in practice to compare larger inputs -- e.g. 64 bits -- without degrading the performance. 
+
+% \begin{itemize}
+% \item \cite{CDSS15}: depth optimized sorting algorithm for HE. Reduce the depth from $\mathcal{O}(l\log^2(N))$ of Batcher network to $\mathcal{O}(\log(N) + \log(l))$ for sorting $N$ $l$-bits integers.
+
+% \item \cite{EGNS15}: sorting algorithm for HE. Conclusion: average case in the encrypted domain corresponds to the worst-case in plain domain, better use sorting networks.
+
+% \item \cite{CKK15,CKK16} (conference and journal extended version) bit wise comparison using SIMD. Algorithm to compute running products.
+
+% \item \cite{KLLW18} equality circuit over non-binary fields. Use the Frobenius automorphism to reduce the depth. 
   
-\item \cite{NGEG17}: analysis of bit-wise and digit-wise comparison. Conclusion: bit-wise is more efficient because it has depth $\mathcal{O}(\log(l))$ instead of $\mathcal{O}(l)$ for digit-wise comparisons. Does not use the depth-free Frobenius automorphism\dots
+% \item \cite{NGEG17}: analysis of bit-wise and digit-wise comparison. Conclusion: bit-wise is more efficient because it has depth $\mathcal{O}(\log(l))$ instead of $\mathcal{O}(l)$ for digit-wise comparisons. Does not use the depth-free Frobenius automorphism\dots
 
-\item \cite{JS19}: bit-wise comparison using SIMD. Conclusion: more efficient than without SIMD. Less interesting than \cite{CKK15} and does not even cite it.
+% \item \cite{JS19}: bit-wise comparison using SIMD. Conclusion: more efficient than without SIMD. Less interesting than \cite{CKK15} and does not even cite it.
 
-\item \cite{AC:CKKLL19,EPRINT:CheKimKim19}: comparison and min/max functions with CKKS.
+% \item \cite{AC:CKKLL19,EPRINT:CheKimKim19}: comparison and min/max functions with CKKS.
 
-\item \cite{AC:CGGI17}: TFHE-based min/max functions. It is faster than we thought. The fastest algorithm to compare two $n$-bit integers takes $170n$ microseconds, which is comparable to our timings.
+% \item \cite{AC:CGGI17}: TFHE-based min/max functions. It is faster than we thought. The fastest algorithm to compare two $n$-bit integers takes $170n$ microseconds, which is comparable to our timings.
  
-\item \cite{LKN19}: modified shell sort. Make shell sort more efficient for HE from $\mathcal{O}(n^2)$ to $\mathcal{O}(n^{3/2}\sqrt{\alpha+\log\log n})$ with failure probability of $2^{-\alpha}$. Complexity worst than for Batcher even-odd merge sort network.
+% \item \cite{LKN19}: modified shell sort. Make shell sort more efficient for HE from $\mathcal{O}(n^2)$ to $\mathcal{O}(n^{3/2}\sqrt{\alpha+\log\log n})$ with failure probability of $2^{-\alpha}$. Complexity worst than for Batcher even-odd merge sort network.
 
-\item \cite{TLWRK20}: Digit-wise comparison using SIMD. Reduce complexity of digit-wise comparison withfrom $\mathcal{O}(t^{d})$ to $\mathcal{O}(t^{r})$ for $r < d$ by decomposing each element in several digits. Compare numbers up to $64$ bits. Depth smaller than $\log(t-1) + \log(d) + 1$ (same algo than us, probably the work to compare with).
+% \item \cite{TLWRK20}: Digit-wise comparison using SIMD. Reduce complexity of digit-wise comparison from $\mathcal{O}(t^{d})$ to $\mathcal{O}(t^{r})$ for $r < d$ by decomposing each element in several digits. Compare numbers up to $64$ bits. Depth smaller than $\log(t-1) + \log(d) + 1$ (same algo than us, probably the work to compare with).
 
-\item \cite{AINA:NGEG17}: the univariate circuit is used in the context of sorting. There is no formal description of the circuit properties and complexity. Neither the decomposition method of~\cite{TLWRK20} or the lexicographic circuit is used.
+% \item \cite{AINA:NGEG17}: the univariate circuit is used in the context of sorting. There is no formal description of the circuit properties and complexity. Neither the decomposition method of~\cite{TLWRK20} or the lexicographic circuit is used.
 
-\item \cite{PoPETS:SFR20}: the univariate circuit is used in the context of top-$k$ selection. As above, there is no formal description of the circuit properties and complexity. Neither the decomposition method of~\cite{TLWRK20} or the lexicographic circuit is used. Their minimum function is based on the comparison table from~\cite{CDSS15}, but its multiplicative complexity is quadratic in the length of an input array. In our case, it is $O(n \log n)$.
+% \item \cite{PoPETS:SFR20}: the univariate circuit is used in the context of top-$k$ selection. As above, there is no formal description of the circuit properties and complexity. Neither the decomposition method of~\cite{TLWRK20} or the lexicographic circuit is used. Their minimum function is based on the comparison table from~\cite{CDSS15}, but its multiplicative complexity is quadratic in the length of an input array. In our case, it is $O(n \log n)$.
 
-\item \cite{JMC:KMNN19}: this work studies polynomial expressions on $\max$, $\argmax$ and other non-arithmetic functions on finite fields. The homomorphic circuit of $\max$ derived from these expressions has a quadratic complexity in $p$. 
+% \item \cite{JMC:KMNN19}: this work studies polynomial expressions on $\max$, $\argmax$ and other non-arithmetic functions on finite fields. The homomorphic circuit of $\max$ derived from these expressions has a quadratic complexity in $p$. 
 
-\end{itemize}
+% \end{itemize}
 
 
   
 %%% Local Variables:
 %%% mode: latex
-%%% TeX-master: "main"
+%%% TeX-master: "main_pets"
 %%% End:

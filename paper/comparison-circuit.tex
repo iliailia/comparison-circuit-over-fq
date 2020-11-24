@@ -84,7 +84,7 @@ In this section we study this structure for both the bivariate and univariate ca
   \end{theorem}  
 
   Since our proof of Theorem~\ref{thm:decomposition-f} is quite long and with no real interest for the purpose of this work, we defer it to an extended version of this paper. 
-  In our experiments, we used the decompositions~(\ref{eq:dec-f}) of $f(X,Y)$ only for small $p$ between $3$ and $7$, which can be found in Appendix \ref{app:decomposition-f}.\newline
+  In our experiments, we used the decompositions~(\ref{eq:decomposition-f-final}) of $f(X,Y)$ only for small $p$ (between $3$ and $11$).\newline
   
 %   In order to show Eq. (\ref{eq:3}) we will need the following lemma:
 
@@ -310,7 +310,7 @@ According to Lemma~\ref{lem:interpolation}, $\chi_{\F_p^-}(z)$ is equal to
     Thus, we can get $\EQ_\S(X,Y)$ almost for free (at the cost of one $\SubPlain$) after evaluating $\LT_\S(X,Y)$, thus saving $O(\log (p-1))$ non-scalar multiplications.
 
     This feature of our circuit allows to compute all the equality operations while comparing large integers using the less-than function $\LT$ from~(\ref{eq:general_lex_order}).
-    This saves $O((d'-1)(k-1) \log (p-1))$ homomorphic multiplications, thus leading to a better running time.
+    This saves $O((d'-1)(k-1) \log (p-1))$ homomorphic multiplications, thus leading to a better running time than for the bivariate circuit.\todo{Mention the fact that since one can only use half of the plaintext space, univariate method cannot really be used if one has to compute stuff before the comparison}
   \end{remark}
 
 \subsection{Min/max function}

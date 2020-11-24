@@ -14,6 +14,7 @@ In the tables presented below, the following notation is used:
   \item $q$: the ciphertext modulus;
   \item $m$: the cyclotomic order of the ring $\intring$;
   \item $n$: the degree of the ring $\intring$;
+  \item $\ell$ the number of slots;
   \item $d$: the dimension of a slot subspace used for digit encoding;
   \item $l$: the dimension of digit vectors encoding input integers over $\F_p^d$;
   \item $k$: the number of input integers encoded in one ciphertext.
@@ -30,7 +31,7 @@ The latter constraint maximizes the number of SIMD slots, thus reducing the amor
 Every input integer is encoded into exactly one ciphertext.
 First, it is decomposed into a vector of $l$ digits over $\F_p^d$ (see Section~\ref{sec:comparison_of_large_integers}).
 Then each digit occupies one SIMD slot.
-Thus, each ciphertext encrypts exactly $k = \#slots/l$ integers. 
+Thus, each ciphertext encrypts exactly $k = \ell/l$ integers. 
 %%%%%%%%
 
 We ran our algorithms with $p$ taken in the interval $[3,659]$.

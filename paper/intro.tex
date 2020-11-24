@@ -63,7 +63,7 @@ By exploiting the structure of these two polynomials, we show that it is possibl
 The benefit of our approach results in significant performance enhancement for both methods. 
 On the one hand, our bivariate circuit can compare two 64-bit integers with an amortized cost of 21ms, which is a gain of $40\%$ with relation to the best previously reported results of Tan et al.~\cite{TLWRK20} (See Table \ref{table:comparison_circuit_results}). 
 On the other hand, our univariate circuit shows even better results with an amortized cost of 11ms for 64-bit numbers -- which is, to the best of our knowledge, more than 3 times faster than previously reported results for this kind of scheme~\cite{TLWRK20}. 
-Note that we can compare two 20-bit numbers with an amortized cost of 3ms, which is better by a factor 1.9 than what can be achieved with CKKS-based algorithms and is comparable to TFHE-based implementations.
+Note that we can compare two 20-bit numbers with an amortized cost of 3ms, which is better by a factor 1.9 than what can be achieved with CKKS-based algorithms and is comparable to TFHE-based implementations (see Table \ref{table:other_he_schemes}).
 
 We also apply our comparison methods to speed up popular computational tasks such as sorting and computing minimum/maximum of an array with $N$ elements. 
 For example, for $N=64$, we obtain an amortized cost of 6.5 seconds to sort 8-bit integers and 19.2 seconds for 32-bit integers, which is faster than the prior work by a factor 9 and 2.5 respectively (see Table \ref{table:sorting_circuit_results}). 
