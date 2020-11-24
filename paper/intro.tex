@@ -56,10 +56,12 @@ By now, schemes of the first category look much more suitable for such non-arith
 Hence, one should resort to heavy conversion algorithms~\cite{JMC:BGGJ20} to leverage the properties of different schemes. 
 
 \subsection{Contributions}
-In this work we study the structure of the circuits corresponding to comparison functions for the BGV and BFV schemes. 
+In this work, we describe the structure of the circuits corresponding to comparison functions for the BGV and BFV schemes. 
 For theses schemes, there exists two approaches: either compare two numbers $x$ and $y$ directly by evaluating a bivariate polynomial in $x$ and $y$, or study the sign of the difference $z=x-y$ by evaluating a univariate polynomial in $z$.
 
-By exploiting the structure of these two polynomials, we show that it is possible to evaluate them more efficiently than what was proposed in the state of the art. 
+By exploiting the structure of these two polynomials, we show that it is possible to evaluate them more efficiently than what was proposed in the state of the art.
+In particular, we prove that these polynomials have multiple zero coefficients that can be ignored during polynomial evaluation.
+
 The benefit of our approach results in significant performance enhancement for both methods. 
 On the one hand, our bivariate circuit can compare two 64-bit integers with an amortized cost of 21ms, which is a gain of $40\%$ with relation to the best previously reported results of Tan et al.~\cite{TLWRK20} (See Table \ref{table:comparison_circuit_results}). 
 On the other hand, our univariate circuit shows even better results with an amortized cost of 11ms for 64-bit numbers -- which is, to the best of our knowledge, more than 3 times faster than previously reported results for this kind of scheme~\cite{TLWRK20}. 
