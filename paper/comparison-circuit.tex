@@ -277,18 +277,18 @@ According to Lemma~\ref{lem:interpolation}, $\chi_{\F_p^-}(z)$ is equal to
   \begin{align*}
     Q_{\LT_\S}(X,Y) = \sum_{a=-\frac{p-1}{2}}^{-1} 1 - (X - Y - a)^{p-1} \bmod p.
   \end{align*}
-  The following lemma describes all the coefficients of $Q_{\LT_\S}(X,Y)$.
-  \begin{lemma}\label{lem:univariate}
+  The following theorem describes all the coefficients of $Q_{\LT_\S}(X,Y)$.
+  \begin{theorem}\label{th:univariate}
     For an odd prime $p$ and $\S = [0, (p-1)/2]$, the $\LT_\S$ function can be interpolated by the following polynomial over $\F_p$
     \begin{align}\label{eq:univariate_circuit}
       Q_{\LT_\S}(X,Y) = \frac{p+1}{2} (X-Y)^{p-1} + \sum_{i=1, \text{odd}}^{p-2} c_i (X-Y)^i.
     \end{align}
     where $c_i = \sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i}$.
-  \end{lemma}
+  \end{theorem}
   \begin{proof}
     See Appendix \ref{app:proof-lem-univariate}
   \end{proof}
-  \textbf{Complexity analysis.} The above lemma implies that the less-than function can be expressed by a univariate polynomial of degree $p-1$.
+  \textbf{Complexity analysis.} The above theorem implies that the less-than function can be expressed by a univariate polynomial of degree $p-1$.
   In general, such polynomials are evaluated in $O(p-1)$ steps according to Horner's method.
   To reduce the number of non-scalar multiplications ($\Mul$), we can resort to the Paterson-Stockmeyer algorithm~\cite{SIAM:PS73} that requires $O(\sqrt{2(p-1)})$ such multiplications.
   However, we can improve this complexity by exploiting the fact that the polynomial in~(\ref{eq:univariate_circuit}) has only one coefficient with an even index, the leading one.
