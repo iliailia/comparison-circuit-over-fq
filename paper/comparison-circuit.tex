@@ -1,23 +1,24 @@
 %As explained in Section \ref{sec:background}, comparing elements over $\mathbb{F}_{p^d}$ boils down to their comparison over $\mathbb{F}_p$. 
-In this section, we study the structure of basic comparison circuits over $\mathbb{F}_p$ used in Section~\ref{sec:background} to compare integers, namely $\LT_{\F_p}$ and $\EQ_{\F_p}$. 
+In this section, we study the structure of basic comparison circuits over $\mathbb{F}_p$ used in Section~\ref{sec:background} to compare integers, namely $\LT_{\S}$ and $\EQ_{\S}$ for some $\S \subseteq [0, p-1]$. 
 
 %Let $\S$ be a subset of $[0,p-1]$ such that $\S$ can be embedded canonically embedded into $\F_p$.
-For any $(x,y)\in \F_p^2$ the equality function is equal to
+For any choice of $\S$, the corresponding equality function over $\F_p$ is equal to
 \begin{align*}
-  \EQ_{\F_p}(x,y) = 1 - (x-y)^{p-1}.
+  \EQ_{\S}(x,y) = 1 - (x-y)^{p-1}.
 \end{align*}
-Unfortunately, $\LT_{\F_p}$ is not that simple and we have to rely on Lagrange interpolation (Lemma~\ref{lem:interpolation}) to compute it. 
+Unfortunately, $\LT_{\S}$ is not that simple and universal and we have to rely on Lagrange interpolation (Lemma~\ref{lem:interpolation}) to compute it. 
 Yet, there are two different ways to evaluate it.
-The first method (as done in \cite{TLWRK20}) directly interpolates $\LT_{\F_p}$ as a bivariate function over $\F_{p}$.
-The second approach (as done in \cite{AINA:NGEG17} and \cite{PoPETS:SFR20}) interpolates a univariate polynomial of $\LT_{\F_p}(z, 0)$ with $z = x - y$.
+The first method (as done in \cite{TLWRK20}) uses $\S = [0,p-1]$ and directly interpolates $\LT_{\F_p}(x,y)$ as a bivariate polynomial over $\F_{p}$.
+The second approach (as done in \cite{AINA:NGEG17} and \cite{PoPETS:SFR20}) has $\S = [0, (p-1)/2]$ and interpolates a univariate polynomial of $\LT_{\S}(z, 0)$ with $z = x - y$.
 %In this case, $x,y$ must belong to the set $[0, (p-1)/2]$. 
 %However, these works evaluated $\LT_{\F_p}$ without exploiting its structure. 
 In this section, we show how to exploit the structure of these polynomials to speed-up their evaluation.
 
-\subsection{Bivariate interpolation of $\LT_{\F_p}$.}
+\subsection{Bivariate interpolation of $\LT_\S$.}
 
-  The less-than function can be interpolated using Lemma~\ref{lem:interpolation} and the following truth table
-  \begin{table}
+  Let $\S = [0,p-1]$.
+  The less-than function can be interpolated using Lemma~\ref{lem:interpolation} and the following truth table.
+  \begin{table}[h]
     \centering
     \begin{tabular}{c|ccccc}
         $<$ & 0 & 1 & 2 & $\cdots$ & $p-1$ \\
@@ -31,54 +32,51 @@ In this section, we show how to exploit the structure of these polynomials to sp
   \end{table}
     
   In particular, the interpolation polynomial of $\LT_\S$ over $\F_p$ is equal to
-  \begin{align}\label{eq:less_than_function}
-    P_{\LT_\S}(X,Y) & = \sum_{a = 0}^{p-2} \EQ_\S(X,a)\sum_{b = a+1}^{p-1} \EQ_\S(Y,b) \nonumber\\
-                &= \sum_{a = 0}^{p-2} (1-\princhar_p(X - a)) \sum_{b = a+1}^{p-1} (1-\princhar_p(Y - b)) \nonumber \\
-                &= \sum_{a = 0}^{p-2} (1-(X - a)^{p-1}) \sum_{b = a+1}^{p-1} (1-(Y - b)^{p-1}).
-  \end{align}
-
-  From Eq (\ref{eq:less_than_function}), it appears that $P_{\LT_\S}$ has degree at most $p-1$ in each variable and so, at first sight, it seems to have total degree at most $2p - 2$. It appears that this is not the case:
+  \begin{align*}%\label{eq:less_than_function}
+    P_{\LT_\S}(X,Y) &= \sum_{a = 0}^{p-2} \EQ_\S(X,a)\sum_{b = a+1}^{p-1} \EQ_\S(Y,b) \nonumber\\
+    = \sum_{a = 0}^{p-2}& \left(1-\left(X - a\right)^{p-1}\right) \sum_{b = a+1}^{p-1} \left(1-\left(Y - b\right)^{p-1}\right).
+  \end{align*}
+  Surprisingly, the total degree of $P_{\LT_\S}(X,Y)$ is only $p$ and its coefficients can be described by the following theorem.
   \begin{theorem} \label{thm:less_than_total_degree}
-    Let $p>2$ be a prime number and $\S = [0,p-1]$, then $P_{\LT_\S}(X,Y)$ is a polynomial over $\F_p$ of the following form:
+    Let $p>2$ be a prime number and $\S = [0,p-1]$, then the interpolation polynomial of $\LT_\S$ over $\F_p$ has the following form
     \begin{align*}
       P_{\LT_\S}(X,Y) = Y^{p-1} - \frac{p-1}{2} (XY)^{\frac{p-1}{2}} + \sum_{\substack{i,j>0 \\ i+j \le p}} a_{ij} X^i Y^j 
     \end{align*}
-    where $a_{ij} = \sum_{a=0}^{p-2} \sum_{b=a+1}^{p-1} a^{p-1-i} b^{p-1-j} \in \F_p$. In particular, it has total degree at most $p$.
+    where $a_{ij} = \sum_{a=0}^{p-2} \sum_{b=a+1}^{p-1} a^{p-1-i} b^{p-1-j} \in \F_p$.
+    The total degree of $P_{\LT_\S}(X,Y)$ is $p$.
   \end{theorem}
-
   \begin{proof}
     See Appendix \ref{proof_thm_less_than_total_degree}.
   \end{proof}
-
-  Now that we have a better idea of what $P_{\LT_\S}$ looks like we enumerate some obvious facts which worth being stated:
+  From the definition of $\LT_\S$, one can easily prove the following facts about $P_{\LT_\S}$:
   \begin{itemize}[label=--]
-  \item $P_{\LT_\S} (X, 0) = 0$ thus $Y$ divides $P_{\LT_\S} (X, Y)$.
-  \item $P_{\LT_\S} (X, X) = P_{\LT_\S} (Y,Y) = 0$ thus $(X - Y)$ divides $P_{\LT_\S} (X, Y)$.
-  \item $P_{\LT_\S} (p-1, Y)=0$ thus $X + 1$ divides $P_{\LT_\S} (X, Y)$.
-  
+    \item $P_{\LT_\S} (X, 0) = 0$, thus $Y$ divides $P_{\LT_\S} (X, Y)$;
+    \item $P_{\LT_\S} (X, X) = P_{\LT_\S} (Y,Y) = 0$, thus $(X - Y)$ divides $P_{\LT_\S} (X, Y)$;
+    \item $P_{\LT_\S} (p-1, Y)=0$ thus $X + 1$ divides $P_{\LT_\S} (X, Y)$.
   \end{itemize}
-  Therefore there exists a bivariate polynomial $f(X,Y)$ of total degree $p - 3$ over $\F_p$ such that:
+  Hence, there exists a bivariate polynomial $f(X,Y)$ of total degree $p - 3$ over $\F_p$ such that:
   \begin{equation}
     \label{eq:decomposition-LT}
-    P_{\LT_\S} (X, Y) = Y(X - Y)(X + 1)f(X, Y) \bmod p.
+    P_{\LT_\S} (X, Y) = Y(X - Y)(X + 1)f(X, Y).
   \end{equation}
-
-  We will now be interested in the structure of the polynomial $f$.
-
+  The following theorem describes the structure of $f(X,Y)$.
   \begin{theorem}\label{thm:decomposition-f}
-    Let $p$ be an odd prime, for any $z\in\F_p$ we have:
+    Let $p$ be an odd prime and $\S = [0,p-1]$.
+    Let $P_{\LT_\S} (X, Y)$ be the interpolation polynomial of $\LT_\S$ over $\F_p$ and $P_{\LT_\S} (X, Y) = Y(X - Y)(X + 1)f(X, Y)$.
+    Then, for any $z \in \F_p$ we have
     \begin{equation}
       \label{eq:3}
        f(z,z) = f(z,0) = f(p-1,z).
     \end{equation}
-    As a consequence, when $p>3$ there exists a bivariate polynomials $f_1(X,Y)$ of total degree $p-5$ over $\F_p$ such that:
-    \begin{align}
-      \label{eq:dec-f}
-      f(X,Y) &= f(X,0) + Y(X-Y)f_1(X,Y) \nonumber \\
-      &= f_0(X) + Y(X-Y)f_1(X,Y).
-    \end{align}   
-    This decomposition can be applied recursively to $f_1(X,Y)$, so that there exists $(p-1)/2$ polynomials $f_i$ over $\mathbb{F}_p$, $0\leq i \leq (p-3)/2$, such that:
-
+    As a consequence, 
+    %there exists a bivariate polynomials $f_1(X,Y)$ of total degree $p-5$ over $\F_p$ such that:
+    %\begin{align}
+    %  \label{eq:dec-f}
+    %  f(X,Y) &= f(X,0) + Y(X-Y)f_1(X,Y) \nonumber \\
+    %  &= f_0(X) + Y(X-Y)f_1(X,Y).
+    %\end{align}   
+    %This decomposition can be applied recursively to $f_1(X,Y)$, so that 
+    there exists $(p-1)/2$ polynomials $f_i(X)$ over $\F_p$, $0\leq i \leq (p-3)/2$, such that:
     \begin{align}\label{eq:decomposition-f-final}
       f(X,Y) = \sum_{i=0}^{(p-3)/2} f_i(X)Z^i,
     \end{align}
@@ -92,7 +90,7 @@ In this section, we show how to exploit the structure of these polynomials to sp
   \end{theorem}  
 
   Since our proof of Theorem~\ref{thm:decomposition-f} is quite long and with no real interest for the purpose of this work, we defer it to an extended version of this paper. 
-  In our experiments, we used the decompositions~(\ref{eq:decomposition-f-final}) of $f(X,Y)$ only for small $p$ (between $3$ and $11$).\newline
+  In our experiments, we used the decompositions~(\ref{eq:decomposition-f-final}) of $f(X,Y)$ only for small $p$ (between $3$ and $7$), which you can find in Appendix~\ref{app:decomposition-f}.\newline
   
 %   In order to show Eq. (\ref{eq:3}) we will need the following lemma:
 
@@ -237,33 +235,31 @@ In this section, we show how to exploit the structure of these polynomials to sp
 \textbf{Complexity analysis.}
 In \cite{TLWRK20}, the authors proposed to evaluate $P_{\LT_S}(X,Y)$ by evaluating each monomials separately before summing them up. 
 Given $x,y \in \F_p$, they precompute the powers of $x$ and $y$ up to $p-1$ for a total of $2p-4$ non-scalar multiplications. 
-Then, another $p-1$ non-scalar multiplications are needed to evaluate each monomial $((\sum_i c_i X^i)Y^j)_{j}$ where the $c_i$s are scalars in $\F_p$, before summing them together to get the final result. 
+Then, another $p-1$ non-scalar multiplications are needed to evaluate each monomial $((\sum_i c_i X^i)Y^j)_{j}$ where $c_i$'s are scalars in $\F_p$, before summing them together to get the final result. 
 Overall their evaluation of $P_{\LT_\S}(X,Y)$ requires $3p-5$ non-scalar multiplications.
 
-Following the idea of \cite{TLWRK20} and using the decomposition of $f(X,Y)$ given in Eq. (\ref{eq:decomposition-f-final}) one needs:
+Following this idea and using the decomposition of $f(X,Y)$ given in Eq. (\ref{eq:decomposition-f-final}) one needs:
 \begin{itemize}
-\item $2$ multiplications to compute $(X+1)Z$ for $p\geq 3$ and only $1$ when $p=2$;
+\item $2$ multiplications to compute $(X+1)Z$ if $p\geq 3$ or $1$ multiplication when $p=2$;
 \end{itemize}
 and then for $p\geq 5$:
 \begin{itemize}
 \item $p-4$ multiplications to compute the $X^i$'s for $2\leq i \leq p-3$ required to compute the terms $f_i(X)$;
 \item $(p-5)/2$ multiplications to compute the $Z^i$ for $2\leq i \leq (p-3)/2$;
 \item $(p-3)/2$ multiplications to compute the products $f_i(X)\cdot Z^i$;
-\item $1$ final multiplication to multiply $f(X,Y)$ and $(X+1)Z$.
+\item $1$ final multiplication $f(X,Y)(X+1)Z$.
 \end{itemize}
+Overall, at most $2p-5$ non-scalar multiplications are needed to homomorphically evaluate $P_{\LT_\S}(X,Y)$ for \mbox{$p \geq 5$}. 
+This number can be slightly reduced by optimizing the way of computing $f_i$'s. 
+For instance, it can be done with only $4$ and $6$ multiplications for $p=5$ and $7$, respectively (see Appendix \ref{app:decomposition-f}), which is only $p-1$ non-scalar multiplications.
 
-Thus overall, for $p\geq 5$, one needs at most $2p-5$ non-scalar multiplications to evaluate $P_{\LT_\S}(X,Y)$ homomorphically. 
-Actually by optimising the way of computing the $f_i$ this number can be slightly reduced. 
-For instance for $p=5$ and $7$ it can be done using only $4$ and $6$ multiplications respectively (see Appendix \ref{app:decomposition-f}), hence for a prime $2\leq p \leq 7$, $P_{\LT_\S}(X,Y)$ can be computed with only $p-1$ non-scalar multiplications.
-
-Overall, for $p\geq 5$, our method saves $p$ multiplications over the method of \cite{TLWRK20}. However its complexity remains linear in $p$ which is unpractical for performing homomorphic comparisons using large digits (and thus a large $p$).
+Overall, for $p\geq 5$, our method saves $p$ multiplications over the method of Tan et al.~\cite{TLWRK20}. 
+However, the complexity of the bivariate circuit remains linear in $p$ which is unpractical for performing homomorphic comparisons using large digits (i.e. a large $p$).
   
 \subsection{Univariate interpolation of $\LT_\S$}
-The linear complexity for evaluating the bivariate circuit comes from the fact that it is bivariate. 
-However, it is possible to evaluate univariate polynomials of degree $p-1$ in $\mathcal{O}(\sqrt{p})$ non scalar multiplications using \cite{SIAM:PS73}. 
-Therefore it would be interesting to be able to evaluate $\LT_S$ using a univariate polynomial. 
-This can be achieved by computing the difference $x-y$ of the two input values and looking at its sign.
-To compute the sign function (or $\LT_\S(X-Y,0)$) using finite field arithmetic, we need to split finite field elements into two classes:  negative ($\F_p^-$) and non-negative ($\F_p^+$).
+Unlike bivariate polynomials, it is possible to evaluate univariate polynomials of degree $p-1$ in $\mathcal{O}(\sqrt{p})$ non-scalar multiplications using the Paterson-Stockmeyer algorithm~\cite{SIAM:PS73}. 
+To evaluate $\LT_S$ as a univariate polynomial, we compute the difference $x-y$ of the two input values and looking at its sign.
+To compute the sign function (or $\LT_\S(x,0)$) using finite field arithmetic, we need to split finite field elements into two classes:  negative ($\F_p^-$) and non-negative ($\F_p^+$).
 In addition, for any $x, y \in \S$ the following property should hold:
 \begin{align*}
   x - y \in 
@@ -272,7 +268,7 @@ In addition, for any $x, y \in \S$ the following property should hold:
     \F_p^- \text{ if } \LT_\S(x,y) = 1.
   \end{cases}
 \end{align*}   
-Let $\S = [0, (p-1)/2]$ for a prime odd integer $p$.
+It is easy to see that these constraints are satisfied by $\S = [0, (p-1)/2]$.
 Let us split $\F_p$ into $\F_p^+ = [0, (p-1)/2]$ and $\F_p^- = [-(p-1)/2, -1]$.
 Notice that for any $x, y \in \S$, their difference $x - y$ belongs to $\F_p^-$ if and only if $x < y$.
 
@@ -281,11 +277,11 @@ According to Lemma~\ref{lem:interpolation}, $\chi_{\F_p^-}(z)$ is equal to
 \begin{align*}
   \chi_{\F_p^-}(z) = \sum_{a=-\frac{p-1}{2}}^{-1} 1 - (z - a)^{p-1}.
 \end{align*}
-  Combining the above facts the $\LT_\S$ function can be interpolated by the following polynomial.
+  Combining the above facts, the $\LT_\S$ function can be interpolated by the following polynomial over $\F_p$
   \begin{align*}
-    Q_{\LT_\S}(X,Y) = \sum_{a=-\frac{p-1}{2}}^{-1} 1 - (X - Y - a)^{p-1} \bmod p.
+    Q_{\LT_\S}(X,Y) = \sum_{a=-\frac{p-1}{2}}^{-1} 1 - (X - Y - a)^{p-1}\,.
   \end{align*}
-  The following theorem describes all the coefficients of $Q_{\LT_\S}(X,Y)$.
+  The following theorem describes all the coefficients of this interpolation polynomial.
   \begin{theorem}\label{th:univariate}
     For an odd prime $p$ and $\S = [0, (p-1)/2]$, the $\LT_\S$ function can be interpolated by the following polynomial over $\F_p$
     \begin{align}\label{eq:univariate_circuit}
@@ -297,28 +293,36 @@ According to Lemma~\ref{lem:interpolation}, $\chi_{\F_p^-}(z)$ is equal to
     See Appendix \ref{app:proof-lem-univariate}
   \end{proof}
   \textbf{Complexity analysis.} The above theorem implies that the less-than function can be expressed by a univariate polynomial of degree $p-1$.
-  In general, such polynomials are evaluated in $O(p-1)$ steps according to Horner's method.
-  To reduce the number of non-scalar multiplications ($\Mul$), we can resort to the Paterson-Stockmeyer algorithm~\cite{SIAM:PS73} that requires $O(\sqrt{2(p-1)})$ such multiplications.
+  In general, such polynomials are evaluated in $p-1$ multiplications according to Horner's method.
+  
+  To reduce the number of non-scalar multiplications, we can resort to the Paterson-Stockmeyer algorithm~\cite{SIAM:PS73} that requires $\sqrt{2(p-1)} + \log_2 (p-1) + \mathcal{O}(1)$ such multiplications.
   However, we can improve this complexity by exploiting the fact that the polynomial in~(\ref{eq:univariate_circuit}) has only one coefficient with an even index, the leading one.
   Thus, if $Z=X-Y$, we can rewrite~(\ref{eq:univariate_circuit}) as follows
   \begin{align*}
     \alpha_{p-1} Z^{p-1} + Z \sum_{i=0, \text{even}}^{p-3} \alpha_{i+1} Z^i =  \alpha_{p-1} Z^{p-1} + Z g(Z^2)
   \end{align*}
   where $\alpha_i = \sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i}$ and $g(X)$ is a polynomial of degree $(p-3)/2$.
-  To evaluate $g(X)$, the Paterson-Stockmeyer algorithm requires $O(\sqrt{p-3})$ non-scalar multiplications.
-  Furthermore, the preprocessing phase of this algorithm computes $Z^2, Z^4, \dots, Z^{2k}$ and $Z^{4k}, Z^{8k}, \dots, Z^{2^r k}$ with $2k(2^r-1) = p-3$.
-  We can use these powers to compute the leading term in $m$ steps, namely
+  To evaluate $g(X)$, the Paterson-Stockmeyer algorithm requires $\sqrt{p-3} + \log_2 \left(\frac{p-3}{2}\right) + \mathcal{O}(1)$ non-scalar multiplications.
+  Furthermore, the preprocessing phase of this algorithm computes the powers $Z^2, Z^4, \dots, Z^{2k}$ and $Z^{4k}, Z^{8k}, \dots, Z^{2^r k}$ with $2k(2^r-1) = p-3$.
+  We can use these powers to compute the leading term in $r$ steps, namely
   \begin{align*}
     Z^2 Z^{2k} Z^{4k} \cdots Z^{2^r k} = Z^{2 + 2k(2^r-1)} = Z^{2 + p - 3} = Z^{p-1}.
   \end{align*}
-  Since $r \in O(\log (p/(2k)))$, the asymptotic complexity of evaluating~(\ref{eq:univariate_circuit}) is $O(\sqrt{p-3})$ non-scalar multiplications.
+  Since the optimal $k$ is about $\sqrt{(p-3)/2}$, we obtain that $r$ must be about $\log_2 \sqrt{p-3}$.
+  Hence, the total non-scalar complexity of evaluating~(\ref{eq:univariate_circuit}) is equal to
+  \begin{align*}
+    \sqrt{p-3} + \frac{3 \log_2 \left(p-3\right)}{2} + \mathcal{O}(1).
+  \end{align*}
   
   \begin{remark}
     A careful reader can notice that the leading term of~(\ref{eq:univariate_circuit}) is equal to $(X-Y)^{p-1}$, which is the heaviest part of the equality circuit $\EQ_\S(X,Y)$.
-    Thus, we can get $\EQ_\S(X,Y)$ almost for free (at the cost of one homomorphic subtraction) after evaluating $\LT_\S(X,Y)$, thus saving $O(\log (p-1))$ non-scalar multiplications.
+    Thus, we can get $\EQ_\S(X,Y)$ almost for free (at the cost of one homomorphic subtraction) after evaluating $\LT_\S(X,Y)$, which saves $\mathcal{O}(\log (p-1))$ non-scalar multiplications.
 
-    This feature of our circuit allows to compute all the equality operations while comparing large integers using the less-than function $\LT$ from~(\ref{eq:general_lex_order}).
-    This saves $O((d'-1)(k-1) \log (p-1))$ homomorphic multiplications, thus leading to a better running time than for the bivariate circuit.\todo{Mention the fact that since one can only use half of the plaintext space, univariate method cannot really be used if one has to compute stuff before the comparison}
+    This feature of the univariate circuit allows to compute all the equality operations while comparing large integers using the less-than function $\LT$ from~(\ref{eq:general_lex_order}).
+    This saves $\mathcal{O}((d'-1)(k-1) \log (p-1))$ homomorphic multiplications, thus leading to a better running time than for the bivariate circuit.
+
+    The downside of the univariate circuit is that only half of the plaintext space is used to encode input integers in comparison to the bivariate method.
+    \todo{Mention the fact that since one can only use half of the plaintext space, univariate method cannot really be used if one has to compute stuff before the comparison}
   \end{remark}
 
 \subsection{Min/max function}

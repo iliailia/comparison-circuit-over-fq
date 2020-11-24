@@ -48,11 +48,11 @@ With the help of the principal character, every function from $\F_{p^d}^l$ to $\
   Let $\F_{p^d} = \F_p[X]/\ideal{f(X)}$ for some irreducible monic polynomial $f(X)$ of degree $d$.
   Let $d'\leq d$ and $\S \subseteq [0,p^{d'}-1]$, we can map $\S$ into $\F_{p^d}$ by using the decomposition of integers in base $p$:
   $$\begin{array}{cccc}
-      \iota : & \S & \rightarrow & \F_{p^d}\,, \\
+      \iota_p : & \S & \rightarrow & \F_{p^d}\,, \\
               & \displaystyle\sum_{i=0}^{d'-1}a_ip^i & \mapsto & \displaystyle\sum_{i=0}^{d'-1}a_i X^{i-1}\,. 
     \end{array}$$
-  Note that the map $\iota$ is injective and gives a one-to-one correspondence between $\S$ and $\F_{p^{d}}$ when $d'=d$ and $\S = [0,p^d-1]$. 
-  Therefore, we identify integers belonging to $\S$ with their image by $\iota$ and thus omit $\iota$ when the situation is clear from the context.
+  Note that the map $\iota_p$ is injective and gives a one-to-one correspondence between $\S$ and $\F_{p^{d}}$ when $d'=d$ and $\S = [0,p^d-1]$. 
+  Therefore, we identify integers belonging to $\S$ with their image by $\iota_p$ and thus omit $\iota_p$ when the situation is clear from the context.
 
   Let $a,b \in \S$ be two integers to be compared and $\sum_{i=0}^{d'-1} a_i X^i$ and $\sum_{i=0}^{d'-1} b_i X^i$ with $a_i, b_i \in \F_p$ are their respective encodings into $\F_{p^d}$.
   The order of the set $\S$ induces a polynomial function in $\F_{p^d}$, which can be interpolated by Lemma~\ref{lem:interpolation}.
@@ -60,7 +60,11 @@ With the help of the principal character, every function from $\F_{p^d}^l$ to $\
   Hence, the total degree of the interpolation polynomial is at least $p^d-1$, 
   which might be prohibitive in practice.
 
-  Tan et al.~\cite{TLWRK20} proposed an alternative approach based on the extraction of coefficients $a_i, b_i \in \F_p$ thanks to the following result from the theory of finite fields (see \cite[Theorem 2.24]{LN86} for the proof).
+  Tan et al.~\cite{TLWRK20} proposed an alternative approach where $\S = [0,p-1]$.
+  If input integers $a$ and $b$ belong to $\S$, the result of $\LT_\S$(a,b) is computed with its interpolation polynomial over $\F_p$.  
+  If $a,b$ are larger and $a,b \in [0,p^{d'-1}]$, they are encoded into $\F_{p^d}$ as above, but their comparison is performed via the lexicographic order defined on $\F_p^{d'}$.
+
+  This method is based on the extraction of coefficients $a_i, b_i \in \F_p$ thanks to the following result from the theory of finite fields (see \cite[Theorem 2.24]{LN86} for the proof).
   \begin{lemma}\label{lem:extraction}
     The linear transformations from $\F_{p^d}$ to $\F_p$ are exactly the mappings $L_{\alpha}(x) = \Tr_{\F_{p^d}/\F_p}(\alpha x)$ for some $\alpha \in \F_{p^d}$ and all $x \in \F_{p^d}$.
     Furthermore, $L_{\alpha} \ne L_{\beta}$ if $\alpha \ne \beta$.
@@ -79,7 +83,7 @@ With the help of the principal character, every function from $\F_{p^d}^l$ to $\
       x       & x^p     & \dots   & x^{p^{d-1}}   \\
       \vdots  & \vdots  & \ddots  & \vdots        \\
       x^{d-1}     & x^{(d-1)p}    & \dots   & x^{(d-1)p^{d-1}}  \\
-    \end{pmatrix}
+    \end{pmatrix}\,,
     \\
     \mA &= \begin{pmatrix}
       \alpha_0      & \alpha_1      & \dots   & \alpha_{d-1}      \\
@@ -89,33 +93,39 @@ With the help of the principal character, every function from $\F_{p^d}^l$ to $\
     \end{pmatrix}
   \end{align*}
   and $\mI_d \in \F_{p^d}^{d \times d}$ is the identity matrix.
-  Hence, the $i$th column of $\inv{\mX}$ contain all the powers $\alpha_i, \alpha_i^p, \dots, \alpha_i^{p^{d-1}}$, which define the linear map $L_{\alpha_i}$.
+  Hence, the $i$th column of $\inv{\mX}$ contain the powers $\alpha_i, \alpha_i^p, \dots, \alpha_i^{p^{d-1}}$, which define the linear map $L_{\alpha_i}$.
 
-  Given the extraction maps $\{L_{\alpha_i}\}_{i\in[0,d'-1]}$, instead of comparing $a$ and $b\in\S$ directly as elements of $\mathbb{F}_{p^d}$, we can extract and then compare their vectors of coefficients $\bm{a} = (a_0,a_1,\ldots,a_{d'-1})$ and $\bm{b} = (b_0,b_1,\ldots,b_{d'-1}) \in \F_p^{d'}$ using the lexicographical order $\bm{<}$ on $\F_{p}^{d'}$ defined by:
+  Given the input encodings $\sum_{i=0}^{d'-1} a_i X^i$ and $\sum_{i=0}^{d'-1} b_i X^i$, we can extract and then compare their vectors of coefficients $\bm{a} = (a_0,a_1,\ldots,a_{d'-1})$ and $\bm{b} = (b_0,b_1,\ldots,b_{d'-1}) \in \F_p^{d'}$ using the lexicographical order $\bm{<}$ on $\F_{p}^{d'}$ defined by
    \begin{align*}
       \bm{a} \bm{<} \bm{b} \Leftrightarrow \exists i\in[0,d'-1] \text{ such that } & a_i < b_i \text{ and } \\
        & a_j = b_j ~~ \forall j > i \,.
     \end{align*}
     The corresponding less-than function is equal to
     \begin{align*}
-      \LT_{\F_p^{d'}}(\bm{a}, \bm{b}) = \sum_{i=0}^{d'-1} \LT_{\F_{p}}(a_{i}, b_{i}) \prod_{j=i+1}^{d'-1} \EQ_{\F_{p}}(a_{j}, b_{j}).
+      \LT_{\S^{d'}}(\bm{a}, \bm{b}) = \sum_{i=0}^{d'-1} \LT_{\S}(a_{i}, b_{i}) \prod_{j=i+1}^{d'-1} \EQ_{\S}(a_{j}, b_{j})\,,
     \end{align*}
+    whereas the equality function is defined by
+    \begin{align*}
+      \EQ_{\S^{d'}}(\bm{a}, \bm{b}) = \prod_{i=0}^{d'-1} \EQ_{\S}(a_{i}, b_{i})\,,
+    \end{align*}
+    Notice that the above construction is generic for any set $\S$ embedded into $\F_p$.
+    For example, if $\S = [0,s-1]$ for some $s < p$, then one can encode input integers via decomposition in base $s$ and compare them using $\LT_{\S^{d'}}$.
   %This function requires $d'$ evaluations of $\LT_{\F_{p}}$ which has degree at most $p-1$, $d'-1$ evaluations of $\EQ_{\F_{p}}$ which has also degree $p-1$ and $2d'-1$ additional multiplications.
   %Thus, if we ignore the complexity of digit extraction, the total complexity of comparing elements of $\F_{p}^{d'}$ in terms of multiplications is $O(d'(p-1))$.
 
 \subsubsection{Comparison of large integers}\label{sec:comparison_of_large_integers}
-When the size of input integers exceeds the field size, $p^d$, we can reapply the same trick as above by decomposing integers in base $p^{d'}$ and then comparing their vectors of digits using the lexicographical order $\bm{<}$ on $\left(\F_{p}^{d'}\right)^l$, for some $d' \le d$.
+When the size of input integers exceeds $|\S|^d$, we can reapply the same trick as above by decomposing integers in base $|\S|^{d'}$ and then comparing their vectors of digits using the lexicographical order $\bm{<}$ on $\left(\F_{p}^{d'}\right)^l$, for some $d' \le d$.
 
-Let $a,b \in [0, p^{d'l}-1]$ be input integers. 
-We represent an integer $a = a_0 + a_1p^{d'} + a_2p^{2d'}+\ldots +a_{l-1}p^{(l-1)d'}$ by the vector $\va=(\bm{a}_0,\bm{a}_1,\ldots,\bm{a}_{l-1}) \in \left(\F_{p}^{d'}\right)^l$ of its digits of length $l$. 
+Let $a,b \in [0, |\S|^{ld'}-1]$ be input integers. 
+We represent an integer $a = \sum_{i=0}^l a_i |\S|^{id'}$ by the vector $\va=(\bm{a}_0,\bm{a}_1,\ldots,\bm{a}_{l-1}) \in \left(\F_{p}^{d'}\right)^l$ of its digits of length $l$. 
 The comparison of two integers $a$ and $b$ is thus equivalent to the comparison of their vector of digits $\va=(\bm{a}_0,\bm{a}_1,\ldots,\bm{a}_{l-1})$ and $\vb=(\bm{b}_0,\bm{b}_1,\ldots,\bm{b}_{l-1})$ using the lexicographical order $\bm{<}$ on $\left(\F_{p}^{d'}\right)^l$ defined as follows
     \begin{align*}
       \va \bm{<} \vb \Leftrightarrow \exists i\in[0,l-1] \text{ such that } & \bm{a}_i < \bm{b}_i \text{ and } \\
       & \bm{a}_j = \bm{b}_j ~~ \forall j > i\,.
     \end{align*}
-  As done in~\cite{TLWRK20}, we can employ $\EQ_{\F_{p}^{d'}}$ and $\LT_{\F_{p}^{d'}}$ to compute the corresponding less-than function $\LT(\va, \vb)$ as follows
+  As done in~\cite{TLWRK20}, we can employ $\EQ_{\S^{d'}}$ and $\LT_{\S^{d'}}$ to compute the corresponding less-than function $\LT(\va, \vb)$ as follows
   \begin{align}\label{eq:general_lex_order}
-    \LT(\va, \vb) = \sum_{i=0}^{l-1} \LT_{\F_{p}^{d'}}(\bm{a}_{i}, \bm{b}_{i}) \prod_{j=i+1}^{l-1} \EQ_{\F_{p}^{d'}}(\bm{a}_{j}, \bm{b}_{j}).
+    \LT(\va, \vb) = \sum_{i=0}^{l-1} \LT_{\S^{d'}}(\bm{a}_{i}, \bm{b}_{i}) \prod_{j=i+1}^{l-1} \EQ_{\S^{d'}}(\bm{a}_{j}, \bm{b}_{j}).
   \end{align}
   %Notice that the multiplicative depth of this function depends essentially of the products of the equality functions.
   %In fact, these products compare subvectors $\va_i = (\bm{a}_i, \bm{a}_{i+1},\dots,\bm{a}_{k-1})$ and $\vb_i = (\bm{b}_i, \bm{b}_{i+1},\dots,\bm{b}_{k-1})$ for $i \in [1,l-1]$.
