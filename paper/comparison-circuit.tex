@@ -46,7 +46,7 @@ In this section, we show how to exploit the structure of these polynomials to sp
     The total degree of $P_{\LT_\S}(X,Y)$ is $p$.
   \end{theorem}
   \begin{proof}
-    See Appendix \ref{proof_thm_less_than_total_degree}.
+    See Appendix \ref{app:proof_thm_less_than_total_degree}.
   \end{proof}
   From the definition of $\LT_\S$, one can easily prove the following facts about $P_{\LT_\S}$:
   \begin{itemize}[label=--]
@@ -258,7 +258,7 @@ However, the complexity of the bivariate circuit remains linear in $p$ which is 
   
 \subsection{Univariate interpolation of $\LT_\S$}
 Unlike bivariate polynomials, it is possible to evaluate univariate polynomials of degree $p-1$ in $\mathcal{O}(\sqrt{p})$ non-scalar multiplications using the Paterson-Stockmeyer algorithm~\cite{SIAM:PS73}. 
-To evaluate $\LT_S$ as a univariate polynomial, we compute the difference $x-y$ of the two input values and looking at its sign.
+To evaluate $\LT_S$ as a univariate polynomial, we compute the difference $x-y$ of the two input values and check its sign.
 To compute the sign function (or $\LT_\S(x,0)$) using finite field arithmetic, we need to split finite field elements into two classes:  negative ($\F_p^-$) and non-negative ($\F_p^+$).
 In addition, for any $x, y \in \S$ the following property should hold:
 \begin{align*}
@@ -304,7 +304,7 @@ According to Lemma~\ref{lem:interpolation}, $\chi_{\F_p^-}(z)$ is equal to
   where $\alpha_i = \sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i}$ and $g(X)$ is a polynomial of degree $(p-3)/2$.
   To evaluate $g(X)$, the Paterson-Stockmeyer algorithm requires $\sqrt{p-3} + \log_2 \left(\frac{p-3}{2}\right) + \mathcal{O}(1)$ non-scalar multiplications.
   Furthermore, the preprocessing phase of this algorithm computes the powers $Z^2, Z^4, \dots, Z^{2k}$ and $Z^{4k}, Z^{8k}, \dots, Z^{2^r k}$ with $2k(2^r-1) = p-3$.
-  We can use these powers to compute the leading term in $r$ steps, namely
+  We can use these powers to compute the leading term in $r$ non-scalar multiplications, namely
   \begin{align*}
     Z^2 Z^{2k} Z^{4k} \cdots Z^{2^r k} = Z^{2 + 2k(2^r-1)} = Z^{2 + p - 3} = Z^{p-1}.
   \end{align*}
@@ -321,18 +321,17 @@ According to Lemma~\ref{lem:interpolation}, $\chi_{\F_p^-}(z)$ is equal to
     This feature of the univariate circuit allows to compute all the equality operations while comparing large integers using the less-than function $\LT$ from~(\ref{eq:general_lex_order}).
     This saves $\mathcal{O}((d'-1)(k-1) \log (p-1))$ homomorphic multiplications, thus leading to a better running time than for the bivariate circuit.
 
-    The downside of the univariate circuit is that only half of the plaintext space is used to encode input integers in comparison to the bivariate method.
-    \todo{Mention the fact that since one can only use half of the plaintext space, univariate method cannot really be used if one has to compute stuff before the comparison}
+    The downside of the univariate circuit is that at most half of the plaintext space is used to encode input integers in comparison to the bivariate method.
   \end{remark}
 
 \subsection{Min/max function}
 
-  Given the less-than function $\LT_\S$ defined on a set $\S$, one can compute the minimum of two elements $x$ and $y$ in the following generic way
+  Given the less-than function $\LT_\S$, one can compute the minimum of two elements $x, y \in \S$ in the following generic way
   \begin{align*}
     \min_\S(x,y) &= x \cdot \LT_\S(x,y) + y \cdot (1 - \LT_\S(x,y)) \\
-    &= y + (x-y) \cdot \LT_\S(x,y)
+    &= y + (x-y) \cdot \LT_\S(x,y)\,.
   \end{align*}
-  Notice that the difference $x - y$ naturally emerges in this expression, thus hinting that the univariate circuit from~(\ref{eq:univariate_circuit}) might be useful here.
+  Notice that the input difference $x - y$ naturally emerges in this expression, thus hinting that the univariate circuit from~(\ref{eq:univariate_circuit}) might be useful here.
   Indeed, by replacing $X - Y$ with a variable $Z$ we obtain the univariate polynomial representation of the minimum function 
   \begin{align*}
     Q_{\min_\S}(X,Y) &= Y + Z \cdot Q_{\LT_S}(X,Y) \\
@@ -348,9 +347,9 @@ According to Lemma~\ref{lem:interpolation}, $\chi_{\F_p^-}(z)$ is equal to
     Q_{\max_\S}(X,Y) &= \frac{p+1}{2} (X+Y) - \sum_{i=1}^{\frac{p-1}{2}} Z^{2i} \sum_{a=1}^{\frac{p-1}{2}} a^{p-2i}.
   \end{align*}
   \begin{remark}
-    Maximum and minimum functions are a basic building block in the neural network design.
-    For example, one of the most popular activation functions in neural networks is the rectifier, or ReLU.
-    The above polynomial of $\max_\S$ yields the following simple polynomial for the ReLU function
+    Maximum and minimum functions are basic building blocks in the neural network design.
+    For example, one of the most popular activation functions in neural networks is the rectifier, or ReLU, which is equal to $\max(x,0)$.
+    The above polynomial of $\max_\S$ yields the following simple polynomial for the ReLU function defined on $\S=[0,(p-1)/2]$
     \begin{align*}
       Q_{\ReLU_\S}(X) &= Q_{\max_\S}(X,0) \\
       &= \frac{p+1}{2} X - \sum_{i=1}^{\frac{p-1}{2}} X^{2i} \sum_{a=1}^{\frac{p-1}{2}} a^{p-2i}.
