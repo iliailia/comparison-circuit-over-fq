@@ -259,7 +259,7 @@ However, the complexity of the bivariate circuit remains linear in $p$ which is 
 \subsection{Univariate interpolation of $\LT_\S$}
 Unlike bivariate polynomials, it is possible to evaluate univariate polynomials of degree $p-1$ in $\mathcal{O}(\sqrt{p})$ non-scalar multiplications using the Paterson-Stockmeyer algorithm~\cite{SIAM:PS73}. 
 To evaluate $\LT_S$ as a univariate polynomial, we compute the difference $x-y$ of the two input values and check its sign.
-To compute the sign function (or $\LT_\S(x,0)$) using finite field arithmetic, we need to split finite field elements into two classes:  negative ($\F_p^-$) and non-negative ($\F_p^+$).
+To compute the sign function using finite field arithmetic, we need to split finite field elements into two classes:  negative ($\F_p^-$) and non-negative ($\F_p^+$).
 In addition, for any $x, y \in \S$ the following property should hold:
 \begin{align*}
   x - y \in 
@@ -292,6 +292,13 @@ According to Lemma~\ref{lem:interpolation}, $\chi_{\F_p^-}(z)$ is equal to
   \begin{proof}
     See Appendix \ref{app:proof-lem-univariate}
   \end{proof}
+  \begin{remark}\label{rem:sign_function}
+    The polynomial $Q_{\LT_\S}(X,Y)$ yields the interpolation polynomial of the sign function $\sign_{\S'}$ defined on $\S' = [-(p-1)/2, (p-1)/2]$ as $\sign_{\S'}(x) = 1$ if $x < 0$ and $\sign_{\S'}(x) = 1$ if $x \ge 0$.
+    In particular, we have 
+    \begin{align}\label{eq:sign_interpolation}
+      Q_{\sign_{\S'}}(X) = Q_{\LT_\S}(X,0)\,.
+    \end{align} 
+  \end{remark}
   \textbf{Complexity analysis.} The above theorem implies that the less-than function can be expressed by a univariate polynomial of degree $p-1$.
   In general, such polynomials are evaluated in $p-1$ multiplications according to Horner's method.
   
@@ -327,10 +334,10 @@ According to Lemma~\ref{lem:interpolation}, $\chi_{\F_p^-}(z)$ is equal to
 \subsection{Min/max function}
 
   Given the less-than function $\LT$ defined on some set, one can compute the minimum of two elements $x, y$ of this set in the following generic way
-  \begin{align*}
-    \min(x,y) &= x \cdot \LT(x,y) + y \cdot (1 - \LT(x,y)) \\
+  \begin{align}\label{eq:generic_minimum}
+    \min(x,y) &= x \cdot \LT(x,y) + y \cdot (1 - \LT(x,y)) \nonumber\\
     &= y + (x-y) \cdot \LT(x,y)\,.
-  \end{align*}
+  \end{align}
   Notice that the input difference $x - y$ naturally emerges in this expression, thus hinting that the univariate circuit from~(\ref{eq:univariate_circuit}) might be useful here.
   Indeed, by replacing $X - Y$ with a variable $Z$ we obtain the univariate polynomial representation of the minimum function on the set $\S=[0,(p-1)/2]$ 
   \begin{align*}
@@ -349,9 +356,11 @@ According to Lemma~\ref{lem:interpolation}, $\chi_{\F_p^-}(z)$ is equal to
   \begin{remark}
     Maximum and minimum functions are basic building blocks in the neural network design.
     For example, one of the most popular activation functions in neural networks is the rectifier, or ReLU, which is equal to $\max(x,0)$.
-    The above polynomial of $\max_\S$ yields the following simple polynomial for the ReLU function defined on $\S=[0,(p-1)/2]$
+    By analogy with~(\ref{eq:generic_minimum}), we have $\max(x,0) = x \cdot (1 - \sign_{\S'}(x))$ where $\S' = [-(p-1)/2,(p-1)/2]$ (see Remark~\ref{rem:sign_function}).
+    Thus, Eq.~(\ref{eq:sign_interpolation}) yields the following interpolation polynomial of the ReLU function on $\S'$
+    %The above polynomial of $\max_\S$ yields the following simple polynomial for the ReLU function defined on $\S=[0,(p-1)/2]$
     \begin{align*}
-      Q_{\ReLU_\S}(X) &= Q_{\max_\S}(X,0) \\
+      Q_{\ReLU_{\S'}}(X) &= X \cdot (1 - Q_{\sign_{\S'}}(X))\\
       &= \frac{p+1}{2} X - \sum_{i=1}^{\frac{p-1}{2}} X^{2i} \sum_{a=1}^{\frac{p-1}{2}} a^{p-2i}.
     \end{align*}
   \end{remark}

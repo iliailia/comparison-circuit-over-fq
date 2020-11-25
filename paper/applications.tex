@@ -54,7 +54,7 @@
 \label{sec:min/max}
 
 	Another application of our comparison algorithms is concerned with finding a minimum (or maximum) element of an array.
-	To find the minimum of an array with $N$ elements, at least $N-1$ calls of the pairwise minimum function are required~\cite[Chapter 9]{CLR09}, which can be achieved, for instance, by \emph{the tournament method}.
+	To find the minimum of an array with $N$ elements, at least $N-1$ calls of the pairwise minimum function are required~\cite[Chapter 9]{CLR09}, which can be achieved, for instance, by the \emph{tournament method}.
 	
 	The tournament method consists of $\ceil{\log N}$ iterations.
 	In each iteration, the input array is divided into pairs. 
@@ -111,6 +111,11 @@
 	Let $A = [a_0,\dots,a_{N-1}]$ be an input array.
 	First, we perform $T$ iterations of the tournament algorithm, which leaves us with an array $A' = [a'_0, \dots, a'_{N'-1}]$ of length $N' = \ceil{N/2^T}$ containing minimal elements of $A$.
 	Then, we can find the minimum by computing the comparison table $\mL$ as in direct sorting and extracting one of the minimal elements.
+	If $M(f)$ is the non-scalar multiplicative complexity of a function $f$, then the total number of non-scalar multiplications to find the minimum of an array is approximately equal to
+	\begin{align*}
+		N(1 - 2^{-T}) \cdot M\left(\min(x,y)\right) + \frac{N'(N'-1)}{2} \cdot M\left(\LT\right) \\
+		+ M(\mathtt{Extraction}).
+	\end{align*}
 	
 	The extraction of a minimum element can be done with two methods.
 	In the first approach, we use the fact that the Hamming weight of the comparison table row corresponding to the minimum is equal to $N'-1$.
@@ -125,7 +130,7 @@
 	which is independent of the input array length $N$.
 	Since $\EQ_{[0,N'-1]}$ need $\log_2(p-1) + \wt(p-1) - 1$ non-scalar multiplications, then the number of non-scalar multiplications needed to extract the array minimum is equal to 
 	\begin{align*}
-		N' (\log_2(p-1) + \wt(p-1) - 1).
+		M(\mathtt{Extraction}) = N' (\log_2(p-1) + \wt(p-1) - 1).
 	\end{align*}
 	Shaul et al.~\cite{PoPETS:SFR20} proposed another circuit to extract the array minimum that exploits the fact that the comparison table row related to the minimum contains only $1$ except for the main diagonal entry.
 	In other words, the product of $\prod_{j=1, j \ne i}^{N'} \mL_{ij} = 1$ if and only if $a'_i = \min(A')$.
@@ -139,7 +144,7 @@
 	\end{align*}
 	This extraction circuit requires the following number of multiplications 
 	\begin{align*}
-		N' (N'-2).
+		M(\mathtt{Extraction}) = N' (N'-2).
 	\end{align*}
 	This implies that for small enough $N'$, Shaul's circuit~(\ref{eq:shaul_minimum}) has a smaller depth or/and a smaller multiplication complexity than the circuit in~(\ref{eq:our_minimum}).
 	Furthermore, Shaul's circuit supports any length $N' > p$, whereas (\ref{eq:our_minimum}) requires $N' \le p$ such that $\wt(\mL[i])$ do not overflow modulo $p$.
