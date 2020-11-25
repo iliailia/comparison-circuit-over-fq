@@ -216,7 +216,7 @@ To find the minimum of 64 32-bit integers, our minimum algorithm requires about 
 
     In Table~\ref{table:other_he_schemes}, our implementation of the less-than function is compared to the implementations of this function in TFHE \cite{AC:CGGI17,JC:CGGI20} and CKKS \cite{EPRINT:CheKimKim19}.
 
-    Chilloti et al. \cite{AC:CGGI17,JC:CGGI20} constructed a deterministic weighted automata that can compute the maximum function using the TFHE scheme.
+    Chilloti et al.~\cite{AC:CGGI17,JC:CGGI20} constructed a deterministic weighted automata that can compute the maximum function using the TFHE scheme.
     The same automata can compute the less-than function without any performance loss. 
     In this case, the running time of the less-than function of two $n_b$-bit integers takes $170 n_b$ microseconds on a hardware similar to ours and with the encryption parameters supporting at least 152 bits of security.
     This security level might be lowered by a recent attack of Espitau et al.~\cite{EPRINT:EJK20}.

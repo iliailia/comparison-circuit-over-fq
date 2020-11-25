@@ -113,7 +113,7 @@
 	Then, we can find the minimum by computing the comparison table $\mL$ as in direct sorting and extracting one of the minimal elements.
 	If $M(f)$ is the non-scalar multiplicative complexity of a function $f$, then the total number of non-scalar multiplications to find the minimum of an array is approximately equal to
 	\begin{align*}
-		N(1 - 2^{-T}) \cdot M\left(\min(x,y)\right) + \frac{N'(N'-1)}{2} \cdot M\left(\LT\right) \\
+		(N - N') \cdot M\left(\min(x,y)\right) + \frac{N'(N'-1)}{2} \cdot M\left(\LT\right) \\
 		+ M(\mathtt{Extraction}).
 	\end{align*}
 	
