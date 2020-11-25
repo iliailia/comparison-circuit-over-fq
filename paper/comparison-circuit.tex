@@ -46,7 +46,7 @@ In this section, we show how to exploit the structure of these polynomials to sp
     The total degree of $P_{\LT_\S}(X,Y)$ is $p$.
   \end{theorem}
   \begin{proof}
-    See Appendix \ref{proof_thm_less_than_total_degree}.
+    See Appendix \ref{app:proof_thm_less_than_total_degree}.
   \end{proof}
   From the definition of $\LT_\S$, one can easily prove the following facts about $P_{\LT_\S}$:
   \begin{itemize}[label=--]
@@ -321,8 +321,7 @@ According to Lemma~\ref{lem:interpolation}, $\chi_{\F_p^-}(z)$ is equal to
     This feature of the univariate circuit allows to compute all the equality operations while comparing large integers using the less-than function $\LT$ from~(\ref{eq:general_lex_order}).
     This saves $\mathcal{O}((d'-1)(k-1) \log (p-1))$ homomorphic multiplications, thus leading to a better running time than for the bivariate circuit.
 
-    The downside of the univariate circuit is that only half of the plaintext space is used to encode input integers in comparison to the bivariate method.
-    \todo{Mention the fact that since one can only use half of the plaintext space, univariate method cannot really be used if one has to compute stuff before the comparison}
+    The downside of the univariate circuit is that at most half of the plaintext space is used to encode input integers in comparison to the bivariate method.
   \end{remark}
 
 \subsection{Min/max function}
