@@ -326,13 +326,13 @@ According to Lemma~\ref{lem:interpolation}, $\chi_{\F_p^-}(z)$ is equal to
 
 \subsection{Min/max function}
 
-  Given the less-than function $\LT_\S$, one can compute the minimum of two elements $x, y \in \S$ in the following generic way
+  Given the less-than function $\LT$ defined on some set, one can compute the minimum of two elements $x, y$ of this set in the following generic way
   \begin{align*}
-    \min_\S(x,y) &= x \cdot \LT_\S(x,y) + y \cdot (1 - \LT_\S(x,y)) \\
-    &= y + (x-y) \cdot \LT_\S(x,y)\,.
+    \min(x,y) &= x \cdot \LT(x,y) + y \cdot (1 - \LT(x,y)) \\
+    &= y + (x-y) \cdot \LT(x,y)\,.
   \end{align*}
   Notice that the input difference $x - y$ naturally emerges in this expression, thus hinting that the univariate circuit from~(\ref{eq:univariate_circuit}) might be useful here.
-  Indeed, by replacing $X - Y$ with a variable $Z$ we obtain the univariate polynomial representation of the minimum function 
+  Indeed, by replacing $X - Y$ with a variable $Z$ we obtain the univariate polynomial representation of the minimum function on the set $\S=[0,(p-1)/2]$ 
   \begin{align*}
     Q_{\min_\S}(X,Y) &= Y + Z \cdot Q_{\LT_S}(X,Y) \\
     & = Y + \frac{p+1}{2} Z + \sum_{i=1}^{\frac{p-1}{2}} Z^{2i} \sum_{a=1}^{\frac{p-1}{2}} a^{p-2i} \\
@@ -340,7 +340,7 @@ According to Lemma~\ref{lem:interpolation}, $\chi_{\F_p^-}(z)$ is equal to
     & = \frac{p+1}{2} (X+Y) + g(Z^2)\,,
   \end{align*}
   where $g(X)$ is a polynomial of degree $(p-1)/2$. 
-  As a result, $\min_S(x,y)$ can be computed with $O(\sqrt{p-1})$ non-scalar multiplications via the Paterson-Stockmeyer algorithm.
+  As a result, $\min_S(x,y)$ can be computed with $\mathcal{O}(\sqrt{p-1})$ non-scalar multiplications via the Paterson-Stockmeyer algorithm.
 
   Following the above reasoning, the maximum function can be computed with the following polynomial
   \begin{align*}

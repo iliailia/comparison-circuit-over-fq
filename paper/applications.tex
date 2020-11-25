@@ -3,7 +3,7 @@
 
     To demonstrate the efficiency of our comparison algorithms, we applied them to a popular computational task that demands multiple comparisons, sorting.
 	The best homomorphic sorting algorithm in terms of running time is the direct sorting algorithm due to {\c C}etin et al.~\cite{CDSS15}.
-	For a given array $A = [a_0,\dots,a_{n-1}]$, this algorithm computes a \emph{comparison matrix} $\mL$ defined by
+	For a given array $A = [a_0,\dots,a_{N-1}]$, this algorithm computes a \emph{comparison matrix} $\mL$ defined by
 	\begin{align*}
 		\mL_{ij} =
 		\begin{cases}
@@ -17,32 +17,32 @@
 	Thus, $a_i$ has a zero index in $A$ after sorting; in other words, $a_i$ is the maximum element of $A$.
 
 	Let $A'$ be a sorted version of $A$ in the descending order.
-	To compute $A'[i]$ for any $i \in [0,n-1]$, we homomorphically select an element $a_j$ such that $\wt(\mL[j]) = i$.
+	To compute $A'[i]$ for any $i \in [0,N-1]$, we homomorphically select an element $a_j$ such that $\wt(\mL[j]) = i$.
 	This can be done with the following sum  
-	\begin{align*}
-		A'[i] = \sum_{j=0}^{n-1} \EQ_{[0,n-1]}(i,\wt\left(\mL[j]\right)) \cdot a_j\,.
-	\end{align*}
-	Note that the equality function should be defined on the set $[0,n-1]$, which implies that $n$ must be smaller than the plaintext modulus $p$.
+	\begin{align}\label{eq:sorting_extraction}
+		A'[i] = \sum_{j=0}^{N-1} \EQ_{[0,N-1]}(i,\wt\left(\mL[j]\right)) \cdot a_j\,.
+	\end{align}
+	Note that the equality function should be defined on the set $[0,N-1]$, which implies that $N$ must be smaller than the plaintext modulus $p$.
 
 	\begin{remark}
-		Since the matrix $\mL$ is defined by $n(n-1)/2$ elements, it can be costly to keep it in memory for large~$n$.
+		Since the matrix $\mL$ is defined by $N(N-1)/2$ elements, it can be costly to keep it in memory for large~$N$.
 		Instead, we can compute the Hamming weights of its rows by iteratively computing one comparison $\LT(a_i, a_j)$ with $i < j$ at a time.
-		To achieve this, we create an array of size $n$ initialized with zeros that eventually will store the Hamming weights.
+		To achieve this, we create an array of size $N$ initialized with zeros that eventually will store the Hamming weights.
 		Then, we add the outcome of $\LT(a_i, a_j)$ to the $i$th element of this array and the result of $1-\LT(a_i, a_j)$ to the $j$th element.
-		In this approach, only $n$ elements of the Hamming weight array are being kept in RAM.
+		In this approach, only $N$ elements of the Hamming weight array are being kept in RAM.
 	\end{remark}
 
-	The direct sorting algorithm requires $n(n-1)/2$ less-than operations to compute the matrix $\mL$ and $n^2$ equality operations to compute sorted elements of $A'$.
-	While computing equalities, we can reduce the total number of non-scalar multiplications if $n$ is large enough.
+	The direct sorting algorithm requires $N(N-1)/2$ less-than operations to compute the matrix $\mL$ and $N^2$ equality operations to compute sorted elements of $A'$.
+	While computing equalities, we can reduce the total number of non-scalar multiplications if $N$ is large enough.
 	Recall $\EQ_\S$ needs $M = \log_2(p-1) + \wt(p-1) - 1$ non-scalar multiplications for any $\S \subseteq [0,p-1]$.
-	Hence, to compute $\EQ_{[0,n-1]}(i,\wt\left(\mL[j]\right))$ for all $i \in [0,n-1]$, we should perform $n M$ multiplications.
+	Hence, to compute $\EQ_{[0,N-1]}(i,\wt\left(\mL[j]\right))$ for all $i \in [0,N-1]$, we should perform $N M$ multiplications.
 	%$\EQ(i,\wt\left(\mL[j]\right)) = 1 - (i-\wt\left(\mL[j]\right))^{p-1}$
 	Using Lemma~\ref{lem:difference_to_p-1} (see Appendix~\ref{app:proof_thm_less_than_total_degree}), we can rewrite 
 	\begin{align*}
-		\EQ_{[0,n-1]}\left(i,\wt\left(\mL[j]\right)\right) = 1 - \sum_{k=0}^{p-1} i^k \cdot \wt\left(\mL[j]\right)^{p-1-k}\,.
+		\EQ_{[0,N-1]}\left(i,\wt\left(\mL[j]\right)\right) = 1 - \sum_{k=0}^{p-1} i^k \cdot \wt\left(\mL[j]\right)^{p-1-k}\,.
 	\end{align*}
 	If we precompute the powers $\wt\left(\mL[j]\right)^{p-1-k}$, then we need only $p-2$ non-scalar multiplications to compute all the equalities $\EQ(i,\wt\left(\mL[j]\right))$ as the index $i$ is not encrypted.
-	Hence, if $n > (p-2)/M$, this approach results in a smaller number of non-scalar multiplications.
+	Hence, if $N > (p-2)/M$, this approach results in a smaller number of non-scalar multiplications.
 	Yet, this method introduces $p-1$ scalar multiplications (by powers $i^k$) and $p-2$ additions. 
 	However, these operations are much faster in HE schemes than non-scalar multiplication such that the gain from reducing non-scalar multiplications becomes dominant. 
 	
@@ -50,12 +50,13 @@
 	This allows to avoid large encryption parameters and costly bootstrapping operations.
 	%We can further reduce this depth by computing the Hamming weight modulo a plaintext modulus $p$ that is equal or larger than the length of an array $n$.
 
-\subsection{Min/max of an array}
+\subsection{Minimum and maximum of an array}
 \label{sec:min/max}
 
-	Another application of our comparison algorithms is concerned with the minimum (or maximum) function of an array.
-	To find the minimum of an input array with $n$ elements, at least $n-1$ calls of the pairwise minimum function are required~\cite[Chapter 9]{CLR09}, which can be achieved by \emph{the tournament method}.
-	In this method, one reduces the size of the input array in $\ceil{\log n}$ iterations.
+	Another application of our comparison algorithms is concerned with finding a minimum (or maximum) element of an array.
+	To find the minimum of an array with $N$ elements, at least $N-1$ calls of the pairwise minimum function are required~\cite[Chapter 9]{CLR09}, which can be achieved, for instance, by \emph{the tournament method}.
+	
+	The tournament method consists of $\ceil{\log N}$ iterations.
 	In each iteration, the input array is divided into pairs. 
 	If the array length is odd, one element is stashed for the next iteration. 
 	Then, the maximum of each pair is removed from the array.
@@ -103,48 +104,47 @@
 		\caption{The tournament method of finding the minimum of an array. In each stage, the array elements are divided into pairs. Only minimum of a pair go to the next stage.}
 		\label{fig:minimum_tournament}
 	\end{figure}
-	Unfortunately, the tournament method has a big multiplicative complexity, namely $\ceil{\log n} \cdot d(\min(x,y))$.
+	Unfortunately, the tournament method has a big multiplicative complexity, namely $\ceil{\log N} \cdot d(\min(x,y))$.
 	In the HE world, this enforces us to use either impractical encryption parameters~\cite{TMP15} or a slow bootstrapping function.
 
-	To reduce the depth, we can combine the tournament method and direct sorting.
-	First, we perform $\ell$ iterations of the tournament algorithm, which leaves us with an array $\va' = (a'_0, \dots, a'_{n'-1})$ of length $n' = \ceil{n/2^\ell}$ containing the minimum.
-	Then, we can find the minimum by computing the comparison table as in direct sorting and extracting the minimal element.
-	This can be done with two methods.
-
-	First, one can leverage the fact that the Hamming weight of the comparison table row corresponding to the minimal element is equal to $n'-1$.
-	Hence, we can retrieve the minimal element as follows
+	To reduce the depth of the array minimum algorithm, we can combine the tournament method and direct sorting.
+	Let $A = [a_0,\dots,a_{N-1}]$ be an input array.
+	First, we perform $T$ iterations of the tournament algorithm, which leaves us with an array $A' = [a'_0, \dots, a'_{N'-1}]$ of length $N' = \ceil{N/2^T}$ containing minimal elements of $A$.
+	Then, we can find the minimum by computing the comparison table $\mL$ as in direct sorting and extracting one of the minimal elements.
+	
+	The extraction of a minimum element can be done with two methods.
+	In the first approach, we use the fact that the Hamming weight of the comparison table row corresponding to the minimum is equal to $N'-1$.
+	Hence, we can retrieve the minimum as in~(\ref{eq:sorting_extraction})
 	\begin{align}\label{eq:our_minimum}
-		\min(\va') = \sum_{i=0}^{n'-1} \EQ(n'-1,\wt\left(\mL[i]\right)) \cdot a'_i.
+		\min(A') = \sum_{i=0}^{N'-1} \EQ_{[0,N'-1]}(N'-1,\wt\left(\mL[i]\right)) \cdot a'_i.
 	\end{align}
-	Here, the multiplicative depth is reduced to 
+	Here, the multiplicative depth is equal to 
 	\begin{align*}
-		\ell \cdot d(\min(x,y)) + d(\LT) + d(\EQ) + 1 \\
-		= (\ell + 2) \cdot \ceil{\log (p-1)} + 1
+		T \cdot d(\min(x,y)) + d(\LT) + \ceil{\log_2 (p-1)} + 1
 	\end{align*}
-	which is independent of the array length $n$.
-	If $M(\EQ)$ and $M(\LT)$ is the number of multiplications in the equality function $\EQ$ and the less-than function $\LT$, respectively, the multiplicative complexity is equal to 
+	which is independent of the input array length $N$.
+	Since $\EQ_{[0,N'-1]}$ need $\log_2(p-1) + \wt(p-1) - 1$ non-scalar multiplications, then the number of non-scalar multiplications needed to extract the array minimum is equal to 
 	\begin{align*}
-		n (1 + M(\EQ)) + \frac{n(n-1)}{2} \cdot  M(\LT).
+		N' (\log_2(p-1) + \wt(p-1) - 1).
 	\end{align*}
-	Shaul et al.~\cite{PoPETS:SFR20} proposed another circuit for the array minimum function that exploits the fact that the comparison table row related to the minimal element contains only $1$ except for the main diagonal element.
-	In other words, the product of $\prod_{j=1, j \ne i}^{n} \mL_{ij} = 1$ if and only if $a'_i = \min(\va')$.
+	Shaul et al.~\cite{PoPETS:SFR20} proposed another circuit to extract the array minimum that exploits the fact that the comparison table row related to the minimum contains only $1$ except for the main diagonal entry.
+	In other words, the product of $\prod_{j=1, j \ne i}^{N'} \mL_{ij} = 1$ if and only if $a'_i = \min(A')$.
 	Hence, the minimal element is equal to
 	\begin{align}\label{eq:shaul_minimum}
-		\min(\va') = \sum_{i=0}^{n'-1} a'_i \cdot \prod_{j=1, j \ne i}^{n} \mL_{ij}.
+		\min(A') = \sum_{i=0}^{N'-1} a'_i \cdot \prod_{j=1, j \ne i}^{N'} \mL_{ij}.
 	\end{align}
 	The resulting depth of this circuit amounts to
 	\begin{align*}
-		\ell \cdot d(\min) + d(\LT) + \ceil{\log (n-1)} + 1 \\
-		= (\ell + 1) \cdot \ceil{\log (p-1)} + \ceil{\log (n-1)} + 1. 
+		T \cdot d\left(\min(x,y)\right) + d(\LT) + \ceil{\log (N'-1)} + 1.
 	\end{align*}
-	This circuit requires the following number of multiplications 
+	This extraction circuit requires the following number of multiplications 
 	\begin{align*}
-		n (n-1) + \frac{n(n-1)}{2} \cdot M(\LT) .
+		N' (N'-2).
 	\end{align*}
-	This implies that for small enough $n$, Shaul's circuit~(\ref{eq:shaul_minimum}) has smaller depth or smaller multiplication complexity than the circuit in~(\ref{eq:our_minimum}).
-	Furthermore, Shaul's circuit is correct even if $n > p$, whereas (\ref{eq:our_minimum}) requires $n \le p$ such that $\wt(\mL[i])$ are computed correctly.
+	This implies that for small enough $N'$, Shaul's circuit~(\ref{eq:shaul_minimum}) has a smaller depth or/and a smaller multiplication complexity than the circuit in~(\ref{eq:our_minimum}).
+	Furthermore, Shaul's circuit supports any length $N' > p$, whereas (\ref{eq:our_minimum}) requires $N' \le p$ such that $\wt(\mL[i])$ do not overflow modulo $p$.
 
-	In the experiments conducted in Section~\ref{sec:impl-results}, we use the best of these approaches for given $n$ and $p$. 
+	In the experiments conducted in Section~\ref{sec:impl-results}, we use the best of these approaches for given $N$, $T$ and $p$. 
 	%%%%%%%%%%
 %%% Local Variables:
 %%% mode: latex
