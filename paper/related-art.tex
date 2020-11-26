@@ -1,7 +1,3 @@
-%Since comparison between numbers is a common operation required in many applications, its homomorphic evaluation has been the object of several works.
-%Since inputs are encrypted, a comparison algorithm cannot terminate whenever the first difference between most significant bits is detected. 
-%As a consequence, homomorphic comparison has a complexity corresponding to the worst-case complexity in the plain domain. 
-%However, the practical efficiency of homomorphic comparison depends on an HE scheme.Since comparison is a common function required in many applications, its homomorphic evaluation has been the object of several works.
 Comparison is a common function required in many applications; as a consequence, its homomorphic evaluation has been the object of several works.
 Since inputs are encrypted, a comparison algorithm cannot terminate whenever it finds the first difference between most significant bits. 
 As a result, homomorphic comparison has a complexity corresponding to the worst-case complexity in the plain domain. 
@@ -10,12 +6,12 @@ The practical efficiency of homomorphic comparison depends on the type of HE sch
 For bit-wise HE schemes (FHEW, TFHE), Chillotti~et~al.~\cite{AC:CGGI17,JC:CGGI20} showed that one could compare two $n$-bit integers by evaluating a deterministic weighted automata made of $5n~\texttt{CMux}$ gates. 
 Using the TFHE scheme, evaluating a \texttt{CMux} gate takes around $34$ microseconds on a commodity laptop, meaning that one can homomorphically compare two $n$-bit numbers in around $170n$ microseconds. 
 Note that these estimations correspond to the fastest (leveled) version of TFHE which avoids bootstrapping. 
-If one wants to use the bootstrapped version then the best method requires to evaluate $7n~\texttt{Mux}$ gates, where each gate takes around $13$ millisecond to be evaluated, which makes a total of $91n$ millisecond.
+If one wants to use the bootstrapped version then the best method requires to evaluate $7n~\texttt{Mux}$ gates, where each gate takes around $26$ millisecond to be evaluated, which makes a total of $182n$ millisecond.
 
 Schemes from the second category (BGV and BFV) can use \ac{SIMD} techniques to batch several plaintexts into a single ciphertext~\cite{SV14}. 
 Therefore, a natural idea would be to pack the input bits into a single ciphertext. 
 Cheon et al.~\cite{CKK15,CKK16} studied comparison functions in this context using the bivariate polynomial interpolation. 
-Some of the algorithmic tools they have used -- e.g. computation of running sums and products -- are optimal~\todo{What do you mean by `optimal'?} in the homomorphic setting and have laid the ground for future works in this direction.
+Some of the algorithmic tools they have used -- e.g. computation of running sums and products -- are optimal in the homomorphic setting, i.e. regarding the multiplicative depth and the number of multiplications, and have laid the ground for future works in this direction.
 
 Some works have tried to exploit other features of these schemes by encoding integers modulo an odd prime $p$ instead of bits. 
 In \cite{NGEG17}, Narumanchi et al. compare integer-wise comparison algorithms based on the univariate interpolation with bit-wise counterparts.
@@ -46,7 +42,7 @@ The situation for the CKKS scheme is quite different since its plaintext space n
 Therefore, circuit optimizations related to data encoded into finite fields are not applicable for CKKS. 
 Nonetheless, the approximated nature of computations in CKKS makes it suitable to use iterative methods from real analysis to compute close approximations of non-arithmetic functions. 
 Bajard et al.~\cite{BMSZ20} used Newton iteration to evaluate the sign function, while independently Cheon et al.~\cite{AC:CKKLL19,EPRINT:CheKimKim19} generalized this approach and studied its efficiency in more details. 
-Using the methods of~\cite{EPRINT:CheKimKim19}, one can compare 20-bit numbers with an amortized cost of $5.7$ milliseconds (see Table~\ref{table:other_he_schemes}), which is comparable, although slower, to TFHE. 
+Using the methods of~\cite{EPRINT:CheKimKim19}, one can compare 20-bit numbers with an amortized cost comparable, although slower, to TFHE. 
 However, in order to obtain these timings one has to use quite large encryption parameters (ring dimension $2^{17}$ and ciphertext modulus up to $2200$ bits). 
 Since the cost of homomorphic operations increases quasi-linearly with the ring dimension, while the number of slots only increases linearly, increasing the dimension would affect significantly the timings. 
 Therefore, it would be interesting to know whether these methods can be used in practice to compare larger inputs -- e.g. 64-bit integers -- without degrading the performance. 

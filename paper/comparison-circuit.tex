@@ -9,7 +9,7 @@ For any choice of $\S$, the corresponding equality function over $\F_p$ is equal
 Unfortunately, $\LT_{\S}$ is not that simple and universal and we have to rely on Lagrange interpolation (Lemma~\ref{lem:interpolation}) to compute it. 
 Yet, there are two different ways to evaluate it.
 The first method (as done in \cite{TLWRK20}) uses $\S = [0,p-1]$ and directly interpolates $\LT_{\F_p}(x,y)$ as a bivariate polynomial over $\F_{p}$.
-The second approach (as done in \cite{AINA:NGEG17} and \cite{PoPETS:SFR20}) has $\S = [0, (p-1)/2]$ and interpolates a univariate polynomial of $\LT_{\S}(z, 0)$ with $z = x - y$.
+The second approach (as done in \cite{NGEG17} and \cite{PoPETS:SFR20}) has $\S = [0, (p-1)/2]$ and interpolates a univariate polynomial of $\LT_{\S}(z, 0)$ with $z = x - y$.
 %In this case, $x,y$ must belong to the set $[0, (p-1)/2]$. 
 %However, these works evaluated $\LT_{\F_p}$ without exploiting its structure. 
 In this section, we show how to exploit the structure of these polynomials to speed-up their evaluation.
@@ -247,7 +247,7 @@ and then for $p\geq 5$:
 \item $p-4$ multiplications to compute the $X^i$'s for $2\leq i \leq p-3$ required to compute the terms $f_i(X)$;
 \item $(p-5)/2$ multiplications to compute the $Z^i$ for $2\leq i \leq (p-3)/2$;
 \item $(p-3)/2$ multiplications to compute the products $f_i(X)\cdot Z^i$;
-\item $1$ final multiplication $f(X,Y)(X+1)Z$.
+\item $1$ final multiplication $(X+1)Z\cdot f(X,Y)$.
 \end{itemize}
 Overall, at most $2p-5$ non-scalar multiplications are needed to homomorphically evaluate $P_{\LT_\S}(X,Y)$ for \mbox{$p \geq 5$}. 
 This number can be slightly reduced by optimizing the way of computing $f_i$'s. 
@@ -354,7 +354,7 @@ According to Lemma~\ref{lem:interpolation}, $\chi_{\F_p^-}(z)$ is equal to
     Q_{\max_\S}(X,Y) &= \frac{p+1}{2} (X+Y) - \sum_{i=1}^{\frac{p-1}{2}} Z^{2i} \sum_{a=1}^{\frac{p-1}{2}} a^{p-2i}.
   \end{align*}
   \begin{remark}
-    Maximum and minimum functions are basic building blocks in the neural network design.
+    Maximum and minimum functions are basic building blocks in the design of neural networks.
     For example, one of the most popular activation functions in neural networks is the rectifier, or ReLU, which is equal to $\max(x,0)$.
     By analogy with~(\ref{eq:generic_minimum}), we have $\max(x,0) = x \cdot (1 - \sign_{\S'}(x))$ where $\S' = [-(p-1)/2,(p-1)/2]$ (see Remark~\ref{rem:sign_function}).
     Thus, Eq.~(\ref{eq:sign_interpolation}) yields the following interpolation polynomial of the ReLU function on $\S'$
@@ -560,5 +560,5 @@ According to Lemma~\ref{lem:interpolation}, $\chi_{\F_p^-}(z)$ is equal to
 
 %%% Local Variables:
 %%% mode: latex
-%%% TeX-master: "main"
+%%% TeX-master: "main_pets"
 %%% End:

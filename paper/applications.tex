@@ -37,7 +37,7 @@
 	Recall $\EQ_\S$ needs $M = \log_2(p-1) + \wt(p-1) - 1$ non-scalar multiplications for any $\S \subseteq [0,p-1]$.
 	Hence, to compute $\EQ_{[0,N-1]}(i,\wt\left(\mL[j]\right))$ for all $i \in [0,N-1]$, we should perform $N M$ multiplications.
 	%$\EQ(i,\wt\left(\mL[j]\right)) = 1 - (i-\wt\left(\mL[j]\right))^{p-1}$
-	Using Lemma~\ref{lem:difference_to_p-1} (see Appendix~\ref{app:proof_thm_less_than_total_degree}), we can rewrite 
+	Using Lemma~\ref{lem:difference_to_p-1} (see Appendix~\ref{app:proof_thm_less_than_total_degree}), we can rewrite: 
 	\begin{align*}
 		\EQ_{[0,N-1]}\left(i,\wt\left(\mL[j]\right)\right) = 1 - \sum_{k=0}^{p-1} i^k \cdot \wt\left(\mL[j]\right)^{p-1-k}\,.
 	\end{align*}

@@ -139,7 +139,7 @@ For the sorting and the array minimum applications (Tables~\ref{table:sorting_ci
 \end{table*}
 
 As shown in Table~\ref{table:comparison_circuit_results}, our lexicographic order circuits have a better running time than the prior work of Tan et al.~\cite{TLWRK20} for any plaintext modulus $p$.
-In particular, our bivatiate circuit is up to 42\% faster than the bivaraite circuit of Tan et al. for small $p$.
+In particular, using our bivariate circuit, the less-than function is 42\% faster than with the circuit of Tan et al. on their fastest set of parameters ($(p,d,l) = (5,7,4)$).
 The best running time per integer was achieved by our univariate circuit, which outperforms any bivariate circuit for any $p > 5$ at the cost of larger encryption parameters.
 For $p=131$, the univariate circuit takes only 11 milliseconds to compare two 64-bit integers, which is more than 3 times faster than the circuit of Tan et al.
 
