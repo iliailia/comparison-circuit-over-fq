@@ -1,7 +1,7 @@
 \ac{FHE} gives the ability to perform any kind of computations directly on encrypted data. 
 It is therefore a natural candidate for privacy-preserving outsourced storage and computation techniques. 
 Since Gentry's breakthrough in 2009~\cite{STOC:Gentry09}, FHE has received a worldwide attention which has resulted in numerous improvements. 
-As a result, \ac{FHE} can now be used in practice in many practical scenarios, e.g. genome analysis~\cite{KL15}, energy forecasting~\cite{BCIV17}, image recognition~\cite{BMMP18} and secure messaging~\cite{SP:ACLS18}.\todo{more citations?} 
+As a result, \ac{FHE} can now be used in practice in many practical scenarios, e.g. genome analysis~\cite{KL15}, energy forecasting~\cite{BCIV17}, image recognition~\cite{BMMP18} and secure messaging~\cite{SP:ACLS18}. 
 In addition, FHE is currently going through a standardization process~\cite{HomomorphicEncryptionSecurityStandard}.
   
 In practice, homomorphic encryption schemes can be classified into three main categories:
@@ -16,9 +16,9 @@ In practice, homomorphic encryption schemes can be classified into three main ca
 	Although homomorphic operations in these schemes are less efficient than for bit-wise encryption schemes, their running time per SIMD slot can be better than of the binary-friendly schemes above. 
 	We refer to this performance metric as the \emph{amortized running time}.
 	\item The CKKS scheme~\cite{CKKS17}, which allows to perform computations over approximated numbers, forms the third category. 
-	It is similar to the second category in the sense that one can pack several numbers and compute on them in a SIMD fashion.
+	It is similar to the second category in the sense that one can pack several numbers and compute on them in a SIMD manner.
 	The CKKS scheme does not have the algebraic constraints that lower the packing capacity of BGV and BFV. 
-	Hence, it is usually possible to pack more elements in a single ciphertext in CKKS, thus resulting the best amortized cost. 
+	Hence, it is usually possible to pack more elements in CKKS ciphertext, thus resulting with the best amortized cost. 
 	Unlike previous schemes, CKKS encodes complex, and thus real, numbers natively. 
 	However, homomorphic computations are not exact, which means that decrypted results are only valid up to a certain precision. 
 \end{itemize}
@@ -38,7 +38,7 @@ Schemes of the second category operate naturally on $p$-ary arithmetic circuits,
 However, these schemes become much less efficient when considering other kinds of computations, e.g. comparison operations, step functions. 
 To alleviate this problem, one can use tools from number theory to evaluate specific functions with relatively efficient $p$-ary circuits. 
 Nonetheless, in general this techniques are too weak to outperform schemes of the first category.
-Bootstrapping algorithms of these schemes are quite heavy and usually avoided in practice. 
+Moreover, bootstrapping algorithms of these schemes are quite heavy and usually avoided in practice. 
 
 CKKS, similarly to second category schemes, is very efficient when operating on arithmetic circuits. 
 However, unlike other schemes which perform modular arithmetic, it allows to perform computations on complex (and thus real) numbers. 
@@ -47,7 +47,7 @@ However, since CKKS usually supports huge packing capacity, it usually presents 
 The bootstrapping algorithm of CKKS is fundamentally different from the above schemes as it refreshes ciphertexts only partially and introduces additional loss of output precision.
 Therefore, the CKKS bootstrapping is usually avoided in practice. 
 
-Although \ac{FHE} now offers a relatively efficient alternative for secure computation, some functions remain difficult to evaluate efficiently regardless a scheme. 
+Although \ac{FHE} now offers a relatively efficient alternative for secure computation, some functions remain difficult to evaluate efficiently regardless the considered scheme. 
 Step functions, which are required in many practical applications, form a good example of such functions because of their discontinuous nature. 
 The difficulty to evaluate discontinuous functions comes from the hardness to evaluate a quite basic and relatively simple function: the comparison function. 
 Although comparison is an elementary operation required in many applications including the famous \emph{Millionaires problem} of Yao \cite{Yao82} or advance machine learning tasks of the iDASH competition\footnote{http://www.humangenomeprivacy.org/2020/index.html}, it remains difficult to evaluate homomorphically.

@@ -1,7 +1,7 @@
 \subsection{Notations}
   Vectors will be written in column form and denoted by boldface lower-case letters. 
   The set of integers $\{\ell,\ldots,k\}$ is denoted by $[\ell,k]$.
-
+  
   For a non-negative integer $a$, let $\texttt{wt}(a)$ be the Hamming weight of its binary expansion. We denote the set of residue classes modulo $p$ by $\Z_p$ and the class representatives of $\Z_p$ are taken from the half-open interval $[-p/2, p/2)$.
 
 \subsection{Comparison of integers with finite fields operations}
@@ -62,7 +62,7 @@ With the help of the principal character, every function from $\F_{p^d}^l$ to $\
 
   Tan et al.~\cite{TLWRK20} proposed an alternative approach where $\S = [0,p-1]$.
   If input integers $a$ and $b$ belong to $\S$, the result of $\LT_\S$(a,b) is computed with its interpolation polynomial over $\F_p$.  
-  If $a,b$ are larger and $a,b \in [0,p^{d'-1}]$, they are encoded into $\F_{p^d}$ as above, but their comparison is performed via the lexicographic order defined on $\F_p^{d'}$.
+  If $a,b$ are larger, e.g. $a,b \in [0,p^{d'-1}]$, they are encoded into $\F_{p^d}$ as above, but their comparison is performed via the lexicographic order defined on $\F_p^{d'}$.
 
   This method is based on the extraction of coefficients $a_i, b_i \in \F_p$ thanks to the following result from the theory of finite fields (see \cite[Theorem 2.24]{LN86} for the proof).
   \begin{lemma}\label{lem:extraction}
@@ -217,7 +217,7 @@ For freshly encrypted ciphertexts, the decryption correctness means that $\Decry
 Homomorphic arithmetic operations are addition and multiplication.
 The addition (multiplication) algorithm takes two input ciphertexts $\ct_1$ and $\ct_2$ encrypting plaintexts $\pt_1$ and $\pt_2$ respectively.
 It outputs a ciphertext $\ct$ that encrypts the sum (product) of these plaintexts in the ring $\intring_p$.
-It implies that homomorphic addition sums (multiplies) respective SIMD slots of $\pt_1$ and $\pt_2$.
+It implies that homomorphic addition (resp. multiplication) sums (resp. multiplies) respective SIMD slots of $\pt_1$ and $\pt_2$.
 It is also possible to define similar operations between ciphertexts and plaintexts.  
 
 %As shown in Section~\ref{subsec:crt}, the projection map $\proj_I$ can select the SIMD slots indexed by a set $I \subseteq \{0,\dots,\slots-1\}$ and set the rest to zero.
@@ -310,5 +310,5 @@ Thus, in the following sections we focus on the non-scalar complexity of compari
 
 %%% Local Variables:
 %%% mode: latex
-%%% TeX-master: "main"
+%%% TeX-master: "main_pets"
 %%% End:
