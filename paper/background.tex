@@ -1,7 +1,6 @@
 \subsection{Notations}
   Vectors will be written in column form and denoted by boldface lower-case letters. 
   The set of integers $\{\ell,\ldots,k\}$ is denoted by $[\ell,k]$.
-  
   For a non-negative integer $a$, let $\texttt{wt}(a)$ be the Hamming weight of its binary expansion. We denote the set of residue classes modulo $p$ by $\Z_p$ and the class representatives of $\Z_p$ are taken from the half-open interval $[-p/2, p/2)$.
 
 \subsection{Comparison of integers with finite fields operations}
@@ -34,7 +33,7 @@ According to Euler's theorem, it returns $1$ if $x$ is non-zero and $0$ otherwis
 %  a^{p^d-1} = a^{(p-1)(p^{d-1} + \dots + 1)} = \prod_{i=0}^{d-1} \left(a^{p-1}\right)^{p^i},
 %\end{align}
 %$\chi$ can be computed with Frobenius maps ($x \mapsto x^p$) and multiplications.
-With the help of the principal character, every function from $\F_{p^d}^l$ to $\F_{p^d}$ can be interpolated by a unique polynomial according to the following well-know lemma. 
+Using the principal character, every function from $\F_{p^d}^l$ to $\F_{p^d}$ can be interpolated by a unique polynomial according to the following well-know lemma. 
 \begin{lemma}\label{lem:interpolation}
   Every function $f: \F_{p^d}^l \rightarrow \F_{p^d}$ is a polynomial function represented by a unique polynomial $P_f(X_1,\dots,X_{l})$ of degree at most $p^d - 1$ in each variable.
   In particular,
@@ -63,13 +62,12 @@ With the help of the principal character, every function from $\F_{p^d}^l$ to $\
   Tan et al.~\cite{TLWRK20} proposed an alternative approach where $\S = [0,p-1]$.
   If input integers $a$ and $b$ belong to $\S$, the result of $\LT_\S$(a,b) is computed with its interpolation polynomial over $\F_p$.  
   If $a,b$ are larger, e.g. $a,b \in [0,p^{d'-1}]$, they are encoded into $\F_{p^d}$ as above, but their comparison is performed via the lexicographic order defined on $\F_p^{d'}$.
-
   This method is based on the extraction of coefficients $a_i, b_i \in \F_p$ thanks to the following result from the theory of finite fields (see \cite[Theorem 2.24]{LN86} for the proof).
   \begin{lemma}\label{lem:extraction}
-    The linear transformations from $\F_{p^d}$ to $\F_p$ are exactly the mappings $L_{\alpha}(x) = \Tr_{\F_{p^d}/\F_p}(\alpha x)$ for some $\alpha \in \F_{p^d}$ and all $x \in \F_{p^d}$.
+    The linear transformations from $\F_{p^d}$ to $\F_p$ are exactly the mappings $L_{\alpha}(x) = \Tr_{\F_{p^d}/\F_p}(\alpha x)$ for some $\alpha \in \F_{p^d}$.
     Furthermore, $L_{\alpha} \ne L_{\beta}$ if $\alpha \ne \beta$.
   \end{lemma}
-  In particular, this lemma implies that for any $i \in [0,d'-1]$ there exist $\alpha_i \in \F_{p^d}$ such that $L_{\alpha_i}(a) = a_i$ for any $a$ from the vector subspace $\F_p^{d'}$ of $\F_{p^d}$.
+  This lemma implies that for any $i \in [0,d'-1]$ there exist $\alpha_i \in \F_{p^d}$ such that $L_{\alpha_i}(a) = a_i$ for any $a$ from the vector subspace $\F_p^{d'}$ of $\F_{p^d}$.
   Such $\alpha_i$'s can be computed by solving the following system of equations over $\F_{p^d}$ 
   \begin{align*}
     \mX \mA
@@ -114,7 +112,8 @@ With the help of the principal character, every function from $\F_{p^d}^l$ to $\
   %Thus, if we ignore the complexity of digit extraction, the total complexity of comparing elements of $\F_{p}^{d'}$ in terms of multiplications is $O(d'(p-1))$.
 
 \subsubsection{Comparison of large integers}\label{sec:comparison_of_large_integers}
-When the size of input integers exceeds $|\S|^d$, we can reapply the same trick as above by decomposing integers in base $|\S|^{d'}$ and then comparing their vectors of digits using the lexicographical order $\bm{<}$ on $\left(\F_{p}^{d'}\right)^l$, for some $d' \le d$.
+When the size of input integers exceeds $|\S|^d$, we can decompose integers in base $|\S|^{d'}$ and then compare their vectors of digits using the lexicographical order $\bm{<}$ on $\left(\F_{p}^{d'}\right)^l$, for some $d' \le d$.
+In fact, we compute two lexicographical orders on top of each other.
 
 Let $a,b \in [0, |\S|^{ld'}-1]$ be input integers. 
 We represent an integer $a = \sum_{i=0}^l a_i |\S|^{id'}$ by the vector $\va=(\bm{a}_0,\bm{a}_1,\ldots,\bm{a}_{l-1}) \in \left(\F_{p}^{d'}\right)^l$ of its digits of length $l$. 
@@ -214,11 +213,10 @@ For freshly encrypted ciphertexts, the decryption correctness means that $\Decry
 
 \subsubsection{Homomorphic operations}
 
-Homomorphic arithmetic operations are addition and multiplication.
-The addition (multiplication) algorithm takes two input ciphertexts $\ct_1$ and $\ct_2$ encrypting plaintexts $\pt_1$ and $\pt_2$ respectively.
+The homomorphic addition (multiplication) algorithm takes two input ciphertexts $\ct_1$ and $\ct_2$ encrypting plaintexts $\pt_1$ and $\pt_2$ respectively.
 It outputs a ciphertext $\ct$ that encrypts the sum (product) of these plaintexts in the ring $\intring_p$.
-It implies that homomorphic addition (resp. multiplication) sums (resp. multiplies) respective SIMD slots of $\pt_1$ and $\pt_2$.
-It is also possible to define similar operations between ciphertexts and plaintexts.  
+It implies that homomorphic addition (multiplication) sums (multiplies) respective SIMD slots of $\pt_1$ and $\pt_2$.
+Similar operations between ciphertexts and plaintexts are defined as well.  
 
 %As shown in Section~\ref{subsec:crt}, the projection map $\proj_I$ can select the SIMD slots indexed by a set $I \subseteq \{0,\dots,\slots-1\}$ and set the rest to zero.
 %This functionality is homomorphically realized by the $\Select$ function.

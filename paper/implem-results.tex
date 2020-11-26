@@ -232,9 +232,6 @@ To find the minimum of 64 32-bit integers, our array minimum algorithm requires 
 
     Our implementation runs with $p=131$, $m=17293$ ($n=17292$), which corresponds to 5764 integers of 8-16 bits or 2882 20-bit integers encoded into one ciphertext.
     The encryption parameters corresponds to a security level of at least 126 bits.
-    
-    As shown in Table~\ref{table:other_he_schemes}, our algorithm for the less-than function demonstrates a similar performance as the TFHE-based implementation and is up to 2 times faster than the CKKS-based work.
-    This means that in use cases that involve arithmetic and non-arithmetic functions (e.g. artificial neural networks) one might resort to only an HE scheme supporting exact arithmetic circuits (i.e. BGV/BFV) instead of combining it with an HE scheme efficient for a non-arithmetic part of the computation (i.e. TFHE).
 
     \begin{table}[h]
       \centering
@@ -263,6 +260,9 @@ To find the minimum of 64 32-bit integers, our array minimum algorithm requires 
       \newline *TFHE timings are estimated from~\cite{JC:CGGI20}.}
       \label{table:other_he_schemes}
     \end{table}
+    
+    As shown in Table~\ref{table:other_he_schemes}, our algorithm for the less-than function demonstrates a similar performance as the TFHE-based implementation and is up to 2 times faster than the CKKS-based work.
+    This means that in use cases that involve arithmetic and non-arithmetic functions (e.g. artificial neural networks) one might resort to only an HE scheme supporting exact arithmetic circuits (i.e. BGV/BFV) instead of combining it with an HE scheme efficient for a non-arithmetic part of the computation (i.e. TFHE).
     
 %%% Local Variables:
 %%% mode: latex

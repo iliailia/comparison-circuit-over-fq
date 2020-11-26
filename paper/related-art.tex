@@ -43,8 +43,8 @@ Therefore, circuit optimizations related to data encoded into finite fields are 
 Nonetheless, the approximated nature of computations in CKKS makes it suitable to use iterative methods from real analysis to compute close approximations of non-arithmetic functions. 
 Bajard et al.~\cite{BMSZ20} used Newton iteration to evaluate the sign function, while independently Cheon et al.~\cite{AC:CKKLL19,EPRINT:CheKimKim19} generalized this approach and studied its efficiency in more details. 
 Using the methods of~\cite{EPRINT:CheKimKim19}, one can compare 20-bit numbers with an amortized cost comparable, although slower, to TFHE. 
-However, in order to obtain these timings one has to use quite large encryption parameters (ring dimension $2^{17}$ and ciphertext modulus up to $2200$ bits). 
-Since the cost of homomorphic operations increases quasi-linearly with the ring dimension, while the number of slots only increases linearly, increasing the dimension would affect significantly the timings. 
+However, to obtain these timings one has to use quite large encryption parameters (ring dimension $2^{17}$ and ciphertext modulus up to $2200$ bits). 
+Since the running time of homomorphic operations increases quasi-linearly with the ring dimension, while the number of slots only increases linearly, increasing the dimension would affect significantly the timings. 
 Therefore, it would be interesting to know whether these methods can be used in practice to compare larger inputs -- e.g. 64-bit integers -- without degrading the performance. 
 
 % \begin{itemize}

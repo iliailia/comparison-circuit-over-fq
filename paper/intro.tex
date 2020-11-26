@@ -1,10 +1,10 @@
-\ac{FHE} gives the ability to perform any kind of computations directly on encrypted data. 
+\ac{FHE} can perform any kind of computations directly on encrypted data. 
 It is therefore a natural candidate for privacy-preserving outsourced storage and computation techniques. 
 Since Gentry's breakthrough in 2009~\cite{STOC:Gentry09}, FHE has received a worldwide attention which has resulted in numerous improvements. 
 As a result, \ac{FHE} can now be used in practice in many practical scenarios, e.g. genome analysis~\cite{KL15}, energy forecasting~\cite{BCIV17}, image recognition~\cite{BMMP18} and secure messaging~\cite{SP:ACLS18}. 
 In addition, FHE is currently going through a standardization process~\cite{HomomorphicEncryptionSecurityStandard}.
   
-In practice, homomorphic encryption schemes can be classified into three main categories:
+In practice, homomorphic encryption (HE) schemes can be classified into three main categories:
 \begin{itemize}
 	\item The schemes encrypting their input bit-wise meaning that each bit of the input is encrypted into a different ciphertext. 
 	From there, the operations are carried over each bit separately. 
@@ -69,7 +69,7 @@ Note that we can compare two 20-bit numbers with an amortized cost of 3ms, which
 
 We also apply our comparison methods to speed up popular computational tasks such as sorting and computing minimum/maximum of an array with $N$ elements. 
 For example, for $N=64$, we obtain an amortized cost of 6.5 seconds to sort 8-bit integers and 19.2 seconds for 32-bit integers, which is faster than the prior work by a factor 9 and 2.5 respectively (see Table \ref{table:sorting_circuit_results}). 
-For $N=64$, we can also obtain the minimum of 8-bit integers with an amortized running time of 404 ms and of 32-bit integers with an amortized time of 9.57 seconds (see Table \ref{table:minimum_circuit_results}).
+For $N=64$, we can find the minimum of 8-bit integers with an amortized running time of 404 ms and of 32-bit integers with an amortized time of 9.57 seconds (see Table \ref{table:minimum_circuit_results}).
 
 \subsection{Related Art}
 \label{sec:related-art}
