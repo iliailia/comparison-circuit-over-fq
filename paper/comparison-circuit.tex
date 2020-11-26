@@ -40,7 +40,7 @@ In this section, we show how to exploit the structure of these polynomials to sp
   \begin{theorem} \label{thm:less_than_total_degree}
     Let $p>2$ be a prime number and $\S = [0,p-1]$, then the interpolation polynomial of $\LT_\S$ over $\F_p$ has the following form
     \begin{align*}
-      P_{\LT_\S}(X,Y) = Y^{p-1} - \frac{p-1}{2} (XY)^{\frac{p-1}{2}} + \sum_{\substack{i,j>0 \\ i+j \le p}} a_{ij} X^i Y^j 
+      P_{\LT_\S}(X,Y) = Y^{p-1} - \frac{p-1}{2} (XY)^{\frac{p-1}{2}} + \sum_{\substack{i,j>0, \\ i \ne j, \\ i+j \le p}} a_{ij} X^i Y^j 
     \end{align*}
     where $a_{ij} = \sum_{a=0}^{p-2} \sum_{b=a+1}^{p-1} a^{p-1-i} b^{p-1-j} \in \F_p$.
     The total degree of $P_{\LT_\S}(X,Y)$ is $p$.

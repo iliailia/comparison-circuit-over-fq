@@ -1,7 +1,6 @@
-\section{Proof of Theorem \ref{thm:less_than_total_degree}}
+\section{Proof of Theorem~\ref{thm:less_than_total_degree}}
 \label{app:proof_thm_less_than_total_degree}
-To prove this statement we will need the following Lemma.
-
+To prove Theorem~\ref{thm:less_than_total_degree} we need the following lemmas.
   \begin{lemma}\label{lem:difference_to_p-1}
     For all $(a,b)\in\Z^2$ we have:
     \[
@@ -30,16 +29,18 @@ To prove this statement we will need the following Lemma.
     \]
   \end{lemma}
   \begin{proof}
-    It is enough to prove that the sum $\sum_{a=0}^{p-1} a^n = 0 \mod p$ for any $0 \leq n < p-1$. The case $n=0$ is straightforward, now let us assume $n>0$. Let $g$ be a primitive element of $\F_p$.
+    Since $\sum_{a=0}^{p-1} b = 0 \mod p$ for any $b \in \F_p$, it is enough to prove that the sum $\sum_{a=0}^{p-1} a^n = 0 \mod p$ for any $0 \leq n < p-1$.
+    Since the case $n=0$ is straightforward, let us assume $n>0$. 
+    Let $g$ be a primitive element of $\F_p$.
     Since $p > 2$, we have $g \ne 1$.
     Thus, we can rewrite the above sum as follows.
-    \begin{align}
+    \begin{align*}
       \sum_{i=1}^{p-1} g^{in} = \frac{g^{pn} - g^n}{g^n - 1}.
-    \end{align}
+    \end{align*}
     Since $g^{pn} \equiv g^n \mod p$, the sum turns into zero modulo $p$.
   \end{proof}
-  Now, We have all the ingredients to prove Theorem \ref{thm:less_than_total_degree}.
-  \begin{proof}[Theorem \ref{thm:less_than_total_degree}]
+  Now, we have all the ingredients to prove Theorem~\ref{thm:less_than_total_degree}.
+  \begin{proof}[Proof of Theorem \ref{thm:less_than_total_degree}]
     Assume that all computations are done modulo $p$.
     Using Lemma~\ref{lem:difference_to_p-1}, we obtain that $P_{\LT_\S}(X,Y)$ is equal to
     \begin{align*}
@@ -50,24 +51,24 @@ To prove this statement we will need the following Lemma.
       \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} 1 - \sum_{i=0}^{p-1} X^i a^{p-1-i} - \sum_{i=0}^{p-1} Y^i b^{p-1-i} \\
       + \sum_{i=0}^{p-1} \sum_{j=0}^{p-1} X^i Y^j a^{p-1-i} b^{p-1-j}.
     \end{align*}
-    Let us separately compute polynomial coefficients.
+    Let us compute individual polynomial coefficients.
     The constant term is equal to
     \begin{align*}
       \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} 1 - a^{p-1} - b^{p-1} + a^{p-1} b^{p-1} \\
-      = \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} 1 - a^{p-1} - 1 + a^{p-1} = 0 
+      = \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} 1 - a^{p-1} - 1 + a^{p-1} = 0\,. 
     \end{align*}
-    The coefficients by $X^i$ with $i > 0$ can be computed as follows
+    Coefficients by $X^i$ with $i > 0$ can be computed as follows
     \begin{align*}
-      \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} \left(-a^{p-1-i}\right) + a^{p-1-i} = 0.
+      \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} \left(-a^{p-1-i}\right) + a^{p-1-i}b^{p-1} = 0\,.
     \end{align*}
-    Next, we compute the coefficients by $Y^i$ with $i > 0$.
+    Next, we compute coefficients by $Y^i$ with $i > 0$.
     \begin{align*}
       -\sum_{a = 0}^{p-2} &\sum_{b=a+1}^{p-1} b^{p-1-i} - a^{p-1} b^{p-1-i} \\
       &= -\sum_{b=1}^{p-1} b^{p-1-i} - \sum_{a = 1}^{p-2} \sum_{b=a+1}^{p-1} b^{p-1-i} - b^{p-1-i} \\
       &= -\sum_{b=1}^{p-1} b^{p-1-i}.
     \end{align*}
     If $i = p-1$, this sum is equal to $1$.
-    According to Lemma~\ref{lem:sum_poly}, it is $0$ if $i \ne 0 \mod (p-1)$.
+    According to Lemma~\ref{lem:sum_poly}, it is $0$ if $i < p-1$.
     
     To compute coefficients by $X^i Y^j$ with $i, j > 0$, we will use Faulhaber's formula below
     \begin{align*}
@@ -81,50 +82,56 @@ To prove this statement we will need the following Lemma.
     Note that $P(0) = 0$.
     The coefficient by $X^i Y^j$ for some positive $i$ and $j$ is equal to
     \begin{align*}
-      \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} a^{p-1-i} b^{p-1-j} = \sum_{b = 1}^{p-1} b^{p-1-j} \sum_{a=0}^{b-1} a^{p-1-i}.
+      \sum_{a = 0}^{p-2} \sum_{b=a+1}^{p-1} a^{p-1-i} b^{p-1-j} &= \sum_{b = 1}^{p-1} b^{p-1-j} \sum_{a=0}^{b-1} a^{p-1-i}\,. \\
     \end{align*}
-    According to~(\ref{eq:faulhaber}), it follows that there exist a polynomial $P(X)$ of degree $p-i$ such that $\sum_{a=0}^{b-1} a^{p-1-i} = P(b)$.
-    Since $Q(X) = X^{p-1-j} P(X)$ has degree $2p-1-i-j$, Lemma~\ref{lem:sum_poly} implies that if $i+j > p$, then
+    According to~(\ref{eq:faulhaber}), there exist a polynomial $P_i(X)$ of degree $p-i$ such that $\sum_{a=0}^{b-1} a^{p-1-i} = P_i(b)$.
+    Since $Q_{ij}(X) = X^{p-1-j} P_i(X)$ has degree $2p-1-i-j$, Lemma~\ref{lem:sum_poly} implies that if $i+j > p$, then
     \begin{align*}
-      \sum_{b = 1}^{p-1} b^{p-1-j} \sum_{a=0}^{b-1} a^{p-1-i} = \sum_{b=1}^{p-1} Q(b) = 0.
+      \sum_{b = 1}^{p-1} b^{p-1-j} &\sum_{a=0}^{b-1} a^{p-1-i} = \sum_{b = 1}^{p-1} b^{p-1-j} P_i(b) \\ 
+      &= \sum_{b=1}^{p-1} Q_{ij}(b) = \sum_{b=0}^{p-1} Q_{ij}(b) - Q_{ij}(0) = 0.
     \end{align*}
-    Thus, the total degree of $P_{\LT_\S}(X,Y)$ is at most $p$.
+    Thus, all the coefficient $X^i Y^j$ with $i + j > p$ are zero, which means that the total degree of $P_{\LT_\S}(X,Y)$ is at most $p$.
 
-    In addition, we consider the case when $i = j$.
+    In addition, we consider the case when $i = j$ and $i,j \le (p-1)/2$.
     Let us consider the following sum
     \begin{align*}
-      \sum_{a=0}^{p-1} a^{p-1-i} \sum_{b=0}^{p-1} b^{p-1-i} = 0.
+      \sum_{a=0}^{p-1} a^{p-1-i} \sum_{b=0}^{p-1} b^{p-1-i} = 0\,.
     \end{align*}
     We can rewrite it as follows
     \begin{align*}
       \sum_{a=0}^{p-1} & a^{p-1-i} \sum_{b=0}^{p-1} b^{p-1-i} \\
-      &= 2\sum_{a=0}^{p-2} a^{p-1-i} \sum_{b=a+1}^{p-1} b^{p-1-i} + \sum_{a=0}^{p-1} a^{2(p-1-i)}.
+      &= 2\sum_{a=0}^{p-2} a^{p-1-i} \sum_{b=a+1}^{p-1} b^{p-1-i} + \sum_{a=0}^{p-1} a^{2(p-1-i)}\,.
     \end{align*}
-    If $i \ne (p-1)/2$, then the last sum is zero.
-    Thus, the coefficient by $X^i Y^i$ is equal to $\sum_{a=0}^{p-2} a^{p-1-i} \sum_{b=a+1}^{p-1} b^{p-1-i} = 0$.
-    If $i = (p-1)/2$, then following the above argument, this coefficient is equal to $-(p-1)/2$.
+    This implies that
+    \begin{align*}
+      \sum_{a=0}^{p-2} a^{p-1-i} \sum_{b=a+1}^{p-1} b^{p-1-i} = -\frac{1}{2}\sum_{a=0}^{p-1} a^{2(p-1-i)}\,.
+    \end{align*}
+    Note that the inverse of $2$ is well defined modulo $p$ since $p$ is an odd prime.
+    If $i < (p-1)/2$, then Lemma~\ref{lem:sum_poly} says the sum on the right side is zero.
+    Thus, the coefficient by $X^i Y^i$, which is exactly the sum on the left side, is equal to zero.
+    If $i = (p-1)/2$, the above equality yields that the coefficient by $(XY)^{(p-1)/2}$ is equal to $-(p-1)/2$.
   \end{proof}
 
 \section{Decomposition of $f(X,Y)$ for $3\leq p \leq 7$}
 \label{app:decomposition-f}
-Let $Z = Y(X-Y)$.
+Let $Z = Y(X-Y)$. 
+One non-scalar multiplication is needed to compute $Z$.
 
 \textbf{p=3.}
-$$f(X,Y) = 2.$$
+$$f(X,Y) = 2\,.$$
 
 Since the polynomial $f(X,Y)$ is constant, it can be computed without any homomorphic multiplication.
 
 \textbf{p=5.}
-$$f(X,Y) = 4X^2 + 4X + Z.$$
+$$f(X,Y) = 4X^2 + 4X + Z\,.$$
 
-Two homomorphic multiplications ($\Mul$) are needed to compute $X^2$ and $Z$.
+Two non-scalar multiplications are needed to compute $X^2$ and $Z$.
 
 \textbf{p=7.}
 $$f(X,Y) = 1 + 4X(X+1) + 6[X(X+1)]^2 + (X^2+3X)Z + 6Z^2$$
 
-In this case, four homomorphic multiplications ($\Mul$) are needed (indicated in bold) when rewritten as follows
-
-$$f(X,Y) = 1 + 2(\bm{X}^2+X)\bm{\cdot}[2 + 3(X^2+X)] + \bm{Z}\bm{\cdot}[(X^2+3X) + 6Z].$$
+In this case, four non-scalar multiplications are needed (indicated in bold) when rewritten as follows
+$$f(X,Y) = 1 + 2(\bm{X}^2+X)\bm{\cdot}[2 + 3(X^2+X)] + \bm{Z}\bm{\cdot}[(X^2+3X) + 6Z]\,.$$
 
 \section{Proof of Theorem~\ref{th:univariate}}
 \label{app:proof-lem-univariate}
@@ -138,11 +145,11 @@ $$f(X,Y) = 1 + 2(\bm{X}^2+X)\bm{\cdot}[2 + 3(X^2+X)] + \bm{Z}\bm{\cdot}[(X^2+3X)
       \sum_{a=-\frac{p-1}{2}}^{-1} 1 - \sum_{i=0}^{p-1} Z^i a^{p-1-i}
       = \sum_{i=1}^{p-1} Z^i \sum_{a=-\frac{p-1}{2}}^{-1} (-a^{p-1-i}).
     \end{align*}
-    If $i$ is even, then the $i$th coefficient is equal to
+    If $i$ is even and $i < p-1$, then the $i$th coefficient is equal to
     \begin{align*}
-      -\sum_{a=-\frac{p-1}{2}}^{-1} a^{p-1-i} &= -\sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i} = -\frac{\sum_{a=-\frac{p-1}{2}}^{\frac{p-1}{2}} a^{p-1-i}}{2}.
+      -\sum_{a=-\frac{p-1}{2}}^{-1} a^{p-1-i} &= -\sum_{a=1}^{\frac{p-1}{2}} a^{p-1-i} = -\frac{1}{2}\sum_{a=-\frac{p-1}{2}}^{\frac{p-1}{2}} a^{p-1-i}.
     \end{align*}
-    This coefficient is equal to $0$ for any even $0<i < p-1$ as $\sum_{a=0}^{p-1} a^{p-1-i} = 0$ in this case.
+    This coefficient is equal to $0$ for any even $0<i < p-1$ thanks to Lemma~\ref{lem:sum_poly}.
     The $(p-1)$-th coefficient is equal to $-(p-1)/2 = (p+1)/2 \bmod p$.
     If $i$ is odd, then we can rewrite the $i$th coefficient in the following way
     \begin{align*}
