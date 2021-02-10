@@ -190,10 +190,35 @@ For the sorting and the array minimum applications (Tables~\ref{table:sorting_ci
   \label{table:univariate_circuit_results}
 \end{table*}
 
-As shown in Table~\ref{table:comparison_circuit_results}, our lexicographic order circuits have a better running time than the prior work of Tan et al.~\cite{TLWRK20} for any plaintext modulus $p$.
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            width=7.0cm, 
+            height=6cm, 
+            ymin=0, ymax=110, 
+            xmin=0, xmax=7, 
+            axis y line = left, axis x line = bottom,
+            axis line style = {draw=none},
+            xtick = {1,2,3,4,5,6},
+            xticklabels = {3,5,7,11,13,17},
+            ylabel = {Amortized time, ms},
+            xlabel = {plaintext modulus $p$},
+            ytick = \empty]
+                \addplot[ybar, fill=white, bar width = 15pt, nodes near coords] coordinates {(1, 90) (2, 36) (3,71) (4,99) (5,54) (6,101)};
+                \addplot[ybar, fill=gray, bar width = 10pt, nodes near coords] coordinates {(1, 70) (2, 21) (3,40) (4,64) (5,35) (6,70)};
+                \addplot[ybar, fill=black, bar width = 5pt, nodes near coords] coordinates {(1, 56) (2, 21) (3,31) (4,35) (5,16) (6,27)};
+                
+            \end{axis}
+    \end{tikzpicture}
+    \caption{\textbf{Less-than function via different methods.} The amortized running time per 64-bit integer of our lexicographic order algorithms and the algorithm of Tan et al.~\cite{TLWRK20}. The data is taken from Table~\ref{table:comparison_circuit_results}.}
+    \label{fig:comparison_circuit_results}
+\end{figure}
+
+As shown in Table~\ref{table:comparison_circuit_results} and Figure~\ref{fig:comparison_circuit_results}, our lexicographic order circuits have a better running time than the prior work of Tan et al.~\cite{TLWRK20} even for small plaintext moduli.
 In particular, using our bivariate circuit, the less-than function is 42\% faster than with the circuit of Tan et al. on their fastest set of parameters ($(p,d,l) = (5,7,4)$).
 The best running time per integer was achieved by our univariate circuit, which outperforms any bivariate circuit for any $p > 5$ at the cost of larger encryption parameters.
-For $p=131$, the univariate circuit takes only 11 milliseconds to compare two 64-bit integers (Table~\ref{table:univariate_circuit_results}), which is more than 3 times faster than the best running time achieved by the circuit of Tan et al.
+Table~\ref{table:univariate_circuit_results} shows that for $p=131$, the univariate circuit takes only 11 milliseconds to compare two 64-bit integers, which is more than 3 times faster than the best running time achieved by the circuit of Tan et al.
 
 \begin{table}[h]
   \centering
