@@ -133,6 +133,12 @@ class Comparator{
 
     // less than function comparing slots one by one in F_11
     void less_than_mod_11(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;
+
+    // less than function comparing slots one by one in F_13
+    void less_than_mod_13(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;
+
+    // less than function comparing slots one by one in F_17
+    void less_than_mod_17(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;    
   
     // exact equality 
     void is_zero(Ctxt& ctxt_res, const Ctxt& ctxt_z, long pow = 1) const;

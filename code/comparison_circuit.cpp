@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
   //test min/max circuit
   //comparator.test_min_max(runs);
 
-  printAllTimers(cout);
+  //printAllTimers(cout);
 
   return 0;
 }

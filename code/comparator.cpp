@@ -292,7 +292,7 @@ void Comparator::create_poly()
 	}
 	else
 	{
-		// computing the coefficients of the bivariate polynomial
+		// computing the coefficients of the bivariate polynomial of Tan et al.
 		m_bivar_less_coefs.SetDims(p,p);
 
 		// y^{p-1}
@@ -777,120 +777,395 @@ void Comparator::less_than_mod_7(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt&
 
 void Comparator::less_than_mod_11(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
 {
-    // Y = y(x-y)
-    // X = x(x+1)
-	// Comp(x,y) = Y(x+1)[(7X + 8X^2 + 8X^3 - X^4) + (3 + (7x+4)(X+1)^2 + 4(X+1)^3)Y + (x^2+6x + 4(X +5x)^2)Y^2 + 5(x^2+7x)Y^3 - Y^4]
 	cout << "Compute comparison polynomial" << endl;
 
-	Ctxt Y = ctxt_x, x_plus_1 = ctxt_x;
-
+	// Comp(x,y) = Y*(x+1)*
+	// ((-x^8 - 4*x^7 + 2*x^6 - 2*x^5 - 2*x^4 + 2*x^3 + 4*x^2 - 4*x)+
+	// (4*x^6 - 3*x^5 - 2*x^4 + 2*x^3 - 5*x^2 + 5*x)*Y+
+	// (4*x^4 + 4*x^3 + 4*x^2 - 4*x)*Y^2+
+	// (5*x^2 + 2*x)*Y^3+
+	// -Y^4)
+	// 7 muls to compute x^2,...,x^8
+	// 3 muls to compute Y^2,...,Y^4
+	// 3 muls to compute f_i(x)*Y^i
+	// 2 muls to compute Comp(x,y)
+	// Total: 15 muls 
+	
+	Ctxt Y = ctxt_x;
 	// x - y
 	Y -= ctxt_y;
 	// Y = y(x-y)
-	Y.multiplyBy(ctxt_y);
-	// Y(x+1)
+	Y.multiplyBy(ctxt_y); //#1
+
+	Ctxt x_plus_1 = ctxt_x;
+	// x+1
 	x_plus_1.addConstant(ZZ(1));
-	x_plus_1.multiplyBy(Y);
 
-	// X = x^2 + x
-	Ctxt X = ctxt_x;
-	X.multiplyBy(ctxt_x);
-	X += ctxt_x;
+	//powers of x
+	DynamicCtxtPowers x_powers(ctxt_x, 8);
+	//powers of Y
+	DynamicCtxtPowers Y_powers(Y, 4);
+
+	Ctxt fx(m_pk);
+
+	// f0(x)
+	ZZX f0poly;
+	SetCoeff(f0poly, 1, -4);
+	SetCoeff(f0poly, 2, 4);
+	SetCoeff(f0poly, 3, 2);
+	SetCoeff(f0poly, 4, -2);
+	SetCoeff(f0poly, 5, -2);
+	SetCoeff(f0poly, 6, 2);
+	SetCoeff(f0poly, 7, -4);
+	SetCoeff(f0poly, 8, -1);
+	simplePolyEval(ctxt_res, f0poly, x_powers);
+
+	// f1(x)
+	ZZX f1poly;
+	SetCoeff(f1poly, 1, 5);
+	SetCoeff(f1poly, 2, -5);
+	SetCoeff(f1poly, 3, 2);
+	SetCoeff(f1poly, 4, -2);
+	SetCoeff(f1poly, 5, -3);
+	SetCoeff(f1poly, 6, 4);
+	simplePolyEval(fx, f1poly, x_powers);
+
+	// f1(x)*Y
+	fx.multiplyBy(Y);
+	// f0(x) + f1(x)*Y
+	ctxt_res += fx;
+
+	// f2(x)
+	ZZX f2poly;
+	SetCoeff(f2poly, 1, -4);
+	SetCoeff(f2poly, 2, 4);
+	SetCoeff(f2poly, 3, 4);
+	SetCoeff(f2poly, 4, 4);
+	simplePolyEval(fx, f2poly, x_powers);
+
+	// f2(x)*Y^2
+	Ctxt Ypow = Y_powers.getPower(2);
+	fx.multiplyBy(Ypow);
+	// f0(x) + f1(x)*Y + f2(x)*Y^2
+	ctxt_res += fx;
+
+	// f3(x)
+	ZZX f3poly;
+	SetCoeff(f3poly, 1, 2);
+	SetCoeff(f3poly, 2, 5);
+	simplePolyEval(fx, f3poly, x_powers);
+
+	// f3(x)*Y^3
+	Ypow = Y_powers.getPower(3);
+	fx.multiplyBy(Ypow);
+	// f0(x) + f1(x)*Y + f2(x)*Y^2 + f3(x)*Y^3
+	ctxt_res += fx;
+
+	// Y^4
+	fx = Y_powers.getPower(4);
+	// f0(x) + f1(x)*Y + f2(x)*Y^2 + f3(x)*Y^3 - Y^4
+	ctxt_res -= fx;
 	
-	
-	// f0 = 7X + 8X^2 + 8X^3 - X^4
-	Ctxt f0 = X, tmp = X, X_2 = X, X_3 = X;
-	// 7X
-	f0.multByConstant(ZZ(7));
-	
-	// 8(X^2 + X^3)
-	X_2.multiplyBy(X);
-	X_3.multiplyBy(X_2);
-	
-	tmp = X_2;
-	tmp += X_3;
-	tmp += tmp;
-	tmp +=tmp;
-	tmp += tmp;
-	f0 += tmp;
-
-	//X^4
-	Ctxt X_4 = X_2;
-	X_4.multiplyBy(X_2);
-	f0 -= X_4;
-
-	// X' = X + 1
-	//f1 = Y(3 + (7x+4)X'^2 + 4X'^3)
-	Ctxt f1 = X_2;
-	f1 += X;
-	f1 += X;
-	f1.addConstant(ZZ(1));
-
-	Ctxt X1_2 = f1;
-        
-	// 7x + 4 = 4(1-x) mod 11 
-	tmp = ctxt_x;
-	tmp.negate();
-	tmp.addConstant(ZZ(1));
-	tmp += tmp;
-	tmp+=tmp;
-
-	tmp.multiplyBy(Y);
-	f1.multiplyBy(tmp);
-
-	// 4X'^3*Y
-	tmp = X;
-	tmp.addConstant(ZZ(1));
-	tmp += tmp;
-	tmp+= tmp;
-	tmp.multiplyBy(Y);
-	tmp.multiplyBy(X1_2);
-
-	f1 += tmp;
-	f1 += Y;
-	f1 += Y;
-	f1 += Y;
-
-	//X' = x^2 + 6x = X + 5x
-	//f2 = 3X' + 4X'^2
-	X1_2 = ctxt_x;
-	X1_2 += X1_2;
-	X1_2 += X1_2;
-	X1_2 += ctxt_x;
-	X1_2 += X;
-
-	tmp = X1_2;
-	tmp += tmp;
-	tmp += tmp;
-	tmp.addConstant(ZZ(3));
-	tmp.multiplyBy(X1_2);
-
-	Ctxt Y2 = Y;
-	Y2.multiplyBy(Y);
-	Ctxt f2 = Y2;
-	
-	f2.multiplyBy(tmp);
-
-	// X' = x^2 + 7x = X1_2 + x
-	// f3 = 5X
-	X1_2 += ctxt_x;
-	Ctxt f3 = X1_2;
-	f3 += f3;
-	f3 += f3;
-	f3 += X1_2;
-	f3.multiplyBy(Y);
-	f3.multiplyBy(Y2);
-
-	f0 += f1;
-	f2 += f3;
-	f0 += f2;
-
-	Y2.multiplyBy(Y2);
-
-	f0 -= Y2;
-
-	ctxt_res = f0;
+	// (x+1)*f(x)
 	ctxt_res.multiplyBy(x_plus_1);
+	// Y*(x+1)*f(x)
+	ctxt_res.multiplyBy(Y);
+	
+	if(m_verbose)
+	{
+		print_decrypted(ctxt_res);
+		cout << endl;
+	}
+}
+
+void Comparator::less_than_mod_13(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
+{
+	cout << "Compute comparison polynomial" << endl;
+
+	// Comp(x,y) = Y*(x+1)*
+	// (-x^10 - 5*x^9 - 6*x^8 + 6*x^7 + 4*x^6 - 4*x^5 - 5*x^4 + 5*x^3 + 5*x^2 - 5*x) +
+	// (5*x^8 - 4*x^7 - 4*x^6 + 4*x^5 + 5*x^4 - 5*x^3 - 3*x^2 + 3*x)*Y +
+	// (x^6 - 5*x^5 + 6*x^4 - 6*x^3 - 4*x^2 + 4*x)*Y^2 +
+	// (x^4 + 6*x^3 - 3*x^2 + 3*x)*Y^3 +
+	// (6*x^2 + 2*x)*Y^4 +
+	// Y^5)
+	// 9 muls to compute x^2,...,x^10
+	// 4 muls to compute Y^2,...,Y^5
+	// 4 muls to compute f_i(x)*Y^i
+	// 2 muls to compute Comp(x,y)
+	// Total: 19 muls 
+	
+	Ctxt Y = ctxt_x;
+	// x - y
+	Y -= ctxt_y;
+	// Y = y(x-y)
+	Y.multiplyBy(ctxt_y); //#1
+
+	Ctxt x_plus_1 = ctxt_x;
+	// x+1
+	x_plus_1.addConstant(ZZ(1));
+
+	//powers of x
+	DynamicCtxtPowers x_powers(ctxt_x, 10);
+	//powers of Y
+	DynamicCtxtPowers Y_powers(Y, 5);
+
+	Ctxt fx(m_pk);
+
+	// f0(x)
+	ZZX f0poly; // -x^10 - 5*x^9 - 6*x^8 + 6*x^7 + 4*x^6 - 4*x^5 - 5*x^4 + 5*x^3 + 5*x^2 - 5*x
+	SetCoeff(f0poly, 1, -5);
+	SetCoeff(f0poly, 2, 5);
+	SetCoeff(f0poly, 3, 5);
+	SetCoeff(f0poly, 4, -5);
+	SetCoeff(f0poly, 5, -4);
+	SetCoeff(f0poly, 6, 4);
+	SetCoeff(f0poly, 7, 6);
+	SetCoeff(f0poly, 8, -6);
+	SetCoeff(f0poly, 9, -5);
+	SetCoeff(f0poly, 10, -1);
+	simplePolyEval(ctxt_res, f0poly, x_powers);
+
+	// f1(x)
+	ZZX f1poly; // 5*x^8 - 4*x^7 - 4*x^6 + 4*x^5 + 5*x^4 - 5*x^3 - 3*x^2 + 3*x
+	SetCoeff(f1poly, 1, 3);
+	SetCoeff(f1poly, 2, -3);
+	SetCoeff(f1poly, 3, -5);
+	SetCoeff(f1poly, 4, 5);
+	SetCoeff(f1poly, 5, 4);
+	SetCoeff(f1poly, 6, -4);
+	SetCoeff(f1poly, 7, -4);
+	SetCoeff(f1poly, 8, 5);
+	simplePolyEval(fx, f1poly, x_powers);
+
+	// f1(x)*Y
+	fx.multiplyBy(Y);
+	// f0(x) + f1(x)*Y
+	ctxt_res += fx;
+
+	// f2(x)
+	ZZX f2poly; // x^6 - 5*x^5 + 6*x^4 - 6*x^3 - 4*x^2 + 4*x
+	SetCoeff(f2poly, 1, 4);
+	SetCoeff(f2poly, 2, -4);
+	SetCoeff(f2poly, 3, -6);
+	SetCoeff(f2poly, 4, 6);
+	SetCoeff(f2poly, 5, -5);
+	SetCoeff(f2poly, 6, 1);
+	simplePolyEval(fx, f2poly, x_powers);
+
+	// f2(x)*Y^2
+	Ctxt Ypow = Y_powers.getPower(2);
+	fx.multiplyBy(Ypow);
+	// f0(x) + f1(x)*Y + f2(x)*Y^2
+	ctxt_res += fx;
+
+	// f3(x)
+	ZZX f3poly; // x^4 + 6*x^3 - 3*x^2 + 3*x
+	SetCoeff(f3poly, 1, 3);
+	SetCoeff(f3poly, 2, -3);
+	SetCoeff(f3poly, 3, 6);
+	SetCoeff(f3poly, 4, 1);
+	simplePolyEval(fx, f3poly, x_powers);
+
+	// f3(x)*Y^3
+	Ypow = Y_powers.getPower(3);
+	fx.multiplyBy(Ypow);
+	// f0(x) + f1(x)*Y + f2(x)*Y^2 + f3(x)*Y^3
+	ctxt_res += fx;
+
+	// f4(x)
+	ZZX f4poly; // 6*x^2 + 2*x
+	SetCoeff(f4poly, 1, 2);
+	SetCoeff(f4poly, 2, 6);
+	simplePolyEval(fx, f4poly, x_powers);
+
+	// f4(x)*Y^4
+	Ypow = Y_powers.getPower(4);
+	fx.multiplyBy(Ypow);
+	// f0(x) + f1(x)*Y + f2(x)*Y^2 + f3(x)*Y^3 + f4(x)*Y^4
+	ctxt_res += fx;
+
+	// Y^5
+	fx = Y_powers.getPower(5);
+	// f0(x) + f1(x)*Y + f2(x)*Y^2 + f3(x)*Y^3 + f4(x)*Y^4 + Y^5
+	ctxt_res += fx;
+	
+	// (x+1)*f(x)
+	ctxt_res.multiplyBy(x_plus_1);
+	// Y*(x+1)*f(x)
+	ctxt_res.multiplyBy(Y);
+	
+	if(m_verbose)
+	{
+		print_decrypted(ctxt_res);
+		cout << endl;
+	}
+}
+
+void Comparator::less_than_mod_17(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
+{
+	cout << "Compute comparison polynomial" << endl;
+
+	// Comp(x,y) = Y*(x+1)*
+	// (-x^14 - 7*x^13 + 4*x^12 - 4*x^11 + 8*x^10 - 8*x^9 - 7*x^8 + 7*x^7 - 3*x^6 + 3*x^5 + 8*x^4 - 8*x^3 + 4*x^2 - 4*x) +
+	// (7*x^12 - 6*x^11 + 7*x^10 - 7*x^9 + 4*x^8 - 4*x^7 - 4*x^6 + 4*x^5 + x^4 - x^3 - 4*x^2 + 4*x)*Y +
+	// (8*x^10 + 3*x^9 - 7*x^8 + 7*x^7 + 7*x^6 - 7*x^5 + 4*x^4 - 4*x^3 + 6*x^2 - 6*x)*Y^2 +
+	// (4*x^8 + 3*x^7 + 2*x^6 - 2*x^5 - 3*x^4 + 3*x^3 + 4*x^2 - 4*x)*Y^3 +
+	// (2*x^6 + 2*x^5 + 4*x^4 - 4*x^3 - 2*x^2 + 2*x)*Y^4 +
+	// (8*x^4 + 7*x^3 + 4*x^2 - 4*x)*Y^5 + 
+	// (5*x^2 - 3*x)*Y^6 +
+	// Y^7)
+	// 13 muls to compute x^2,...,x^14
+	// 6 muls to compute Y^2,...,Y^7
+	// 6 muls to compute f_i(x)*Y^i
+	// 2 muls to compute Comp(x,y)
+	// Total: 27 muls 
+	
+	Ctxt Y = ctxt_x;
+	// x - y
+	Y -= ctxt_y;
+	// Y = y(x-y)
+	Y.multiplyBy(ctxt_y); //#1
+
+	Ctxt x_plus_1 = ctxt_x;
+	// x+1
+	x_plus_1.addConstant(ZZ(1));
+
+	//powers of x
+	DynamicCtxtPowers x_powers(ctxt_x, 14);
+	//powers of Y
+	DynamicCtxtPowers Y_powers(Y, 7);
+
+	Ctxt fx(m_pk);
+
+	// f0(x)
+	ZZX f0poly; // -x^14 - 7*x^13 + 4*x^12 - 4*x^11 + 8*x^10 - 8*x^9 - 7*x^8 + 7*x^7 - 3*x^6 + 3*x^5 + 8*x^4 - 8*x^3 + 4*x^2 - 4*x
+	SetCoeff(f0poly, 1, -4);
+	SetCoeff(f0poly, 2, 4);
+	SetCoeff(f0poly, 3, -8);
+	SetCoeff(f0poly, 4, 8);
+	SetCoeff(f0poly, 5, 3);
+	SetCoeff(f0poly, 6, -3);
+	SetCoeff(f0poly, 7, 7);
+	SetCoeff(f0poly, 8, -7);
+	SetCoeff(f0poly, 9, -8);
+	SetCoeff(f0poly, 10, 8);
+	SetCoeff(f0poly, 11, -4);
+	SetCoeff(f0poly, 12, 4);
+	SetCoeff(f0poly, 13, -7);
+	SetCoeff(f0poly, 14, -1);
+	simplePolyEval(ctxt_res, f0poly, x_powers);
+
+	// f1(x)
+	ZZX f1poly; // 7*x^12 - 6*x^11 + 7*x^10 - 7*x^9 + 4*x^8 - 4*x^7 - 4*x^6 + 4*x^5 + x^4 - x^3 - 4*x^2 + 4*x
+	SetCoeff(f1poly, 1, 4);
+	SetCoeff(f1poly, 2, -4);
+	SetCoeff(f1poly, 3, -1);
+	SetCoeff(f1poly, 4, 1);
+	SetCoeff(f1poly, 5, 4);
+	SetCoeff(f1poly, 6, -4);
+	SetCoeff(f1poly, 7, -4);
+	SetCoeff(f1poly, 8, 4);
+	SetCoeff(f1poly, 9, -7);
+	SetCoeff(f1poly, 10, 7);
+	SetCoeff(f1poly, 11, -6);
+	SetCoeff(f1poly, 12, 7);
+	simplePolyEval(fx, f1poly, x_powers);
+
+	// f1(x)*Y
+	fx.multiplyBy(Y);
+	// f0(x) + f1(x)*Y
+	ctxt_res += fx;
+
+	// f2(x)
+	ZZX f2poly; // 8*x^10 + 3*x^9 - 7*x^8 + 7*x^7 + 7*x^6 - 7*x^5 + 4*x^4 - 4*x^3 + 6*x^2 - 6*x
+	SetCoeff(f2poly, 1, -6);
+	SetCoeff(f2poly, 2, 6);
+	SetCoeff(f2poly, 3, -4);
+	SetCoeff(f2poly, 4, 4);
+	SetCoeff(f2poly, 5, -7);
+	SetCoeff(f2poly, 6, 7);
+	SetCoeff(f2poly, 7, 7);
+	SetCoeff(f2poly, 8, -7);
+	SetCoeff(f2poly, 9, 3);
+	SetCoeff(f2poly, 10, 8);
+	simplePolyEval(fx, f2poly, x_powers);
+
+	// f2(x)*Y^2
+	Ctxt Ypow = Y_powers.getPower(2);
+	fx.multiplyBy(Ypow);
+	// f0(x) + f1(x)*Y + f2(x)*Y^2
+	ctxt_res += fx;
+
+	// f3(x)
+	ZZX f3poly; // 4*x^8 + 3*x^7 + 2*x^6 - 2*x^5 - 3*x^4 + 3*x^3 + 4*x^2 - 4*x
+	SetCoeff(f3poly, 1, -4);
+	SetCoeff(f3poly, 2, 4);
+	SetCoeff(f3poly, 3, 3);
+	SetCoeff(f3poly, 4, -3);
+	SetCoeff(f3poly, 5, -2);
+	SetCoeff(f3poly, 6, 2);
+	SetCoeff(f3poly, 7, 3);
+	SetCoeff(f3poly, 8, 4);
+	simplePolyEval(fx, f3poly, x_powers);
+
+	// f3(x)*Y^3
+	Ypow = Y_powers.getPower(3);
+	fx.multiplyBy(Ypow);
+	// f0(x) + f1(x)*Y + f2(x)*Y^2 + f3(x)*Y^3
+	ctxt_res += fx;
+
+	// f4(x)
+	ZZX f4poly; // 2*x^6 + 2*x^5 + 4*x^4 - 4*x^3 - 2*x^2 + 2*x
+	SetCoeff(f4poly, 1, 2);
+	SetCoeff(f4poly, 2, -2);
+	SetCoeff(f4poly, 3, -4);
+	SetCoeff(f4poly, 4, 4);
+	SetCoeff(f4poly, 5, 2);
+	SetCoeff(f4poly, 6, 2);
+	simplePolyEval(fx, f4poly, x_powers);
+
+	// f4(x)*Y^4
+	Ypow = Y_powers.getPower(4);
+	fx.multiplyBy(Ypow);
+	// f0(x) + f1(x)*Y + f2(x)*Y^2 + f3(x)*Y^3 + f4(x)*Y^4
+	ctxt_res += fx;
+
+	// f5(x)
+	ZZX f5poly; // 8*x^4 + 7*x^3 + 4*x^2 - 4*x
+	SetCoeff(f5poly, 1, -4);
+	SetCoeff(f5poly, 2, 4);
+	SetCoeff(f5poly, 3, 7);
+	SetCoeff(f5poly, 4, 8);
+	simplePolyEval(fx, f5poly, x_powers);
+
+	// f5(x)*Y^5
+	Ypow = Y_powers.getPower(5);
+	fx.multiplyBy(Ypow);
+	// f0(x) + f1(x)*Y + f2(x)*Y^2 + f3(x)*Y^3 + f4(x)*Y^4 + f5(x)*Y^5
+	ctxt_res += fx;
+
+	// f6(x)
+	ZZX f6poly; // 5*x^2 - 3*x
+	SetCoeff(f6poly, 1, -3);
+	SetCoeff(f6poly, 2, 5);
+	simplePolyEval(fx, f6poly, x_powers);
+
+	// f6(x)*Y^6
+	Ypow = Y_powers.getPower(6);
+	fx.multiplyBy(Ypow);
+	// f0(x) + f1(x)*Y + f2(x)*Y^2 + f3(x)*Y^3 + f4(x)*Y^4 + f5(x)*Y^5 + f6(x)*Y^6
+	ctxt_res += fx;
+
+	// Y^7
+	fx = Y_powers.getPower(7);
+	// f0(x) + f1(x)*Y + f2(x)*Y^2 + f3(x)*Y^3 + f4(x)*Y^4 + f5(x)*Y^5 + f6(x)*Y^6 + Y^7
+	ctxt_res += fx;
+	
+	// (x+1)*f(x)
+	ctxt_res.multiplyBy(x_plus_1);
+	// Y*(x+1)*f(x)
+	ctxt_res.multiplyBy(Y);
 	
 	if(m_verbose)
 	{
@@ -1076,8 +1351,8 @@ void Comparator::less_than_bivar(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt&
   HELIB_NTIMER_START(ComparisonCircuitBivar);
 
   //uncomment to compare with the circuit of Tan et al.
-  //less_than_bivar_tan(ctxt_res, ctxt_x, ctxt_y);
-  //return;
+  less_than_bivar_tan(ctxt_res, ctxt_x, ctxt_y);
+  return;
 
   unsigned long p = m_context.zMStar.getP();
 
@@ -1106,6 +1381,16 @@ void Comparator::less_than_bivar(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt&
     less_than_mod_11(ctxt_res, ctxt_x, ctxt_y);
   }
 
+  if(p == 13)
+  {
+    less_than_mod_13(ctxt_res, ctxt_x, ctxt_y);
+  }
+
+  if(p == 17)
+  {
+    less_than_mod_17(ctxt_res, ctxt_x, ctxt_y);
+  }
+
   if(m_verbose)
   {
     print_decrypted(ctxt_res);
@@ -1117,6 +1402,8 @@ void Comparator::less_than_bivar(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt&
 
 void Comparator::less_than_bivar_tan(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
 {
+	cout << "Compute Tan's comparison polynomial" << endl;
+
 	long p = m_context.zMStar.getP();
 
 	DynamicCtxtPowers x_powers(ctxt_x, p-1);
@@ -1962,7 +2249,7 @@ void Comparator::test_sorting(int num_to_sort, long runs) const
 
   //check that field_size^expansion_len fits into 64-bits
   int space_bit_size = static_cast<int>(ceil(m_expansionLen * log2(digit_base)));
-  unsigned long input_range = LONG_MAX;
+  unsigned long input_range = ULONG_MAX;
   if(space_bit_size < 64)
   {
     //input_range = power_long(field_size, expansion_len);
@@ -2174,7 +2461,8 @@ void Comparator::test_compare(long runs) const
 
   //check that field_size^expansion_len fits into 64-bits
   int space_bit_size = static_cast<int>(ceil(m_expansionLen * log2(digit_base)));
-  unsigned long input_range = LONG_MAX;
+  cout << "Space bit size " << space_bit_size << endl;
+  unsigned long input_range = ULONG_MAX;
   if(space_bit_size < 64)
   {
     //input_range = power_long(field_size, expansion_len);
@@ -2206,7 +2494,7 @@ void Comparator::test_compare(long runs) const
 
       if(m_verbose)
       {
-        cout << "Input" << endl;
+        cout << "Input " << i << endl;
         cout << input_x << endl;
         cout << input_y << endl;
       }
@@ -2227,6 +2515,15 @@ void Comparator::test_compare(long runs) const
       //decomposition of input integers
       digit_decomp(decomp_int_x, input_x, digit_base, m_expansionLen);
       digit_decomp(decomp_int_y, input_y, digit_base, m_expansionLen);
+
+      if(m_verbose)
+      {
+      	cout << "Input decomposition into digits" << endl;
+      	for(int j = 0; j < m_expansionLen; j++)
+      	{
+      		cout << decomp_int_x[j] << " " << decomp_int_y[j] << endl;
+      	}
+      }
 
       //encoding of slots
       for (int j = 0; j < m_expansionLen; j++)
@@ -2269,10 +2566,10 @@ void Comparator::test_compare(long runs) const
     if(m_verbose)
     {
       cout << "Input" << endl;
-      for(int i = 0; i < nslots; i++)
+      for(int j = 0; j < nslots; j++)
       {
-          printZZX(cout, pol_x[i], ord_p);
-          printZZX(cout, pol_y[i], ord_p);
+          printZZX(cout, pol_x[j], ord_p);
+          printZZX(cout, pol_y[j], ord_p);
           cout << endl;
       }
 
@@ -2359,7 +2656,7 @@ void Comparator::test_min_max(long runs) const
 
   //check that field_size^expansion_len fits into 64-bits
   int space_bit_size = static_cast<int>(ceil(m_expansionLen * log2(digit_base)));
-  unsigned long input_range = LONG_MAX;
+  unsigned long input_range = ULONG_MAX;
   if(space_bit_size < 64)
   {
     //input_range = power_long(field_size, expansion_len);
@@ -2568,7 +2865,7 @@ void Comparator::test_array_min(int input_len, long depth, long runs) const
 
   //check that field_size^expansion_len fits into 64-bits
   int space_bit_size = static_cast<int>(ceil(m_expansionLen * log2(digit_base)));
-  unsigned long input_range = LONG_MAX;
+  unsigned long input_range = ULONG_MAX;
   if(space_bit_size < 64)
   {
     //input_range = power_long(field_size, expansion_len);

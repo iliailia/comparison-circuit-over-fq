@@ -14,10 +14,14 @@ Auxiliary functions for integer encoding
 
 using namespace std;
 using namespace helib;
+using namespace NTL;
 
-inline double intlog(unsigned long base, unsigned long input)
+inline int intlog(unsigned long base, unsigned long input)
 {
-  return floor(log2(input)/log2(base));
+	int res = max(static_cast<int>(floor(log2(input)/log2(base))),0);
+	if(power_long(base, res+1) == input)
+		return res+1;
+	return res;
 }
 
 void digit_decomp(vector<long>& decomp, unsigned long input, unsigned long base, int nslots);
