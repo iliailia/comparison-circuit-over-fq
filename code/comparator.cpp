@@ -8,6 +8,108 @@
 #include <NTL/mat_ZZ_pE.h>
 #include <helib/Ptxt.h>
 
+using namespace he_cmp;
+
+// polynomial coefficients of bivariate polynomial decomposition as in Theorem 2 for different plaintext moduli
+map<unsigned long, vector<vector<long>>> fcoefs {
+  {11,
+  	{
+  		{-4, 4, 2, -2, -2, 2, -4, -1},
+  		{5, -5, 2, -2, -3, 4},
+  		{-4, 4, 4, 4},
+  		{2, 5},
+  		{-1}
+  	}
+  },
+  {13,
+  	{
+  		{-5, 5, 5, -5, -4, 4, 6, -6, -5, -1},
+  		{3, -3, -5, 5, 4, -4, -4, 5},
+  		{4, -4, -6, 6, -5, 1},
+  		{3, -3, 6, 1},
+  		{2, 6},
+  		{1}
+  	}
+  },
+  {17, 
+    {
+    	{-4, 4, -8, 8, 3, -3, 7, -7, -8, 8, -4, 4, -7, -1},
+    	{4, -4, -1, 1, 4, -4, -4, 4, -7, 7, -6, 7},
+    	{-6, 6, -4, 4, -7, 7, 7, -7, 3, 8},
+    	{-4, 4, 3, -3, -2, 2, 3, 4},
+    	{2, -2, -4, 4, 2, 2},
+    	{-4, 4, 7, 8},
+    	{-3, 5},
+    	{1}
+    }
+  },
+  {19,
+  	{
+  		{4, -4, 6, -6, 8, -8, -1, 1, 6, -6, 1, -1, 8, -8, -8, -1},
+		{-2, 2, -6, 6, 2, -2, -7, 7, -1, 1, -5, 5, -7, 8},
+    	{2, -2, -9, 9, 2, -2, -1, 1, 7, -7, 9, 3},
+    	{9, -9, -7, 7, 6, -6, 5, -5, -8, -4},
+    	{7, -7, -9, 9, 4, -4, -7, 9},
+    	{5, -5, 3, -3, -9, -1},
+    	{7, -7, 5, -9},
+    	{-3, -4},
+    	{-1}
+  	}
+  },
+  {23,
+  	{
+  		{8, -8, -1, 1, -11, 11, 7, -7, -3, 3, -9, 9, 1, -1, 7, -7, -6, 6, -10, -1},
+		{9, -9, 6, -6, -2, 2, -8, 8, -1, 1, 8, -8, -11, 11, 1, -1, -9, 10},
+		{-10, 10, 4, -4, 3, -3, 0, 0, 7, -7, 2, -2, 7, -7, 2, -11},
+		{5, -5, 9, -9, 1, -1, 0, 0, -8, 8, 2, -2, 10, -3},
+		{-10, 10, -6, 6, -7, 7, -2, 2, 2, -2, -9, 7},
+		{6, -6, -3, 3, -2, 2, -11, 11, 5, -8},
+		{10, -10, -10, 10, 6, -6, -2, -2},
+		{-6, 6, 5, -5, 10, -8},
+		{10, -10, -2, -5},
+		{4, -1},
+		{-1}
+  	}
+  },
+  {29,
+  	{
+  		{2,-2,-6,6,-2,2,14,-14,5,-5,-4,4,-10,10,-4,4,-1,1,0,0,-9,9,-8,8,-13,-1},
+		{8,-8,0,0,10,-10,-12,12,4,-4,11,-11,-2,2,3,-3,-6,6,-3,3,-14,14,-12,13},
+		{4,-4,9,-9,4,-4,12,-12,-11,11,0,0,-11,11,-14,14,-5,5,7,-7,1,-13},
+		{13,-13,0,0,10,-10,-13,13,5,-5,-7,7,-2,2,7,-7,12,-12,-6,13},
+		{-9,9,-14,14,3,-3,-7,7,-13,13,-1,1,7,-7,5,-5,-6,-2},
+		{9,-9,7,-7,-13,13,-3,3,-8,8,-10,10,12,-12,-2,10},
+		{-6,6,8,-8,3,-3,12,-12,-14,14,14,-14,6,-9},
+		{-6,6,7,-7,-5,5,-1,1,-10,10,-14,4},
+		{3,-3,2,-2,-9,9,10,-10,12,12},
+		{-1,1,-6,6,-9,9,-2,-10},
+		{-9,9,-12,12,-14,1},
+		{-1,1,-4,-13},
+		{-5,-6},
+		{1}
+  	}
+  },
+  {31,
+  	{
+  		{-14,14,9,-9,-5,5,4,-4,-9,9,-1,1,-15,15,-11,11,9,-9,0,0,-1,1,13,-13,12,-12,-14,-1},
+		{8,-8,5,-5,9,-9,-1,1,-10,10,12,-12,15,-15,10,-10,-2,2,8,-8,9,-9,-10,10,-13,14},
+		{-14,14,-15,15,-13,13,-10,10,2,-2,13,-13,0,0,-5,5,0,0,-12,12,7,-7,11,7},
+		{-9,9,-6,6,6,-6,-8,8,-11,11,-2,2,-13,13,5,-5,14,-14,-4,4,8,-1},
+		{-13,13,12,-12,-6,6,10,-10,-13,13,10,-10,-1,1,8,-8,-11,11,9,12},
+		{-8,8,9,-9,-4,4,-9,9,-13,13,2,-2,5,-5,-15,15,-12,-15},
+		{-14,14,3,-3,-10,10,-2,2,-4,4,10,-10,9,-9,-12,-6},
+		{-4,4,6,-6,-2,2,-7,7,-1,1,9,-9,12,-10},
+		{-11,11,10,-10,-9,9,-12,12,8,-8,-7,-11},
+		{9,-9,0,0,12,-12,9,-9,3,-6},
+		{-1,1,-9,9,-3,3,2,3},
+		{-14,14,6,-6,15,-14},
+		{-1,1,-12,-11},
+		{-5,9},
+		{-1}
+  	}
+  }
+};
+
 DoubleCRT Comparator::create_shift_mask(double& size, long shift)
 {
 	cout << "Mask for shift " << shift << " is being created" << endl;
@@ -92,6 +194,7 @@ void Comparator::compute_poly_params()
   		{13, 3}, // 3 (6), 1..5
   		{17, 4}, // 4 (7), 1..5
   		{19, 3}, // 3 (8), 1..4
+  		{23, 5}, // 5 (9), 3..6
   		{29, 5}, // 5 (10), 1..6
   		{31, 5}, // 5 (10), 4..6
   		{37, 5}, // 5 (12)
@@ -247,7 +350,7 @@ void Comparator::create_poly()
 	// get p
 	unsigned long p = m_context.zMStar.getP();;
 
-	if(m_isUnivar)
+	if(m_type == UNI)
 	{
 		// polynomial coefficient
 		ZZ_p coef;
@@ -290,7 +393,7 @@ void Comparator::create_poly()
 
 		compute_poly_params();
 	}
-	else
+	else if (m_type == TAN)
 	{
 		// computing the coefficients of the bivariate polynomial of Tan et al.
 		m_bivar_less_coefs.SetDims(p,p);
@@ -483,13 +586,9 @@ void Comparator::extract_mod_p(vector<Ctxt>& mod_p_coefs, const Ctxt& ctxt_x) co
 	HELIB_NTIMER_STOP(Extraction);
 }
 
-Comparator::Comparator(const Context& context, unsigned long d, unsigned long expansion_len, const SecKey& sk, bool verbose): m_context(context), m_slotDeg(d), m_expansionLen(expansion_len), m_sk(sk), m_pk(sk), m_verbose(verbose)
+Comparator::Comparator(const Context& context, CircuitType type, unsigned long d, unsigned long expansion_len, const SecKey& sk, bool verbose): m_context(context), m_type(type), m_slotDeg(d), m_expansionLen(expansion_len), m_sk(sk), m_pk(sk), m_verbose(verbose)
 {
 	//determine the order of p in (Z/mZ)*
-	m_isUnivar = true;
-	unsigned long p = context.zMStar.getP();
-	if (p == 2 || p == 3 || p == 5)
-		m_isUnivar = false;
 	unsigned long ord_p = context.zMStar.getOrdP();
 	//check that the extension degree divides the order of p
 	if (ord_p < d != 0)
@@ -775,391 +874,54 @@ void Comparator::less_than_mod_7(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt&
 	}
 }
 
-void Comparator::less_than_mod_11(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
+void Comparator::less_than_mod_any(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
 {
 	cout << "Compute comparison polynomial" << endl;
-
-	// Comp(x,y) = Y*(x+1)*
-	// ((-x^8 - 4*x^7 + 2*x^6 - 2*x^5 - 2*x^4 + 2*x^3 + 4*x^2 - 4*x)+
-	// (4*x^6 - 3*x^5 - 2*x^4 + 2*x^3 - 5*x^2 + 5*x)*Y+
-	// (4*x^4 + 4*x^3 + 4*x^2 - 4*x)*Y^2+
-	// (5*x^2 + 2*x)*Y^3+
-	// -Y^4)
-	// 7 muls to compute x^2,...,x^8
-	// 3 muls to compute Y^2,...,Y^4
-	// 3 muls to compute f_i(x)*Y^i
-	// 2 muls to compute Comp(x,y)
-	// Total: 15 muls 
 	
 	Ctxt Y = ctxt_x;
 	// x - y
 	Y -= ctxt_y;
 	// Y = y(x-y)
-	Y.multiplyBy(ctxt_y); //#1
+	Y.multiplyBy(ctxt_y);
 
 	Ctxt x_plus_1 = ctxt_x;
 	// x+1
 	x_plus_1.addConstant(ZZ(1));
 
+	unsigned long p = m_context.zMStar.getP();
+
+	unsigned long y_powers = ((p-3) >> 1);
 	//powers of x
-	DynamicCtxtPowers x_powers(ctxt_x, 8);
+	DynamicCtxtPowers x_powers(ctxt_x, p-3);
 	//powers of Y
-	DynamicCtxtPowers Y_powers(Y, 4);
+	DynamicCtxtPowers Y_powers(Y, y_powers);
+	Ctxt Ypow(m_pk);
 
 	Ctxt fx(m_pk);
 
-	// f0(x)
-	ZZX f0poly;
-	SetCoeff(f0poly, 1, -4);
-	SetCoeff(f0poly, 2, 4);
-	SetCoeff(f0poly, 3, 2);
-	SetCoeff(f0poly, 4, -2);
-	SetCoeff(f0poly, 5, -2);
-	SetCoeff(f0poly, 6, 2);
-	SetCoeff(f0poly, 7, -4);
-	SetCoeff(f0poly, 8, -1);
-	simplePolyEval(ctxt_res, f0poly, x_powers);
-
-	// f1(x)
-	ZZX f1poly;
-	SetCoeff(f1poly, 1, 5);
-	SetCoeff(f1poly, 2, -5);
-	SetCoeff(f1poly, 3, 2);
-	SetCoeff(f1poly, 4, -2);
-	SetCoeff(f1poly, 5, -3);
-	SetCoeff(f1poly, 6, 4);
-	simplePolyEval(fx, f1poly, x_powers);
-
-	// f1(x)*Y
-	fx.multiplyBy(Y);
-	// f0(x) + f1(x)*Y
-	ctxt_res += fx;
-
-	// f2(x)
-	ZZX f2poly;
-	SetCoeff(f2poly, 1, -4);
-	SetCoeff(f2poly, 2, 4);
-	SetCoeff(f2poly, 3, 4);
-	SetCoeff(f2poly, 4, 4);
-	simplePolyEval(fx, f2poly, x_powers);
-
-	// f2(x)*Y^2
-	Ctxt Ypow = Y_powers.getPower(2);
-	fx.multiplyBy(Ypow);
-	// f0(x) + f1(x)*Y + f2(x)*Y^2
-	ctxt_res += fx;
-
-	// f3(x)
-	ZZX f3poly;
-	SetCoeff(f3poly, 1, 2);
-	SetCoeff(f3poly, 2, 5);
-	simplePolyEval(fx, f3poly, x_powers);
-
-	// f3(x)*Y^3
-	Ypow = Y_powers.getPower(3);
-	fx.multiplyBy(Ypow);
-	// f0(x) + f1(x)*Y + f2(x)*Y^2 + f3(x)*Y^3
-	ctxt_res += fx;
-
-	// Y^4
-	fx = Y_powers.getPower(4);
-	// f0(x) + f1(x)*Y + f2(x)*Y^2 + f3(x)*Y^3 - Y^4
-	ctxt_res -= fx;
-	
-	// (x+1)*f(x)
-	ctxt_res.multiplyBy(x_plus_1);
-	// Y*(x+1)*f(x)
-	ctxt_res.multiplyBy(Y);
-	
-	if(m_verbose)
+	vector<ZZX> fpolys(y_powers);
+	for (size_t iPoly = 0; iPoly < y_powers; iPoly++)
 	{
-		print_decrypted(ctxt_res);
-		cout << endl;
+		for (size_t iCoef = 0; iCoef < fcoefs[p][iPoly].size(); iCoef++)
+		{
+			SetCoeff(fpolys[iPoly], iCoef+1, fcoefs[p][iPoly][iCoef]);	
+		}
+		if(iPoly == 0)
+		{
+			simplePolyEval(ctxt_res, fpolys[iPoly], x_powers);
+		}
+		else
+		{
+			simplePolyEval(fx, fpolys[iPoly], x_powers);
+			Ypow = Y_powers.getPower(iPoly);
+			fx.multiplyBy(Ypow);
+			ctxt_res += fx;
+		}
 	}
-}
 
-void Comparator::less_than_mod_13(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
-{
-	cout << "Compute comparison polynomial" << endl;
-
-	// Comp(x,y) = Y*(x+1)*
-	// (-x^10 - 5*x^9 - 6*x^8 + 6*x^7 + 4*x^6 - 4*x^5 - 5*x^4 + 5*x^3 + 5*x^2 - 5*x) +
-	// (5*x^8 - 4*x^7 - 4*x^6 + 4*x^5 + 5*x^4 - 5*x^3 - 3*x^2 + 3*x)*Y +
-	// (x^6 - 5*x^5 + 6*x^4 - 6*x^3 - 4*x^2 + 4*x)*Y^2 +
-	// (x^4 + 6*x^3 - 3*x^2 + 3*x)*Y^3 +
-	// (6*x^2 + 2*x)*Y^4 +
-	// Y^5)
-	// 9 muls to compute x^2,...,x^10
-	// 4 muls to compute Y^2,...,Y^5
-	// 4 muls to compute f_i(x)*Y^i
-	// 2 muls to compute Comp(x,y)
-	// Total: 19 muls 
-	
-	Ctxt Y = ctxt_x;
-	// x - y
-	Y -= ctxt_y;
-	// Y = y(x-y)
-	Y.multiplyBy(ctxt_y); //#1
-
-	Ctxt x_plus_1 = ctxt_x;
-	// x+1
-	x_plus_1.addConstant(ZZ(1));
-
-	//powers of x
-	DynamicCtxtPowers x_powers(ctxt_x, 10);
-	//powers of Y
-	DynamicCtxtPowers Y_powers(Y, 5);
-
-	Ctxt fx(m_pk);
-
-	// f0(x)
-	ZZX f0poly; // -x^10 - 5*x^9 - 6*x^8 + 6*x^7 + 4*x^6 - 4*x^5 - 5*x^4 + 5*x^3 + 5*x^2 - 5*x
-	SetCoeff(f0poly, 1, -5);
-	SetCoeff(f0poly, 2, 5);
-	SetCoeff(f0poly, 3, 5);
-	SetCoeff(f0poly, 4, -5);
-	SetCoeff(f0poly, 5, -4);
-	SetCoeff(f0poly, 6, 4);
-	SetCoeff(f0poly, 7, 6);
-	SetCoeff(f0poly, 8, -6);
-	SetCoeff(f0poly, 9, -5);
-	SetCoeff(f0poly, 10, -1);
-	simplePolyEval(ctxt_res, f0poly, x_powers);
-
-	// f1(x)
-	ZZX f1poly; // 5*x^8 - 4*x^7 - 4*x^6 + 4*x^5 + 5*x^4 - 5*x^3 - 3*x^2 + 3*x
-	SetCoeff(f1poly, 1, 3);
-	SetCoeff(f1poly, 2, -3);
-	SetCoeff(f1poly, 3, -5);
-	SetCoeff(f1poly, 4, 5);
-	SetCoeff(f1poly, 5, 4);
-	SetCoeff(f1poly, 6, -4);
-	SetCoeff(f1poly, 7, -4);
-	SetCoeff(f1poly, 8, 5);
-	simplePolyEval(fx, f1poly, x_powers);
-
-	// f1(x)*Y
-	fx.multiplyBy(Y);
-	// f0(x) + f1(x)*Y
-	ctxt_res += fx;
-
-	// f2(x)
-	ZZX f2poly; // x^6 - 5*x^5 + 6*x^4 - 6*x^3 - 4*x^2 + 4*x
-	SetCoeff(f2poly, 1, 4);
-	SetCoeff(f2poly, 2, -4);
-	SetCoeff(f2poly, 3, -6);
-	SetCoeff(f2poly, 4, 6);
-	SetCoeff(f2poly, 5, -5);
-	SetCoeff(f2poly, 6, 1);
-	simplePolyEval(fx, f2poly, x_powers);
-
-	// f2(x)*Y^2
-	Ctxt Ypow = Y_powers.getPower(2);
-	fx.multiplyBy(Ypow);
-	// f0(x) + f1(x)*Y + f2(x)*Y^2
-	ctxt_res += fx;
-
-	// f3(x)
-	ZZX f3poly; // x^4 + 6*x^3 - 3*x^2 + 3*x
-	SetCoeff(f3poly, 1, 3);
-	SetCoeff(f3poly, 2, -3);
-	SetCoeff(f3poly, 3, 6);
-	SetCoeff(f3poly, 4, 1);
-	simplePolyEval(fx, f3poly, x_powers);
-
-	// f3(x)*Y^3
-	Ypow = Y_powers.getPower(3);
-	fx.multiplyBy(Ypow);
-	// f0(x) + f1(x)*Y + f2(x)*Y^2 + f3(x)*Y^3
-	ctxt_res += fx;
-
-	// f4(x)
-	ZZX f4poly; // 6*x^2 + 2*x
-	SetCoeff(f4poly, 1, 2);
-	SetCoeff(f4poly, 2, 6);
-	simplePolyEval(fx, f4poly, x_powers);
-
-	// f4(x)*Y^4
-	Ypow = Y_powers.getPower(4);
-	fx.multiplyBy(Ypow);
-	// f0(x) + f1(x)*Y + f2(x)*Y^2 + f3(x)*Y^3 + f4(x)*Y^4
-	ctxt_res += fx;
-
-	// Y^5
-	fx = Y_powers.getPower(5);
-	// f0(x) + f1(x)*Y + f2(x)*Y^2 + f3(x)*Y^3 + f4(x)*Y^4 + Y^5
-	ctxt_res += fx;
-	
-	// (x+1)*f(x)
-	ctxt_res.multiplyBy(x_plus_1);
-	// Y*(x+1)*f(x)
-	ctxt_res.multiplyBy(Y);
-	
-	if(m_verbose)
-	{
-		print_decrypted(ctxt_res);
-		cout << endl;
-	}
-}
-
-void Comparator::less_than_mod_17(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
-{
-	cout << "Compute comparison polynomial" << endl;
-
-	// Comp(x,y) = Y*(x+1)*
-	// (-x^14 - 7*x^13 + 4*x^12 - 4*x^11 + 8*x^10 - 8*x^9 - 7*x^8 + 7*x^7 - 3*x^6 + 3*x^5 + 8*x^4 - 8*x^3 + 4*x^2 - 4*x) +
-	// (7*x^12 - 6*x^11 + 7*x^10 - 7*x^9 + 4*x^8 - 4*x^7 - 4*x^6 + 4*x^5 + x^4 - x^3 - 4*x^2 + 4*x)*Y +
-	// (8*x^10 + 3*x^9 - 7*x^8 + 7*x^7 + 7*x^6 - 7*x^5 + 4*x^4 - 4*x^3 + 6*x^2 - 6*x)*Y^2 +
-	// (4*x^8 + 3*x^7 + 2*x^6 - 2*x^5 - 3*x^4 + 3*x^3 + 4*x^2 - 4*x)*Y^3 +
-	// (2*x^6 + 2*x^5 + 4*x^4 - 4*x^3 - 2*x^2 + 2*x)*Y^4 +
-	// (8*x^4 + 7*x^3 + 4*x^2 - 4*x)*Y^5 + 
-	// (5*x^2 - 3*x)*Y^6 +
-	// Y^7)
-	// 13 muls to compute x^2,...,x^14
-	// 6 muls to compute Y^2,...,Y^7
-	// 6 muls to compute f_i(x)*Y^i
-	// 2 muls to compute Comp(x,y)
-	// Total: 27 muls 
-	
-	Ctxt Y = ctxt_x;
-	// x - y
-	Y -= ctxt_y;
-	// Y = y(x-y)
-	Y.multiplyBy(ctxt_y); //#1
-
-	Ctxt x_plus_1 = ctxt_x;
-	// x+1
-	x_plus_1.addConstant(ZZ(1));
-
-	//powers of x
-	DynamicCtxtPowers x_powers(ctxt_x, 14);
-	//powers of Y
-	DynamicCtxtPowers Y_powers(Y, 7);
-
-	Ctxt fx(m_pk);
-
-	// f0(x)
-	ZZX f0poly; // -x^14 - 7*x^13 + 4*x^12 - 4*x^11 + 8*x^10 - 8*x^9 - 7*x^8 + 7*x^7 - 3*x^6 + 3*x^5 + 8*x^4 - 8*x^3 + 4*x^2 - 4*x
-	SetCoeff(f0poly, 1, -4);
-	SetCoeff(f0poly, 2, 4);
-	SetCoeff(f0poly, 3, -8);
-	SetCoeff(f0poly, 4, 8);
-	SetCoeff(f0poly, 5, 3);
-	SetCoeff(f0poly, 6, -3);
-	SetCoeff(f0poly, 7, 7);
-	SetCoeff(f0poly, 8, -7);
-	SetCoeff(f0poly, 9, -8);
-	SetCoeff(f0poly, 10, 8);
-	SetCoeff(f0poly, 11, -4);
-	SetCoeff(f0poly, 12, 4);
-	SetCoeff(f0poly, 13, -7);
-	SetCoeff(f0poly, 14, -1);
-	simplePolyEval(ctxt_res, f0poly, x_powers);
-
-	// f1(x)
-	ZZX f1poly; // 7*x^12 - 6*x^11 + 7*x^10 - 7*x^9 + 4*x^8 - 4*x^7 - 4*x^6 + 4*x^5 + x^4 - x^3 - 4*x^2 + 4*x
-	SetCoeff(f1poly, 1, 4);
-	SetCoeff(f1poly, 2, -4);
-	SetCoeff(f1poly, 3, -1);
-	SetCoeff(f1poly, 4, 1);
-	SetCoeff(f1poly, 5, 4);
-	SetCoeff(f1poly, 6, -4);
-	SetCoeff(f1poly, 7, -4);
-	SetCoeff(f1poly, 8, 4);
-	SetCoeff(f1poly, 9, -7);
-	SetCoeff(f1poly, 10, 7);
-	SetCoeff(f1poly, 11, -6);
-	SetCoeff(f1poly, 12, 7);
-	simplePolyEval(fx, f1poly, x_powers);
-
-	// f1(x)*Y
-	fx.multiplyBy(Y);
-	// f0(x) + f1(x)*Y
-	ctxt_res += fx;
-
-	// f2(x)
-	ZZX f2poly; // 8*x^10 + 3*x^9 - 7*x^8 + 7*x^7 + 7*x^6 - 7*x^5 + 4*x^4 - 4*x^3 + 6*x^2 - 6*x
-	SetCoeff(f2poly, 1, -6);
-	SetCoeff(f2poly, 2, 6);
-	SetCoeff(f2poly, 3, -4);
-	SetCoeff(f2poly, 4, 4);
-	SetCoeff(f2poly, 5, -7);
-	SetCoeff(f2poly, 6, 7);
-	SetCoeff(f2poly, 7, 7);
-	SetCoeff(f2poly, 8, -7);
-	SetCoeff(f2poly, 9, 3);
-	SetCoeff(f2poly, 10, 8);
-	simplePolyEval(fx, f2poly, x_powers);
-
-	// f2(x)*Y^2
-	Ctxt Ypow = Y_powers.getPower(2);
-	fx.multiplyBy(Ypow);
-	// f0(x) + f1(x)*Y + f2(x)*Y^2
-	ctxt_res += fx;
-
-	// f3(x)
-	ZZX f3poly; // 4*x^8 + 3*x^7 + 2*x^6 - 2*x^5 - 3*x^4 + 3*x^3 + 4*x^2 - 4*x
-	SetCoeff(f3poly, 1, -4);
-	SetCoeff(f3poly, 2, 4);
-	SetCoeff(f3poly, 3, 3);
-	SetCoeff(f3poly, 4, -3);
-	SetCoeff(f3poly, 5, -2);
-	SetCoeff(f3poly, 6, 2);
-	SetCoeff(f3poly, 7, 3);
-	SetCoeff(f3poly, 8, 4);
-	simplePolyEval(fx, f3poly, x_powers);
-
-	// f3(x)*Y^3
-	Ypow = Y_powers.getPower(3);
-	fx.multiplyBy(Ypow);
-	// f0(x) + f1(x)*Y + f2(x)*Y^2 + f3(x)*Y^3
-	ctxt_res += fx;
-
-	// f4(x)
-	ZZX f4poly; // 2*x^6 + 2*x^5 + 4*x^4 - 4*x^3 - 2*x^2 + 2*x
-	SetCoeff(f4poly, 1, 2);
-	SetCoeff(f4poly, 2, -2);
-	SetCoeff(f4poly, 3, -4);
-	SetCoeff(f4poly, 4, 4);
-	SetCoeff(f4poly, 5, 2);
-	SetCoeff(f4poly, 6, 2);
-	simplePolyEval(fx, f4poly, x_powers);
-
-	// f4(x)*Y^4
-	Ypow = Y_powers.getPower(4);
-	fx.multiplyBy(Ypow);
-	// f0(x) + f1(x)*Y + f2(x)*Y^2 + f3(x)*Y^3 + f4(x)*Y^4
-	ctxt_res += fx;
-
-	// f5(x)
-	ZZX f5poly; // 8*x^4 + 7*x^3 + 4*x^2 - 4*x
-	SetCoeff(f5poly, 1, -4);
-	SetCoeff(f5poly, 2, 4);
-	SetCoeff(f5poly, 3, 7);
-	SetCoeff(f5poly, 4, 8);
-	simplePolyEval(fx, f5poly, x_powers);
-
-	// f5(x)*Y^5
-	Ypow = Y_powers.getPower(5);
-	fx.multiplyBy(Ypow);
-	// f0(x) + f1(x)*Y + f2(x)*Y^2 + f3(x)*Y^3 + f4(x)*Y^4 + f5(x)*Y^5
-	ctxt_res += fx;
-
-	// f6(x)
-	ZZX f6poly; // 5*x^2 - 3*x
-	SetCoeff(f6poly, 1, -3);
-	SetCoeff(f6poly, 2, 5);
-	simplePolyEval(fx, f6poly, x_powers);
-
-	// f6(x)*Y^6
-	Ypow = Y_powers.getPower(6);
-	fx.multiplyBy(Ypow);
-	// f0(x) + f1(x)*Y + f2(x)*Y^2 + f3(x)*Y^3 + f4(x)*Y^4 + f5(x)*Y^5 + f6(x)*Y^6
-	ctxt_res += fx;
-
-	// Y^7
-	fx = Y_powers.getPower(7);
-	// f0(x) + f1(x)*Y + f2(x)*Y^2 + f3(x)*Y^3 + f4(x)*Y^4 + f5(x)*Y^5 + f6(x)*Y^6 + Y^7
+	// c*Y^y_powers
+	fx = Y_powers.getPower(y_powers);
+	fx.multByConstant(ZZ(fcoefs[p][y_powers][0]));
 	ctxt_res += fx;
 	
 	// (x+1)*f(x)
@@ -1350,11 +1112,19 @@ void Comparator::less_than_bivar(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt&
 {
   HELIB_NTIMER_START(ComparisonCircuitBivar);
 
-  //uncomment to compare with the circuit of Tan et al.
-  less_than_bivar_tan(ctxt_res, ctxt_x, ctxt_y);
-  return;
+  //compare with the circuit of Tan et al.
+  if (m_type == TAN)
+  {
+  	less_than_bivar_tan(ctxt_res, ctxt_x, ctxt_y);
+  	return;
+  }
 
   unsigned long p = m_context.zMStar.getP();
+
+  if(p > 31)
+  {
+  	throw helib::LogicError("Bivariate circuit is not implemented for p > 31");
+  }
 
   if(p == 2)
   {
@@ -1376,19 +1146,9 @@ void Comparator::less_than_bivar(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt&
   	less_than_mod_7(ctxt_res, ctxt_x, ctxt_y);
   }
 
-  if(p == 11)
+  if(p > 7)
   {
-    less_than_mod_11(ctxt_res, ctxt_x, ctxt_y);
-  }
-
-  if(p == 13)
-  {
-    less_than_mod_13(ctxt_res, ctxt_x, ctxt_y);
-  }
-
-  if(p == 17)
-  {
-    less_than_mod_17(ctxt_res, ctxt_x, ctxt_y);
+    less_than_mod_any(ctxt_res, ctxt_x, ctxt_y);
   }
 
   if(m_verbose)
@@ -1466,7 +1226,7 @@ void Comparator::compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y)
 	vector<Ctxt> ctxt_eq_p;
 
 	// bivariate circuit
-	if (!m_isUnivar)
+	if (m_type == BI || m_type == TAN)
 	{
 		//cout << "Extraction" << endl;
 		// extract mod p coefficients
@@ -1658,7 +1418,7 @@ void Comparator::compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y)
 void Comparator::min_max_digit(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
 {
 	HELIB_NTIMER_START(MinMaxDigit);
-	if(!m_isUnivar)
+	if(m_type != UNI)
 		throw helib::LogicError("Min/Max is not implemented with the bivariate circuit");
 
 	if(m_expansionLen != 1 || m_slotDeg != 1)
@@ -1754,7 +1514,7 @@ void Comparator::min_max_digit(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_
 void Comparator::min_max(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
 {
 	HELIB_NTIMER_START(MinMax);
-	if(m_isUnivar && m_expansionLen == 1 && m_slotDeg == 1)
+	if(m_type == UNI && m_expansionLen == 1 && m_slotDeg == 1)
 	{
 		min_max_digit(ctxt_min, ctxt_max, ctxt_x, ctxt_y);
 		return;
@@ -2240,7 +2000,7 @@ void Comparator::test_sorting(int num_to_sort, long runs) const
   //encoding base, ((p+1)/2)^d
   //if 2-variable comparison polynomial is used, it must be p^d
   unsigned long enc_base = (p + 1) >> 1;
-  if (!m_isUnivar)
+  if (m_type == BI || m_type == TAN)
   {
   	enc_base = p;
   }
@@ -2452,7 +2212,7 @@ void Comparator::test_compare(long runs) const
   //encoding base, ((p+1)/2)^d
   //if 2-variable comparison polynomial is used, it must be p^d
   unsigned long enc_base = (p + 1) >> 1;
-  if (!m_isUnivar)
+  if (m_type == BI || m_type == TAN)
   {
   	enc_base = p;
   }
@@ -2647,7 +2407,7 @@ void Comparator::test_min_max(long runs) const
   //encoding base, ((p+1)/2)^d
   //if 2-variable comparison polynomial is used, it must be p^d
   unsigned long enc_base = (p + 1) >> 1;
-  if (!m_isUnivar)
+  if (m_type == BI || m_type == TAN)
   {
   	enc_base = p;
   }
@@ -2856,7 +2616,7 @@ void Comparator::test_array_min(int input_len, long depth, long runs) const
   //encoding base, ((p+1)/2)^d
   //if 2-variable comparison polynomial is used, it must be p^d
   unsigned long enc_base = (p + 1) >> 1;
-  if (!m_isUnivar)
+  if (m_type == BI || m_type == TAN)
   {
   	enc_base = p;
   }

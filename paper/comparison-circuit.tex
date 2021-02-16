@@ -246,14 +246,14 @@ and then for $p\geq 5$:
 \begin{itemize}
 \item $p-4$ multiplications to compute the $X^i$'s for $2\leq i \leq p-3$ required to compute the terms $f_i(X)$;
 \item $(p-5)/2$ multiplications to compute the $Z^i$ for $2\leq i \leq (p-3)/2$;
-\item $(p-3)/2$ multiplications to compute the products $f_i(X)\cdot Z^i$;
+\item $(p-5)/2$ multiplications to compute the products $f_i(X)\cdot Z^i$;
 \item $1$ final multiplication $(X+1)Z\cdot f(X,Y)$.
 \end{itemize}
-Overall, at most $2p-5$ non-scalar multiplications are needed to homomorphically evaluate $P_{\LT_\S}(X,Y)$ for \mbox{$p \geq 5$}. 
+Overall, at most $2p-6$ non-scalar multiplications are needed to homomorphically evaluate $P_{\LT_\S}(X,Y)$ for \mbox{$p \geq 5$}. 
 This number can be slightly reduced by optimizing the way of computing $f_i$'s. 
-For instance, it can be done with only $4$ and $6$ multiplications for $p=5$ and $7$, respectively (see Appendix \ref{app:decomposition-f}), which is only $p-1$ non-scalar multiplications.
+For instance, it can be done with only $6$ multiplications for $p=7$, respectively (see Appendix \ref{app:decomposition-f}), which is smaller than $2p-6=8$.
 
-Overall, for $p\geq 5$, our method saves $p$ multiplications over the method of Tan et al.~\cite{TLWRK20}. 
+Overall, for $p\geq 5$, our method saves $p+1$ multiplications over the method of Tan et al.~\cite{TLWRK20}. 
 However, the complexity of the bivariate circuit remains linear in $p$ which is unpractical for performing homomorphic comparisons using large digits (i.e. a large $p$).
   
 \subsection{Univariate interpolation of $\LT_\S$}
