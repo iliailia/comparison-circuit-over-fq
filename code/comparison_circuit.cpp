@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
   {
     if (context.zMStar.numOfGens() == 1)
     {
-      set<long> automVals;
+      std::set<long> automVals;
       long e = 1;
       long ord = context.zMStar.OrderOf(0);
       bool native = context.zMStar.SameOrd(0);
