@@ -23,6 +23,7 @@
 using namespace std;
 using namespace NTL;
 using namespace helib;
+using namespace he_cmp;
 
 // the main function that takes 8 arguments (type in Terminal: ./sorting_circuit argv[1] argv[2] argv[3] argv[4] argv[5] argv[6] argv[7] argv[8])
 // argv[1] - the plaintext modulus
@@ -116,7 +117,7 @@ int main(int argc, char *argv[]) {
     addFrbMatrices(secret_key); //might be useful only when d > 1
 
   // create Comparator (initialize after buildModChain)
-  Comparator comparator(context, d, expansion_len, secret_key, verbose);
+  Comparator comparator(context, UNI, d, expansion_len, secret_key, verbose);
 
   // number of values to be sorted
   int input_len = atoi(argv[6]);

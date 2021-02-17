@@ -23,39 +23,60 @@
 using namespace std;
 using namespace NTL;
 using namespace helib;
+using namespace he_cmp;
 
-// the main function that takes 7 arguments (type in Terminal: ./comparison_circuit argv[1] argv[2] argv[3] argv[4] argv[5] argv[6] argv[7])
-// argv[1] - the plaintext modulus
-// argv[2] - the dimension of a vector space over a finite field
-// argv[3] - the order of the cyclotomic ring
-// argv[4] - the bitsize of the ciphertext modulus in ciphertexts (HElib increases it to fit the moduli chain). The modulus used for public-key generation
-// argv[5] - the length of vectors to be compared
-// argv[6] - the number of experiment repetitions
-// argv[7] - print debug info (y/n)
+// the main function that takes 7 arguments (type in Terminal: ./comparison_circuit argv[1] argv[2] argv[3] argv[4] argv[5] argv[6] argv[7] argv[8])
+// argv[1] - circuit type (U, B or T)
+// argv[2] - the plaintext modulus
+// argv[3] - the dimension of a vector space over a finite field
+// argv[4] - the order of the cyclotomic ring
+// argv[5] - the bitsize of the ciphertext modulus in ciphertexts (HElib increases it to fit the moduli chain). The modulus used for public-key generation
+// argv[6] - the length of vectors to be compared
+// argv[7] - the number of experiment repetitions
+// argv[8] - print debug info (y/n)
 
 // some parameters for quick testing
-// 7 1 75 90 1 10 y
-// 7 1 300 90 1 10 y
-// 17 1 145 120 1 10 y
+// B 7 1 75 90 1 10 y
+// B 7 1 300 90 1 10 y
+// U 17 1 145 120 1 10 y
 int main(int argc, char *argv[]) {
-  if(argc < 8)
+  if(argc < 9)
   {
-   throw invalid_argument("There should be exactly 7 arguments\n");
+   throw invalid_argument("There should be exactly 8 arguments\n");
+  }
+
+
+  CircuitType type = UNI;
+  if (!strcmp(argv[1], "B"))
+  {
+    type = BI;
+  }
+  else if (!strcmp(argv[1], "T"))
+  {
+    type = TAN;
+  }
+  else if (!strcmp(argv[1], "U"))
+  {
+    type = UNI;
+  }
+  else
+  {
+    throw invalid_argument("Choose a valid circuit type (U for univariate, B for bivariate and T for Tan et al.\n");
   }
 
   bool verbose = false;
-  if (!strcmp(argv[7], "y"))
+  if (!strcmp(argv[8], "y"))
     verbose = true;
 
   //////////PARAMETER SET UP////////////////
   // Plaintext prime modulus
-  unsigned long p = atol(argv[1]);
+  unsigned long p = atol(argv[2]);
   // Field extension degree
-  unsigned long d = atol(argv[2]);
+  unsigned long d = atol(argv[3]);
   // Cyclotomic polynomial - defines phi(m)
-  unsigned long m = atol(argv[3]);
+  unsigned long m = atol(argv[4]);
   // Number of ciphertext prime bits in the modulus chain
-  unsigned long nb_primes = atol(argv[4]);
+  unsigned long nb_primes = atol(argv[5]);
   // Number of columns of Key-Switching matix (default = 2 or 3)
   unsigned long c = 3;
   cout << "Initialising context object..." << endl;
@@ -76,7 +97,7 @@ int main(int argc, char *argv[]) {
   cout << endl;
 
   //maximal number of digits in a number
-  unsigned long expansion_len = atol(argv[5]);
+  unsigned long expansion_len = atol(argv[6]);
 
   // Secret key management
   cout << "Creating secret key..." << endl;
@@ -114,10 +135,10 @@ int main(int argc, char *argv[]) {
     addFrbMatrices(secret_key); //might be useful only when d > 1
 
   // create Comparator (initialize after buildModChain)
-  Comparator comparator(context, d, expansion_len, secret_key, verbose);
+  Comparator comparator(context, type, d, expansion_len, secret_key, verbose);
 
   //repeat experiments several times
-  int runs = atoi(argv[6]);
+  int runs = atoi(argv[7]);
   
   //test comparison circuit
   comparator.test_compare(runs);
@@ -125,7 +146,7 @@ int main(int argc, char *argv[]) {
   //test min/max circuit
   //comparator.test_min_max(runs);
 
-  printAllTimers(cout);
+  //printAllTimers(cout);
 
   return 0;
 }

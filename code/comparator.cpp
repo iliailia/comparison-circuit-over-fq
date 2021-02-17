@@ -8,6 +8,108 @@
 #include <NTL/mat_ZZ_pE.h>
 #include <helib/Ptxt.h>
 
+using namespace he_cmp;
+
+// polynomial coefficients of bivariate polynomial decomposition as in Theorem 2 for different plaintext moduli
+map<unsigned long, vector<vector<long>>> fcoefs {
+  {11,
+  	{
+  		{-4, 4, 2, -2, -2, 2, -4, -1},
+  		{5, -5, 2, -2, -3, 4},
+  		{-4, 4, 4, 4},
+  		{2, 5},
+  		{-1}
+  	}
+  },
+  {13,
+  	{
+  		{-5, 5, 5, -5, -4, 4, 6, -6, -5, -1},
+  		{3, -3, -5, 5, 4, -4, -4, 5},
+  		{4, -4, -6, 6, -5, 1},
+  		{3, -3, 6, 1},
+  		{2, 6},
+  		{1}
+  	}
+  },
+  {17, 
+    {
+    	{-4, 4, -8, 8, 3, -3, 7, -7, -8, 8, -4, 4, -7, -1},
+    	{4, -4, -1, 1, 4, -4, -4, 4, -7, 7, -6, 7},
+    	{-6, 6, -4, 4, -7, 7, 7, -7, 3, 8},
+    	{-4, 4, 3, -3, -2, 2, 3, 4},
+    	{2, -2, -4, 4, 2, 2},
+    	{-4, 4, 7, 8},
+    	{-3, 5},
+    	{1}
+    }
+  },
+  {19,
+  	{
+  		{4, -4, 6, -6, 8, -8, -1, 1, 6, -6, 1, -1, 8, -8, -8, -1},
+		{-2, 2, -6, 6, 2, -2, -7, 7, -1, 1, -5, 5, -7, 8},
+    	{2, -2, -9, 9, 2, -2, -1, 1, 7, -7, 9, 3},
+    	{9, -9, -7, 7, 6, -6, 5, -5, -8, -4},
+    	{7, -7, -9, 9, 4, -4, -7, 9},
+    	{5, -5, 3, -3, -9, -1},
+    	{7, -7, 5, -9},
+    	{-3, -4},
+    	{-1}
+  	}
+  },
+  {23,
+  	{
+  		{8, -8, -1, 1, -11, 11, 7, -7, -3, 3, -9, 9, 1, -1, 7, -7, -6, 6, -10, -1},
+		{9, -9, 6, -6, -2, 2, -8, 8, -1, 1, 8, -8, -11, 11, 1, -1, -9, 10},
+		{-10, 10, 4, -4, 3, -3, 0, 0, 7, -7, 2, -2, 7, -7, 2, -11},
+		{5, -5, 9, -9, 1, -1, 0, 0, -8, 8, 2, -2, 10, -3},
+		{-10, 10, -6, 6, -7, 7, -2, 2, 2, -2, -9, 7},
+		{6, -6, -3, 3, -2, 2, -11, 11, 5, -8},
+		{10, -10, -10, 10, 6, -6, -2, -2},
+		{-6, 6, 5, -5, 10, -8},
+		{10, -10, -2, -5},
+		{4, -1},
+		{-1}
+  	}
+  },
+  {29,
+  	{
+  		{2,-2,-6,6,-2,2,14,-14,5,-5,-4,4,-10,10,-4,4,-1,1,0,0,-9,9,-8,8,-13,-1},
+		{8,-8,0,0,10,-10,-12,12,4,-4,11,-11,-2,2,3,-3,-6,6,-3,3,-14,14,-12,13},
+		{4,-4,9,-9,4,-4,12,-12,-11,11,0,0,-11,11,-14,14,-5,5,7,-7,1,-13},
+		{13,-13,0,0,10,-10,-13,13,5,-5,-7,7,-2,2,7,-7,12,-12,-6,13},
+		{-9,9,-14,14,3,-3,-7,7,-13,13,-1,1,7,-7,5,-5,-6,-2},
+		{9,-9,7,-7,-13,13,-3,3,-8,8,-10,10,12,-12,-2,10},
+		{-6,6,8,-8,3,-3,12,-12,-14,14,14,-14,6,-9},
+		{-6,6,7,-7,-5,5,-1,1,-10,10,-14,4},
+		{3,-3,2,-2,-9,9,10,-10,12,12},
+		{-1,1,-6,6,-9,9,-2,-10},
+		{-9,9,-12,12,-14,1},
+		{-1,1,-4,-13},
+		{-5,-6},
+		{1}
+  	}
+  },
+  {31,
+  	{
+  		{-14,14,9,-9,-5,5,4,-4,-9,9,-1,1,-15,15,-11,11,9,-9,0,0,-1,1,13,-13,12,-12,-14,-1},
+		{8,-8,5,-5,9,-9,-1,1,-10,10,12,-12,15,-15,10,-10,-2,2,8,-8,9,-9,-10,10,-13,14},
+		{-14,14,-15,15,-13,13,-10,10,2,-2,13,-13,0,0,-5,5,0,0,-12,12,7,-7,11,7},
+		{-9,9,-6,6,6,-6,-8,8,-11,11,-2,2,-13,13,5,-5,14,-14,-4,4,8,-1},
+		{-13,13,12,-12,-6,6,10,-10,-13,13,10,-10,-1,1,8,-8,-11,11,9,12},
+		{-8,8,9,-9,-4,4,-9,9,-13,13,2,-2,5,-5,-15,15,-12,-15},
+		{-14,14,3,-3,-10,10,-2,2,-4,4,10,-10,9,-9,-12,-6},
+		{-4,4,6,-6,-2,2,-7,7,-1,1,9,-9,12,-10},
+		{-11,11,10,-10,-9,9,-12,12,8,-8,-7,-11},
+		{9,-9,0,0,12,-12,9,-9,3,-6},
+		{-1,1,-9,9,-3,3,2,3},
+		{-14,14,6,-6,15,-14},
+		{-1,1,-12,-11},
+		{-5,9},
+		{-1}
+  	}
+  }
+};
+
 DoubleCRT Comparator::create_shift_mask(double& size, long shift)
 {
 	cout << "Mask for shift " << shift << " is being created" << endl;
@@ -92,6 +194,7 @@ void Comparator::compute_poly_params()
   		{13, 3}, // 3 (6), 1..5
   		{17, 4}, // 4 (7), 1..5
   		{19, 3}, // 3 (8), 1..4
+  		{23, 5}, // 5 (9), 3..6
   		{29, 5}, // 5 (10), 1..6
   		{31, 5}, // 5 (10), 4..6
   		{37, 5}, // 5 (12)
@@ -247,7 +350,7 @@ void Comparator::create_poly()
 	// get p
 	unsigned long p = m_context.zMStar.getP();;
 
-	if(m_isUnivar)
+	if(m_type == UNI)
 	{
 		// polynomial coefficient
 		ZZ_p coef;
@@ -290,9 +393,9 @@ void Comparator::create_poly()
 
 		compute_poly_params();
 	}
-	else
+	else if (m_type == TAN)
 	{
-		// computing the coefficients of the bivariate polynomial
+		// computing the coefficients of the bivariate polynomial of Tan et al.
 		m_bivar_less_coefs.SetDims(p,p);
 
 		// y^{p-1}
@@ -483,13 +586,9 @@ void Comparator::extract_mod_p(vector<Ctxt>& mod_p_coefs, const Ctxt& ctxt_x) co
 	HELIB_NTIMER_STOP(Extraction);
 }
 
-Comparator::Comparator(const Context& context, unsigned long d, unsigned long expansion_len, const SecKey& sk, bool verbose): m_context(context), m_slotDeg(d), m_expansionLen(expansion_len), m_sk(sk), m_pk(sk), m_verbose(verbose)
+Comparator::Comparator(const Context& context, CircuitType type, unsigned long d, unsigned long expansion_len, const SecKey& sk, bool verbose): m_context(context), m_type(type), m_slotDeg(d), m_expansionLen(expansion_len), m_sk(sk), m_pk(sk), m_verbose(verbose)
 {
 	//determine the order of p in (Z/mZ)*
-	m_isUnivar = true;
-	unsigned long p = context.zMStar.getP();
-	if (p == 2 || p == 3 || p == 5)
-		m_isUnivar = false;
 	unsigned long ord_p = context.zMStar.getOrdP();
 	//check that the extension degree divides the order of p
 	if (ord_p < d != 0)
@@ -775,122 +874,60 @@ void Comparator::less_than_mod_7(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt&
 	}
 }
 
-void Comparator::less_than_mod_11(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
+void Comparator::less_than_mod_any(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
 {
-    // Y = y(x-y)
-    // X = x(x+1)
-	// Comp(x,y) = Y(x+1)[(7X + 8X^2 + 8X^3 - X^4) + (3 + (7x+4)(X+1)^2 + 4(X+1)^3)Y + (x^2+6x + 4(X +5x)^2)Y^2 + 5(x^2+7x)Y^3 - Y^4]
 	cout << "Compute comparison polynomial" << endl;
-
-	Ctxt Y = ctxt_x, x_plus_1 = ctxt_x;
-
+	
+	Ctxt Y = ctxt_x;
 	// x - y
 	Y -= ctxt_y;
 	// Y = y(x-y)
 	Y.multiplyBy(ctxt_y);
-	// Y(x+1)
+
+	Ctxt x_plus_1 = ctxt_x;
+	// x+1
 	x_plus_1.addConstant(ZZ(1));
-	x_plus_1.multiplyBy(Y);
 
-	// X = x^2 + x
-	Ctxt X = ctxt_x;
-	X.multiplyBy(ctxt_x);
-	X += ctxt_x;
+	unsigned long p = m_context.zMStar.getP();
+
+	unsigned long y_powers = ((p-3) >> 1);
+	//powers of x
+	DynamicCtxtPowers x_powers(ctxt_x, p-3);
+	//powers of Y
+	DynamicCtxtPowers Y_powers(Y, y_powers);
+	Ctxt Ypow(m_pk);
+
+	Ctxt fx(m_pk);
+
+	vector<ZZX> fpolys(y_powers);
+	for (size_t iPoly = 0; iPoly < y_powers; iPoly++)
+	{
+		for (size_t iCoef = 0; iCoef < fcoefs[p][iPoly].size(); iCoef++)
+		{
+			SetCoeff(fpolys[iPoly], iCoef+1, fcoefs[p][iPoly][iCoef]);	
+		}
+		if(iPoly == 0)
+		{
+			simplePolyEval(ctxt_res, fpolys[iPoly], x_powers);
+		}
+		else
+		{
+			simplePolyEval(fx, fpolys[iPoly], x_powers);
+			Ypow = Y_powers.getPower(iPoly);
+			fx.multiplyBy(Ypow);
+			ctxt_res += fx;
+		}
+	}
+
+	// c*Y^y_powers
+	fx = Y_powers.getPower(y_powers);
+	fx.multByConstant(ZZ(fcoefs[p][y_powers][0]));
+	ctxt_res += fx;
 	
-	
-	// f0 = 7X + 8X^2 + 8X^3 - X^4
-	Ctxt f0 = X, tmp = X, X_2 = X, X_3 = X;
-	// 7X
-	f0.multByConstant(ZZ(7));
-	
-	// 8(X^2 + X^3)
-	X_2.multiplyBy(X);
-	X_3.multiplyBy(X_2);
-	
-	tmp = X_2;
-	tmp += X_3;
-	tmp += tmp;
-	tmp +=tmp;
-	tmp += tmp;
-	f0 += tmp;
-
-	//X^4
-	Ctxt X_4 = X_2;
-	X_4.multiplyBy(X_2);
-	f0 -= X_4;
-
-	// X' = X + 1
-	//f1 = Y(3 + (7x+4)X'^2 + 4X'^3)
-	Ctxt f1 = X_2;
-	f1 += X;
-	f1 += X;
-	f1.addConstant(ZZ(1));
-
-	Ctxt X1_2 = f1;
-        
-	// 7x + 4 = 4(1-x) mod 11 
-	tmp = ctxt_x;
-	tmp.negate();
-	tmp.addConstant(ZZ(1));
-	tmp += tmp;
-	tmp+=tmp;
-
-	tmp.multiplyBy(Y);
-	f1.multiplyBy(tmp);
-
-	// 4X'^3*Y
-	tmp = X;
-	tmp.addConstant(ZZ(1));
-	tmp += tmp;
-	tmp+= tmp;
-	tmp.multiplyBy(Y);
-	tmp.multiplyBy(X1_2);
-
-	f1 += tmp;
-	f1 += Y;
-	f1 += Y;
-	f1 += Y;
-
-	//X' = x^2 + 6x = X + 5x
-	//f2 = 3X' + 4X'^2
-	X1_2 = ctxt_x;
-	X1_2 += X1_2;
-	X1_2 += X1_2;
-	X1_2 += ctxt_x;
-	X1_2 += X;
-
-	tmp = X1_2;
-	tmp += tmp;
-	tmp += tmp;
-	tmp.addConstant(ZZ(3));
-	tmp.multiplyBy(X1_2);
-
-	Ctxt Y2 = Y;
-	Y2.multiplyBy(Y);
-	Ctxt f2 = Y2;
-	
-	f2.multiplyBy(tmp);
-
-	// X' = x^2 + 7x = X1_2 + x
-	// f3 = 5X
-	X1_2 += ctxt_x;
-	Ctxt f3 = X1_2;
-	f3 += f3;
-	f3 += f3;
-	f3 += X1_2;
-	f3.multiplyBy(Y);
-	f3.multiplyBy(Y2);
-
-	f0 += f1;
-	f2 += f3;
-	f0 += f2;
-
-	Y2.multiplyBy(Y2);
-
-	f0 -= Y2;
-
-	ctxt_res = f0;
+	// (x+1)*f(x)
 	ctxt_res.multiplyBy(x_plus_1);
+	// Y*(x+1)*f(x)
+	ctxt_res.multiplyBy(Y);
 	
 	if(m_verbose)
 	{
@@ -1075,11 +1112,19 @@ void Comparator::less_than_bivar(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt&
 {
   HELIB_NTIMER_START(ComparisonCircuitBivar);
 
-  //uncomment to compare with the circuit of Tan et al.
-  //less_than_bivar_tan(ctxt_res, ctxt_x, ctxt_y);
-  //return;
+  //compare with the circuit of Tan et al.
+  if (m_type == TAN)
+  {
+  	less_than_bivar_tan(ctxt_res, ctxt_x, ctxt_y);
+  	return;
+  }
 
   unsigned long p = m_context.zMStar.getP();
+
+  if(p > 31)
+  {
+  	throw helib::LogicError("Bivariate circuit is not implemented for p > 31");
+  }
 
   if(p == 2)
   {
@@ -1101,9 +1146,9 @@ void Comparator::less_than_bivar(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt&
   	less_than_mod_7(ctxt_res, ctxt_x, ctxt_y);
   }
 
-  if(p == 11)
+  if(p > 7)
   {
-    less_than_mod_11(ctxt_res, ctxt_x, ctxt_y);
+    less_than_mod_any(ctxt_res, ctxt_x, ctxt_y);
   }
 
   if(m_verbose)
@@ -1117,6 +1162,8 @@ void Comparator::less_than_bivar(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt&
 
 void Comparator::less_than_bivar_tan(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
 {
+	cout << "Compute Tan's comparison polynomial" << endl;
+
 	long p = m_context.zMStar.getP();
 
 	DynamicCtxtPowers x_powers(ctxt_x, p-1);
@@ -1179,7 +1226,7 @@ void Comparator::compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y)
 	vector<Ctxt> ctxt_eq_p;
 
 	// bivariate circuit
-	if (!m_isUnivar)
+	if (m_type == BI || m_type == TAN)
 	{
 		//cout << "Extraction" << endl;
 		// extract mod p coefficients
@@ -1371,7 +1418,7 @@ void Comparator::compare(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y)
 void Comparator::min_max_digit(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
 {
 	HELIB_NTIMER_START(MinMaxDigit);
-	if(!m_isUnivar)
+	if(m_type != UNI)
 		throw helib::LogicError("Min/Max is not implemented with the bivariate circuit");
 
 	if(m_expansionLen != 1 || m_slotDeg != 1)
@@ -1467,7 +1514,7 @@ void Comparator::min_max_digit(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_
 void Comparator::min_max(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const
 {
 	HELIB_NTIMER_START(MinMax);
-	if(m_isUnivar && m_expansionLen == 1 && m_slotDeg == 1)
+	if(m_type == UNI && m_expansionLen == 1 && m_slotDeg == 1)
 	{
 		min_max_digit(ctxt_min, ctxt_max, ctxt_x, ctxt_y);
 		return;
@@ -1953,7 +2000,7 @@ void Comparator::test_sorting(int num_to_sort, long runs) const
   //encoding base, ((p+1)/2)^d
   //if 2-variable comparison polynomial is used, it must be p^d
   unsigned long enc_base = (p + 1) >> 1;
-  if (!m_isUnivar)
+  if (m_type == BI || m_type == TAN)
   {
   	enc_base = p;
   }
@@ -1962,7 +2009,7 @@ void Comparator::test_sorting(int num_to_sort, long runs) const
 
   //check that field_size^expansion_len fits into 64-bits
   int space_bit_size = static_cast<int>(ceil(m_expansionLen * log2(digit_base)));
-  unsigned long input_range = LONG_MAX;
+  unsigned long input_range = ULONG_MAX;
   if(space_bit_size < 64)
   {
     //input_range = power_long(field_size, expansion_len);
@@ -2165,7 +2212,7 @@ void Comparator::test_compare(long runs) const
   //encoding base, ((p+1)/2)^d
   //if 2-variable comparison polynomial is used, it must be p^d
   unsigned long enc_base = (p + 1) >> 1;
-  if (!m_isUnivar)
+  if (m_type == BI || m_type == TAN)
   {
   	enc_base = p;
   }
@@ -2174,7 +2221,8 @@ void Comparator::test_compare(long runs) const
 
   //check that field_size^expansion_len fits into 64-bits
   int space_bit_size = static_cast<int>(ceil(m_expansionLen * log2(digit_base)));
-  unsigned long input_range = LONG_MAX;
+  cout << "Space bit size " << space_bit_size << endl;
+  unsigned long input_range = ULONG_MAX;
   if(space_bit_size < 64)
   {
     //input_range = power_long(field_size, expansion_len);
@@ -2206,7 +2254,7 @@ void Comparator::test_compare(long runs) const
 
       if(m_verbose)
       {
-        cout << "Input" << endl;
+        cout << "Input " << i << endl;
         cout << input_x << endl;
         cout << input_y << endl;
       }
@@ -2227,6 +2275,15 @@ void Comparator::test_compare(long runs) const
       //decomposition of input integers
       digit_decomp(decomp_int_x, input_x, digit_base, m_expansionLen);
       digit_decomp(decomp_int_y, input_y, digit_base, m_expansionLen);
+
+      if(m_verbose)
+      {
+      	cout << "Input decomposition into digits" << endl;
+      	for(int j = 0; j < m_expansionLen; j++)
+      	{
+      		cout << decomp_int_x[j] << " " << decomp_int_y[j] << endl;
+      	}
+      }
 
       //encoding of slots
       for (int j = 0; j < m_expansionLen; j++)
@@ -2269,10 +2326,10 @@ void Comparator::test_compare(long runs) const
     if(m_verbose)
     {
       cout << "Input" << endl;
-      for(int i = 0; i < nslots; i++)
+      for(int j = 0; j < nslots; j++)
       {
-          printZZX(cout, pol_x[i], ord_p);
-          printZZX(cout, pol_y[i], ord_p);
+          printZZX(cout, pol_x[j], ord_p);
+          printZZX(cout, pol_y[j], ord_p);
           cout << endl;
       }
 
@@ -2350,7 +2407,7 @@ void Comparator::test_min_max(long runs) const
   //encoding base, ((p+1)/2)^d
   //if 2-variable comparison polynomial is used, it must be p^d
   unsigned long enc_base = (p + 1) >> 1;
-  if (!m_isUnivar)
+  if (m_type == BI || m_type == TAN)
   {
   	enc_base = p;
   }
@@ -2359,7 +2416,7 @@ void Comparator::test_min_max(long runs) const
 
   //check that field_size^expansion_len fits into 64-bits
   int space_bit_size = static_cast<int>(ceil(m_expansionLen * log2(digit_base)));
-  unsigned long input_range = LONG_MAX;
+  unsigned long input_range = ULONG_MAX;
   if(space_bit_size < 64)
   {
     //input_range = power_long(field_size, expansion_len);
@@ -2559,7 +2616,7 @@ void Comparator::test_array_min(int input_len, long depth, long runs) const
   //encoding base, ((p+1)/2)^d
   //if 2-variable comparison polynomial is used, it must be p^d
   unsigned long enc_base = (p + 1) >> 1;
-  if (!m_isUnivar)
+  if (m_type == BI || m_type == TAN)
   {
   	enc_base = p;
   }
@@ -2568,7 +2625,7 @@ void Comparator::test_array_min(int input_len, long depth, long runs) const
 
   //check that field_size^expansion_len fits into 64-bits
   int space_bit_size = static_cast<int>(ceil(m_expansionLen * log2(digit_base)));
-  unsigned long input_range = LONG_MAX;
+  unsigned long input_range = ULONG_MAX;
   if(space_bit_size < 64)
   {
     //input_range = power_long(field_size, expansion_len);

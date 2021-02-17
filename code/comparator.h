@@ -14,8 +14,11 @@ using namespace std;
 using namespace NTL;
 using namespace helib;
 
+namespace he_cmp{
+enum CircuitType{UNI, BI, TAN};
+
 class Comparator{
-	const Context& m_context;
+    const Context& m_context;
 
     // field extension degree (d)
   	unsigned long m_slotDeg;
@@ -30,7 +33,7 @@ class Comparator{
     vector<double> m_mulMasksSize;
 
     // univariate or bivariate circuit
-    bool m_isUnivar;
+    CircuitType m_type;
 
     // univariate comparison polynomial of the less-than function
     ZZX m_univar_less_poly;
@@ -131,8 +134,8 @@ class Comparator{
     // less than function comparing slots one by one in F_7
     void less_than_mod_7(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;  
 
-    // less than function comparing slots one by one in F_11
-    void less_than_mod_11(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;
+    // less than function comparing slots one by one in F_17
+    void less_than_mod_any(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt& ctxt_y) const;    
   
     // exact equality 
     void is_zero(Ctxt& ctxt_res, const Ctxt& ctxt_z, long pow = 1) const;
@@ -148,7 +151,7 @@ class Comparator{
 
 public:
   // constructor
-	Comparator(const Context& context, unsigned long d, unsigned long expansion_len, const SecKey& sk, bool verbose);
+	Comparator(const Context& context, CircuitType type, unsigned long d, unsigned long expansion_len, const SecKey& sk, bool verbose);
 
 	const DoubleCRT& get_mask(double& size, long index) const;
   const ZZX& get_less_than_poly() const;
@@ -181,5 +184,6 @@ public:
   // test array_minn function
   void test_array_min(int input_len, long depth, long runs) const;
 };
+}
 
 #endif // #ifndef COMPARATOR_H

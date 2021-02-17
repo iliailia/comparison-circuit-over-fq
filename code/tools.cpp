@@ -4,7 +4,7 @@ void digit_decomp(vector<long>& decomp, unsigned long input, unsigned long base,
 {
   decomp.clear();
   decomp.resize(nslots,0);
-  int power = static_cast<int>(intlog(base, input)) + 1;
+  int power = intlog(base, input) + 1;
   if (power > nslots)
   {
     cout << "Input character is too big to be converted" << endl;
