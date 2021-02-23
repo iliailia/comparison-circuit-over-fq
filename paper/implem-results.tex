@@ -36,7 +36,8 @@ The results of these experiments are presented in Table~\ref{table:comparison_ci
 In addition, we ran the direct sorting and the array minimum algorithms from Section~\ref{sec:applications}; see Tables~\ref{table:sorting_circuit_results} and~\ref{table:minimum_circuit_results}, respectively.
 
 We ran our algorithms with $p \in [3,659]$.
-However, Table~\ref{table:comparison_circuit_results} contains the results with the best observed amortized running time and the best results for small $p$'s, where the bivariate and the univariate comparison circuits have a comparable running time.
+However, Table~\ref{table:comparison_circuit_results} contains the best results for small $p$'s, where the bivariate and the univariate comparison circuits have a comparable running time.
+Table~\ref{table:univariate_circuit_results} contains the results with the best observed amortized running time.
 For the sorting and the array minimum applications (Tables~\ref{table:sorting_circuit_results} and~\ref{table:minimum_circuit_results}), we showed only the results with $p$ and $m$ supporting reasonable security levels and giving the best running time for arrays of length $N=64$.
 
 \begin{table*}[h]
@@ -278,6 +279,9 @@ For the sorting and the array minimum applications (Tables~\ref{table:sorting_ci
 As shown in Table~\ref{table:comparison_circuit_results} and Figure~\ref{fig:comparison_circuit_results}, our lexicographic order circuits have a better running time than the prior work of Tan et al.~\cite{TLWRK20} even for small plaintext moduli.
 In particular, using our bivariate circuit, the less-than function is 1.71 times faster than with the circuit of Tan et al. on their fastest set of parameters ($(p,d,l) = (5,7,4)$).
 The best running time per integer was achieved by our univariate circuit, which outperforms any bivariate circuit for any $p > 5$ at the cost of larger encryption parameters.
+As shown in Figure~\ref{fig:comparison_circuit_results}, the speedup factor of the lexicographic order with the univariate circuit over~\cite{TLWRK20} is increasing with the plaintext modulus.
+This trend is perturbed when $p=23$ and $29$ because the structure of the related slot permutation groups introduces additional computational overhead and ciphertext noise, thus leading to larger encryption parameters. 
+
 Table~\ref{table:univariate_circuit_results} shows that for $p=131$, the univariate circuit takes only 11 milliseconds to compare two 64-bit integers, which is more than 3 times faster than the best running time achieved by the circuit of Tan et al.
 
 \begin{table}[h]
