@@ -1,3 +1,5 @@
+The previous results can help improving the performance of any task involving comparisons performed homomorphically such as private database queries, $k$-nearest neighbour search, top-$k$ selection or step function evaluation in neural nets. In this section we choose to demonstrate the gain brought by our approach for sorting and min/max search which are subroutines needed for the aforementioned tasks.
+
 \subsection{Sorting}
 \label{subsec:sorting}
 
@@ -12,7 +14,20 @@
 			1 - \LT(a_j, a_i) & \text{ if } i > j.
 		\end{cases}
 	\end{align*}
-	It is easy to see that the Hamming weight of the $i$th row of $\mL$ is unique and equal to the array index of $a_i$ after sorting the array $A$ in the descending order.
+
+        \emph{Example} : for $A = [5,1,7,2,3]$, the matrix $L\in\{0,1\}^{5\times 5}$ is given by:
+
+        $$ \mL = \left(
+          \begin{array}{ccccc}
+            0 & 0 & 1 & 0 & 0 \\
+            1 & 0 & 1 & 1 & 1 \\
+            0 & 0 & 0 & 0 & 0 \\
+            1 & 0 & 1 & 0 & 1 \\
+            1 & 0 & 1 & 0 & 0
+          \end{array}
+\right)$$
+        
+        It is easy to see that the Hamming weight of the $i$th row of $\mL$ is unique and equal to the array index of $a_i$ after sorting the array $A$ in the descending order.
 	For example, the zero weight indicates that there are no elements of $A$ bigger than $a_i$. 
 	Thus, $a_i$ has a zero index in $A$ after sorting; in other words, $a_i$ is the maximum element of $A$.
 
@@ -153,5 +168,5 @@
 	%%%%%%%%%%
 %%% Local Variables:
 %%% mode: latex
-%%% TeX-master: "main"
+%%% TeX-master: "main_pets"
 %%% End:

@@ -251,13 +251,14 @@ and then for $p\geq 5$:
 \end{itemize}
 Overall, at most $2p-6$ non-scalar multiplications are needed to homomorphically evaluate $P_{\LT_\S}(X,Y)$ for \mbox{$p \geq 5$}. 
 This number can be slightly reduced by optimizing the way of computing $f_i$'s. 
-For instance, it can be done with only $6$ multiplications for $p=7$, respectively (see Appendix \ref{app:decomposition-f}), which is smaller than $2p-6=8$.
+For instance, it can be done with only $6$ multiplications for $p=7$, (see Appendix \ref{app:decomposition-f}), which is smaller than $2p-6=8$.
 
 Overall, for $p\geq 5$, our method saves $p+1$ multiplications over the method of Tan et al.~\cite{TLWRK20}. 
 However, the complexity of the bivariate circuit remains linear in $p$ which is unpractical for performing homomorphic comparisons using large digits (i.e. a large $p$).
   
 \subsection{Univariate interpolation of $\LT_\S$}
-Unlike bivariate polynomials, it is possible to evaluate univariate polynomials of degree $p-1$ in $\mathcal{O}(\sqrt{p})$ non-scalar multiplications using the Paterson-Stockmeyer algorithm~\cite{SIAM:PS73}. 
+Unlike bivariate polynomials, it is possible to evaluate univariate polynomials of degree $p-1$ in $\mathcal{O}(\sqrt{p})$ non-scalar multiplications using the Paterson-Stockmeyer algorithm~\cite{SIAM:PS73}. The Paterson-Stockmeyer algorithm has been used in various works related to homomorphic encryption in order to speed-up polynomial evaluation. As a recent example, it was applied by Shaul et al \cite{PoPETS:SFR20} in the context of top-$k$ selection, which uses small-number comparison as a subroutine. However, in our case the study of the structure of $\LT_\S$ as a univariate polynomial will allow us to speed-up its evaluation for large $p$ beyond what could be achieved using only Paterson-Stockmeyer.
+
 To evaluate $\LT_S$ as a univariate polynomial, we compute the difference $x-y$ of the two input values and check its sign.
 To compute the sign function using finite field arithmetic, we need to split finite field elements into two classes:  negative ($\F_p^-$) and non-negative ($\F_p^+$).
 In addition, for any $x, y \in \S$ the following property should hold:
@@ -328,7 +329,7 @@ According to Lemma~\ref{lem:interpolation}, $\chi_{\F_p^-}(z)$ is equal to
     This feature of the univariate circuit allows to compute all the equality operations while comparing large integers using the less-than function $\LT$ from~(\ref{eq:general_lex_order}).
     This saves $\mathcal{O}((d'-1)(k-1) \log (p-1))$ homomorphic multiplications, thus leading to a better running time than for the bivariate circuit.
 
-    The downside of the univariate circuit is that at most half of the plaintext space is used to encode input integers in comparison to the bivariate method.
+    The downside of the univariate circuit is that only $(1/2)^d$ of the plaintext space is used to encode input integers in comparison to the bivariate method.
   \end{remark}
 
 \subsection{Min/max function}
@@ -365,6 +366,23 @@ According to Lemma~\ref{lem:interpolation}, $\chi_{\F_p^-}(z)$ is equal to
     \end{align*}
   \end{remark}
 
+  \subsection{Impact on the overall complexity}
+  In this section, we summarize the complexities of our method as compared to the work of Tan et al for the evaluation of the less-than function using the lexicographical order method described in Section \ref{sec:background}. Note that our algorithms do not improve the depth of the circuit, as so we only compare the number of homomorphic multiplications required by the different methods.
+  
+  With fixed $p$ and $d$, the previous work of Tan et al. \cite{TLWRK20} (Section 4.4) showed that in the case of the bivariate circuit the less-than function of two $b$-bit integers requires:
+  
+  $$d\cdot\left(T+ \lceil\log_2(p-1)\rceil + \lceil \log_2 d \rceil \right) + \lfloor\log_2(\log_p 2^b)/d)\rfloor+2$$
+
+  homomorphic multiplications.
+
+  where $T$ is the number of homomorphic multiplications required to evaluate the comparison circuit over $\mathbb{F}_p$. In the work of Tan et al. $T = 3p-5$, while in our case $T = 2p-6$. \textcolor{red}{Actually it does not seem that Tan et al. took into account the equality circuit in their analysis otherwise they should have $4p - 6$ mult: $2p-4$ to compute the powers of $x$ and $y$, $p-1$ to compute $\LT_\S$ and another $p-1$ (from what they say, $\log_2(p-1)$ otherwise), to get $\EQ_\S$. }
+
+  The univariate method allows to save even more multiplications since when computing $\LT_\S(x,y)$ we compute $\texttt{EQ}_\S(x,y)$ and so we have it for free when evaluating the lexicographical order (Remark 2). So in this case the comparison of two $b$-bits integers requires:
+
+  $$\textcolor{red}{TODO}$$
+  
+  with $T\approx \sqrt{2p-4}+3(\log_2(2p-4))/2$ in this case.
+  
 % \subsection{Lexicographic order}\label{subsec:lexicographic_order}
 %   Let $\vx=(x_0,x_1,\ldots,x_{\ell-1})$ and $\vy=(y_0,y_1,\ldots,y_{\ell-1}) \in \F_\fieldcard^\ell$ for the lexicographical order $<$ defined by the choice of $\S$:
 %   \begin{align*}
