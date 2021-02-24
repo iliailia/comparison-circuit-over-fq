@@ -61,7 +61,8 @@ The previous results can help improving the performance of any task involving co
 	Yet, this method introduces $p-1$ scalar multiplications (by powers $i^k$) and $p-2$ additions. 
 	However, these operations are much faster in HE schemes than non-scalar multiplication such that the gain from reducing non-scalar multiplications becomes dominant. 
 	
-	The main advantage of direct sorting is that its multiplicative depth is independent of the array length, namely $d = d\left(\LT\right) + \ceil{\log_2 (p-1)} + 1$.
+	The main advantage of direct sorting is that its multiplicative depth is independent of the array length, namely $d = d\left(\LT\right) + \ceil{\log_2 (p-1)} + 1$ with $d\left(\LT\right)$ given in Equation (\ref{eq:circuit-depth}).
+        
 	This allows to avoid large encryption parameters and costly bootstrapping operations.
 	%We can further reduce this depth by computing the Hamming weight modulo a plaintext modulus $p$ that is equal or larger than the length of an array $n$.
 
@@ -164,7 +165,8 @@ The previous results can help improving the performance of any task involving co
 	This implies that for small enough $N'$, Shaul's circuit~(\ref{eq:shaul_minimum}) has a smaller depth or/and a smaller multiplication complexity than the circuit in~(\ref{eq:our_minimum}).
 	Furthermore, Shaul's circuit supports any length $N' > p$, whereas (\ref{eq:our_minimum}) requires $N' \le p$ such that $\wt(\mL[i])$ do not overflow modulo $p$.
 
-	In the experiments conducted in Section~\ref{sec:impl-results}, we use the best of these approaches for given $N$, $T$ and $p$. 
+	In the experiments conducted in Section~\ref{sec:impl-results}, we use the best of these approaches for given $N$, $T$ and $p$.
+        
 	%%%%%%%%%%
 %%% Local Variables:
 %%% mode: latex
