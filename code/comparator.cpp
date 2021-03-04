@@ -114,7 +114,7 @@ DoubleCRT Comparator::create_shift_mask(double& size, long shift)
 {
 	cout << "Mask for shift " << shift << " is being created" << endl;
 	// get EncryptedArray
-  	const EncryptedArray& ea = *(m_context.ea);
+  	const EncryptedArray& ea = m_context.getEA();
 
   	//extract slots
 	long nSlots = ea.size();
@@ -159,7 +159,7 @@ DoubleCRT Comparator::create_shift_mask(double& size, long shift)
 	ZZX mask_zzx;
 	ea.encode(mask_zzx, mask_vec);
 
-	size = conv<double>(embeddingLargestCoeff(mask_zzx, m_context.zMStar));
+	size = conv<double>(embeddingLargestCoeff(mask_zzx, m_context.getZMStar()));
 
 	DoubleCRT mask_crt = DoubleCRT(mask_zzx, m_context, m_context.allPrimes());
 	return mask_crt;
@@ -177,12 +177,13 @@ void Comparator::create_all_shift_masks()
 
 	    shift <<=1;
 	}
+	cout << "All masks are created" << endl;
 }
 
 void Comparator::compute_poly_params()
 {
 	// get p
-	ZZ p = ZZ(m_context.zMStar.getP());
+	ZZ p = ZZ(m_context.getP());
 	long p_long = conv<long>(p);
 
 	// hardcoded babysteps sizes
@@ -347,8 +348,9 @@ void Comparator::compute_poly_params()
 
 void Comparator::create_poly()
 {
+	cout << "Creating comparison polynomial" << endl;
 	// get p
-	unsigned long p = m_context.zMStar.getP();;
+	unsigned long p = m_context.getP();;
 
 	if(m_type == UNI)
 	{
@@ -458,24 +460,89 @@ void Comparator::create_poly()
 			cout << endl;
 		}
 	}
+
+	cout << "Comparison polynomial is created" << endl;
 }
 
+void Comparator::find_prim_root(ZZ_pE& root) const
+{
+	ZZ qm1 = root.cardinality() - 1;
+
+	cout << "Slot order: " << qm1 << endl;
+
+	vector<ZZ> facts;
+	factorize(facts, qm1); // factorization of slot order
+
+	NTL::set(root);
+
+	for (unsigned long i = 0; i < facts.size(); i++) 
+	{
+		ZZ p = facts[i];
+		ZZ pp = p;
+		ZZ ee = qm1 / p;
+		while (ee % p == 0) 
+		{
+	  		ee = ee / p;
+	  		pp = pp * p;
+		}
+		// so now we have e = pp * ee, where pp is
+		// the power of p that divides e.
+		// Our goal is to find an element of order pp
+
+		NTL::PrimeSeq s;
+		ZZ_pE q = root;
+		ZZ_pE qq = root;
+		ZZ_pE qq1 = root;
+		long iter = 0;
+		do 
+		{
+	  		iter++;
+	  		if (iter > 1000000)
+	    		throw RuntimeError("FindPrimitiveRoot: possible infinite loop?");
+	  		random(q);
+	  		NTL::conv(qq, q);
+	  		power(qq1, qq, qm1 / p);
+		} 
+		while (IsOne(qq1));
+		power(qq1, qq, qm1 / pp); // qq1 has order pp
+
+		mul(root, root, qq1);
+	}
+
+	// independent check that we have an e-th root of unity
+	{
+		ZZ_pE s;
+
+		power(s, root, qm1);
+		if (!IsOne(s))
+	  		throw RuntimeError("FindPrimitiveRoot: internal error (1)");
+
+		// check that s^{e/p} != 1 for any prime divisor p of e
+		for (unsigned long i = 0; i < facts.size(); i++) 
+		{
+	  		ZZ e2 = qm1 / facts[i];
+	  		power(s, root, e2); // s = root^{e/p}
+	  		if (IsOne(s))
+	    		throw RuntimeError("FindPrimitiveRoot: internal error (2)");
+		}
+	}
+}
 
 void Comparator::extraction_init()
 {
 	// get the total number of slots
-	const EncryptedArray& ea = *(m_context.ea);
+	const EncryptedArray& ea = m_context.getEA();
 	long nslots = ea.size();
 
 	// get p
-	long p = m_context.zMStar.getP();
+	long p = m_context.getP();
 	//cout << "p: " << p << endl;
 
 	// get the order of p
-	long d = m_context.zMStar.getOrdP();
+	long d = m_context.getOrdP();
 
 	// get the defining polynomial of a slot mod p
-	ZZX def_poly = m_context.slotRing->G;
+	ZZX def_poly = m_context.getSlotRing()->G;
 
 	//cout << "Def. poly" << def_poly << endl;
 
@@ -491,12 +558,13 @@ void Comparator::extraction_init()
 	
 	// build the trace matrix
 	mat_ZZ_pE trace_matrix;
+	mat_ZZ_pE inv_trace_matrix;
 	trace_matrix.SetDims(d, d);
 	
 	ZZ_pE prim_elem;
 	prim_elem.init(def_poly_p);
-	prim_elem = conv<ZZ_pE>(ZZ_pX(INIT_MONO, 1, ZZ_p(1)));
 
+	find_prim_root(prim_elem);
 	//cout << "Primitive element " << prim_elem << endl;
 
 	ZZ_pE coef;
@@ -514,8 +582,9 @@ void Comparator::extraction_init()
 	//cout << "Trace matrix: " << trace_matrix << endl;
 	//cout << "Modulus: " << trace_matrix[0][0].modulus() << endl; 
 
-	mat_ZZ_pE inv_trace_matrix = NTL::inv(trace_matrix);
+	//inv_trace_matrix = NTL::inv(trace_matrix);
 	//cout << "Inverse of trace matrix" << inv_trace_matrix << endl;
+		
 
 	//cout << "Extraction consts: " << endl;
 	for (long iCoef = 0; iCoef < d; iCoef++)
@@ -534,7 +603,7 @@ void Comparator::extraction_init()
 
 			DoubleCRT tmp_crt(tmp, m_context, m_context.allPrimes());
 
-			double const_size = conv<double>(embeddingLargestCoeff(tmp, m_context.zMStar));
+			double const_size = conv<double>(embeddingLargestCoeff(tmp, m_context.getZMStar()));
 			size_vec.push_back(const_size);
 
 			tmp_crt_vec.push_back(tmp_crt);
@@ -555,11 +624,11 @@ void Comparator::extract_mod_p(vector<Ctxt>& mod_p_coefs, const Ctxt& ctxt_x) co
 		return;
 	}
 
-	const EncryptedArray& ea = *(m_context.ea);
+	const EncryptedArray& ea = m_context.getEA();
 	long nslots = ea.size();
 
 	// get max slot degree
-	long d = m_context.zMStar.getOrdP();
+	long d = m_context.getOrdP();
 
 	// TODO: how to use key switching hoisting from CRYPTO'18?
 	vector<Ctxt> ctxt_frob(d-1, ctxt_x);
@@ -589,7 +658,7 @@ void Comparator::extract_mod_p(vector<Ctxt>& mod_p_coefs, const Ctxt& ctxt_x) co
 Comparator::Comparator(const Context& context, CircuitType type, unsigned long d, unsigned long expansion_len, const SecKey& sk, bool verbose): m_context(context), m_type(type), m_slotDeg(d), m_expansionLen(expansion_len), m_sk(sk), m_pk(sk), m_verbose(verbose)
 {
 	//determine the order of p in (Z/mZ)*
-	unsigned long ord_p = context.zMStar.getOrdP();
+	unsigned long ord_p = context.getOrdP();
 	//check that the extension degree divides the order of p
 	if (ord_p < d != 0)
 	{
@@ -620,10 +689,10 @@ const ZZX& Comparator::get_min_max_poly() const
 void Comparator::print_decrypted(const Ctxt& ctxt) const
 {
 	// get EncryptedArray
-	const EncryptedArray& ea = *(m_context.ea);
+	const EncryptedArray& ea = m_context.getEA();
 
 	// get order of p
-	unsigned long ord_p = m_context.zMStar.getOrdP();
+	unsigned long ord_p = m_context.getOrdP();
 
     long nSlots = ea.size();
     vector<ZZX> decrypted(nSlots);
@@ -640,7 +709,7 @@ void Comparator::batch_shift(Ctxt& ctxt, long start, long shift) const
 {
 	HELIB_NTIMER_START(BatchShift);
 	// get EncryptedArray
-	const EncryptedArray& ea = *(m_context.ea);
+	const EncryptedArray& ea = m_context.getEA();
 	
 	// if shift is zero, do nothing
 	if(shift == 0)
@@ -662,7 +731,7 @@ void Comparator::batch_shift_for_mul(Ctxt& ctxt, long start, long shift) const
 {
 	HELIB_NTIMER_START(BatchShiftForMul);
 	// get EncryptedArray
-	const EncryptedArray& ea = *(m_context.ea);
+	const EncryptedArray& ea = m_context.getEA();
 	
 	// if shift is zero, do nothing
 	if(shift == 0)
@@ -726,7 +795,7 @@ void Comparator::mapTo01_subfield(Ctxt& ctxt, long pow) const
 {
   HELIB_NTIMER_START(MapTo01);	
   // get EncryptedArray
-  const EncryptedArray& ea = *(m_context.ea);
+  const EncryptedArray& ea = m_context.getEA();
 
   // get p
   long p = ctxt.getPtxtSpace();
@@ -888,7 +957,7 @@ void Comparator::less_than_mod_any(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctx
 	// x+1
 	x_plus_1.addConstant(ZZ(1));
 
-	unsigned long p = m_context.zMStar.getP();
+	unsigned long p = m_context.getP();
 
 	unsigned long y_powers = ((p-3) >> 1);
 	//powers of x
@@ -940,7 +1009,7 @@ void Comparator::evaluate_univar_less_poly(Ctxt& ret, Ctxt& ctxt_p_1, const Ctxt
 {
 	HELIB_NTIMER_START(ComparisonCircuitUnivar);
 	// get p
-	ZZ p = ZZ(m_context.zMStar.getP());
+	ZZ p = ZZ(m_context.getP());
 
 	if (p > ZZ(3)) //if p > 3, use the generic Paterson-Stockmeyer strategy
 	{
@@ -1020,7 +1089,7 @@ void Comparator::evaluate_min_max_poly(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctx
 {
 	HELIB_NTIMER_START(MinMaxCircuitUnivar);
 	// get p
-	ZZ p = ZZ(m_context.zMStar.getP());
+	ZZ p = ZZ(m_context.getP());
 
 	// Subtraction z = x - y
 	cout << "Subtraction" << endl;
@@ -1119,7 +1188,7 @@ void Comparator::less_than_bivar(Ctxt& ctxt_res, const Ctxt& ctxt_x, const Ctxt&
   	return;
   }
 
-  unsigned long p = m_context.zMStar.getP();
+  unsigned long p = m_context.getP();
 
   if(p > 31)
   {
@@ -1164,7 +1233,7 @@ void Comparator::less_than_bivar_tan(Ctxt& ctxt_res, const Ctxt& ctxt_x, const C
 {
 	cout << "Compute Tan's comparison polynomial" << endl;
 
-	long p = m_context.zMStar.getP();
+	long p = m_context.getP();
 
 	DynamicCtxtPowers x_powers(ctxt_x, p-1);
 	DynamicCtxtPowers y_powers(ctxt_y, p-1);
@@ -1425,7 +1494,7 @@ void Comparator::min_max_digit(Ctxt& ctxt_min, Ctxt& ctxt_max, const Ctxt& ctxt_
 		throw helib::LogicError("Min/Max is not implemented for vectors over F_p");
 
 	// get EncryptedArray
-  	const EncryptedArray& ea = *(m_context.ea);
+  	const EncryptedArray& ea = m_context.getEA();
   	//extract slots
 	long nSlots = ea.size();
 
@@ -1599,7 +1668,7 @@ void Comparator::array_min(Ctxt& ctxt_res, const vector<Ctxt>& ctxt_in, long dep
 	if(cur_len > 1)
 	{
 		// plaintext modulus
-  		long p = m_context.zMStar.getP();
+  		long p = m_context.getP();
 		// multiplications in the equality circuit
 		long eq_mul_num = static_cast<long>(floor(log2(p-1))) + weight(ZZ(p-1)) - 1;
 		long eq_depth = static_cast<long>(ceil(log2(p-1)));
@@ -1761,7 +1830,7 @@ void Comparator::get_sorting_index(vector<Ctxt>& ctxt_out, const vector<Ctxt>& c
 	size_t input_len = ctxt_in.size();
 
 	// plaintext modulus
-  	long p = m_context.zMStar.getP();
+  	long p = m_context.getP();
 
 	if (input_len > p)
 		throw helib::LogicError("The number of ciphertexts cannot be larger than the plaintext modulus");
@@ -1807,7 +1876,7 @@ void Comparator::sort(vector<Ctxt>& ctxt_out, const vector<Ctxt>& ctxt_in) const
 	size_t input_len = ctxt_in.size();
 
 	// plaintext modulus
-  	long p = m_context.zMStar.getP();
+  	long p = m_context.getP();
 
 	if (input_len > p)
 		throw helib::LogicError("The number of ciphertexts cannot be larger than the plaintext modulus");
@@ -1980,16 +2049,16 @@ void Comparator::test_sorting(int num_to_sort, long runs) const
   uniform_int_distribution<long> distr_i;
 
   // get EncryptedArray
-  const EncryptedArray& ea = *(m_context.ea);
+  const EncryptedArray& ea = m_context.getEA();
 
   //extract number of slots
   long nslots = ea.size();
 
   //get p
-  unsigned long p = m_context.zMStar.getP();
+  unsigned long p = m_context.getP();
 
   //order of p
-  unsigned long ord_p = m_context.zMStar.getOrdP();
+  unsigned long ord_p = m_context.getOrdP();
 
   //amount of numbers in one ciphertext
   unsigned long numbers_size = nslots / m_expansionLen;
@@ -2192,16 +2261,16 @@ void Comparator::test_compare(long runs) const
   uniform_int_distribution<long> distr_i;
 
   // get EncryptedArray
-  const EncryptedArray& ea = *(m_context.ea);
+  const EncryptedArray& ea = m_context.getEA();
 
   //extract number of slots
   long nslots = ea.size();
 
   //get p
-  unsigned long p = m_context.zMStar.getP();
+  unsigned long p = m_context.getP();
 
   //order of p
-  unsigned long ord_p = m_context.zMStar.getOrdP();
+  unsigned long ord_p = m_context.getOrdP();
 
   //amount of numbers in one ciphertext
   unsigned long numbers_size = nslots / m_expansionLen;
@@ -2387,16 +2456,16 @@ void Comparator::test_min_max(long runs) const
   uniform_int_distribution<long> distr_i;
 
   // get EncryptedArray
-  const EncryptedArray& ea = *(m_context.ea);
+  const EncryptedArray& ea = m_context.getEA();
 
   //extract number of slots
   long nslots = ea.size();
 
   //get p
-  unsigned long p = m_context.zMStar.getP();
+  unsigned long p = m_context.getP();
 
   //order of p
-  unsigned long ord_p = m_context.zMStar.getOrdP();
+  unsigned long ord_p = m_context.getOrdP();
 
   //amount of numbers in one ciphertext
   unsigned long numbers_size = nslots / m_expansionLen;
@@ -2596,16 +2665,16 @@ void Comparator::test_array_min(int input_len, long depth, long runs) const
   uniform_int_distribution<long> distr_i;
 
   // get EncryptedArray
-  const EncryptedArray& ea = *(m_context.ea);
+  const EncryptedArray& ea = m_context.getEA();
 
   //extract number of slots
   long nslots = ea.size();
 
   //get p
-  unsigned long p = m_context.zMStar.getP();
+  unsigned long p = m_context.getP();
 
   //order of p
-  unsigned long ord_p = m_context.zMStar.getOrdP();
+  unsigned long ord_p = m_context.getOrdP();
 
   //amount of numbers in one ciphertext
   unsigned long numbers_size = nslots / m_expansionLen;

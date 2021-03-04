@@ -147,7 +147,10 @@ class Comparator{
     void int_to_slot(ZZX& poly, unsigned long input, unsigned long enc_base) const;
 
     // compute an array of positions of ciphertexts in ctxt_in when sorted
-    void get_sorting_index(vector<Ctxt>& ctxt_out, const vector<Ctxt>& ctxt_in) const; 
+    void get_sorting_index(vector<Ctxt>& ctxt_out, const vector<Ctxt>& ctxt_in) const;
+
+    // find the primitive root of a SIMD slot
+    void find_prim_root(ZZ_pE& root) const; 
 
 public:
   // constructor

@@ -81,19 +81,22 @@ int main(int argc, char *argv[]) {
   unsigned long c = 3;
   cout << "Initialising context object..." << endl;
   // Intialise context
-  Context context(m, p, 1);
-  context.scale = 6;
-  // Modify the context, adding primes to the modulus chain
-  cout  << "Building modulus chain..." << endl;
-  buildModChain(context, nb_primes, c);
+  auto context = ContextBuilder<BGV>()
+            .m(m)
+            .p(p)
+            .r(1)
+            .bits(nb_primes)
+            .c(c)
+            .scale(6)
+            .build();
 
   // Print the security level
-  cout << "Q size: " << context.logOfProduct(context.ctxtPrimes)/log(2.0) << endl;
+  cout << "Q size: " << context.logOfProduct(context.getCtxtPrimes())/log(2.0) << endl;
   cout << "Q*P size: " << context.logOfProduct(context.fullPrimes())/log(2.0) << endl;
   cout << "Security: " << context.securityLevel() << endl;
 
   // Print the context
-  context.zMStar.printout();
+  context.getZMStar().printout();
   cout << endl;
 
   //maximal number of digits in a number
@@ -109,16 +112,16 @@ int main(int argc, char *argv[]) {
   // Compute key-switching matrices that we need
   if (expansion_len > 1)
   {
-    if (context.zMStar.numOfGens() == 1)
+    if (context.getZMStar().numOfGens() == 1)
     {
       std::set<long> automVals;
       long e = 1;
-      long ord = context.zMStar.OrderOf(0);
-      bool native = context.zMStar.SameOrd(0);
+      long ord = context.getZMStar().OrderOf(0);
+      bool native = context.getZMStar().SameOrd(0);
       if(!native)
-        automVals.insert(context.zMStar.genToPow(0, -ord));
+        automVals.insert(context.getZMStar().genToPow(0, -ord));
       while (e < expansion_len){
-        long atm = context.zMStar.genToPow(0, ord-e);
+        long atm = context.getZMStar().genToPow(0, ord-e);
         //cout << "Automorphism " << -e << " is " << atm << endl;
         automVals.insert(atm);
         e <<=1;
@@ -142,9 +145,6 @@ int main(int argc, char *argv[]) {
   
   //test comparison circuit
   comparator.test_compare(runs);
-
-  //test min/max circuit
-  //comparator.test_min_max(runs);
 
   //printAllTimers(cout);
 
