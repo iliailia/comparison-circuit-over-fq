@@ -257,7 +257,7 @@ Overall, for $p\geq 5$, our method saves $p+1$ multiplications over the method o
 However, the complexity of the bivariate circuit remains linear in $p$ which is unpractical for performing homomorphic comparisons using large digits (i.e. a large $p$).
   
 \subsection{Univariate interpolation of $\LT_\S$}
-Unlike bivariate polynomials, it is possible to evaluate univariate polynomials of degree $p-1$ in $\mathcal{O}(\sqrt{p})$ non-scalar multiplications using the Paterson-Stockmeyer algorithm~\cite{SIAM:PS73}. The Paterson-Stockmeyer algorithm has been used in various works related to homomorphic encryption in order to speed-up polynomial evaluation. As a recent example, it was applied by Shaul et al \cite{PoPETS:SFR20} in the context of top-$k$ selection, which uses small-number comparison as a subroutine. However, in our case the study of the structure of $\LT_\S$ as a univariate polynomial will allow us to speed-up its evaluation for large $p$ beyond what could be achieved using only Paterson-Stockmeyer.
+Unlike bivariate polynomials, it is possible to evaluate univariate polynomials of degree $p-1$ in $\mathcal{O}(\sqrt{p})$ non-scalar multiplications using the Paterson-Stockmeyer algorithm~\cite{SIAM:PS73}. The Paterson-Stockmeyer algorithm has been used in various works related to homomorphic encryption in order to speed-up polynomial evaluation. As a recent example, it was applied by Shaul et al \cite{PoPETS:SFR20} in the context of top-$k$ selection, which uses small-number comparison as a subroutine. However, in our case the study of the structure of $\LT_\S$ as a univariate polynomial will allow us to speed-up its evaluation for large $p$ beyond what could be achieved using only the Paterson-Stockmeyer algorithm.
 
 To evaluate $\LT_S$ as a univariate polynomial, we compute the difference $x-y$ of the two input values and check its sign.
 To compute the sign function using finite field arithmetic, we need to split finite field elements into two classes:  negative ($\F_p^-$) and non-negative ($\F_p^+$).
@@ -367,7 +367,7 @@ According to Lemma~\ref{lem:interpolation}, $\chi_{\F_p^-}(z)$ is equal to
   \end{remark}
 
   \subsection{Impact on the overall complexity}
-  In this section, we summarize the complexities of our method as compared to the work of Tan et al for the evaluation of the less-than function using the lexicographical order method described in Section \ref{sec:background}.
+  In this section, we summarize the complexities of our method as compared to the work of Tan et al. for the evaluation of the less-than function using the lexicographical order method described in Section \ref{sec:background}.
 
   For fixed $p$ and $d$ Tan et al. determined in \cite{TLWRK20} (Section 4.4), that the depth of the circuit evaluating the less-than function of two $b$-bits integers is 
   \begin{equation}

@@ -29,7 +29,7 @@ First, it is decomposed into a vector of $l$ digits over $\F_p^d$ (see Section~\
 Then each digit embedded into one SIMD slot.
 Thus, each ciphertext encrypts exactly $k = \ell/l$ integers.
 
-Note that although our algorithms saves some homomorphic multiplications as compared to \cite{TLWRK20}, the depth of the circuits remains unchanged. Since a ciphertext size depends mainly on the depth of the circuit one wants to evaluate and the desired level of security, we obtain similar bandwidth requirements than previous works.
+Note that although our algorithms save some homomorphic multiplications as compared to \cite{TLWRK20}, the depth of the circuits remains unchanged. Since the ciphertext size depends mainly on the depth of the circuit one wants to evaluate and the desired level of security, we obtain similar bandwidth requirements than previous works.
 
 To compare our algorithms with the state of the art, we ran the lexicographic order algorithm ($\LT$) to compute the less-than function on 64-bit integers.
 The results of these experiments are presented in Table~\ref{table:comparison_circuit_results}.
