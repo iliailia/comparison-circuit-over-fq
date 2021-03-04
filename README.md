@@ -49,6 +49,6 @@ To test the minimum function, run this command
     
 where
 + `N`: the number of values in the input array.
-+ `T`: the number of tournament stages.
++ `T`: the number of tournament stages (see Section 4.2 of the paper).
 
 Other arguments have the same meaning as above. The univariate circuit is used here by default.
