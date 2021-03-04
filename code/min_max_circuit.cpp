@@ -25,13 +25,13 @@ using namespace NTL;
 using namespace helib;
 using namespace he_cmp;
 
-// the main function that takes 8 arguments (type in Terminal: ./min_max_circuit argv[1] argv[2] argv[3] argv[4] argv[5] argv[6] argv[7] argv[8])
+// the main function that takes 8 arguments (type in Terminal: ./min_max_circuit argv[1] argv[2] argv[3] argv[4] argv[5] argv[6] argv[7] argv[8] argv[9])
 // argv[1] - the plaintext modulus
 // argv[2] - the dimension of a vector space over a finite field
 // argv[3] - the order of the cyclotomic ring
 // argv[4] - the bitsize of the ciphertext modulus in ciphertexts (HElib increases it to fit the moduli chain). The modulus used for public-key generation
 // argv[5] - the length of vectors to be compared
-// argv[6] - the number of values to be sorted
+// argv[6] - the number of values in the input array
 // argv[7] - the number of tournament stages
 // argv[8] - the number of experimental runs
 // argv[9] - print debug info (y/n)
