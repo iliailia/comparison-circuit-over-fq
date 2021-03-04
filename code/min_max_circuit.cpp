@@ -25,7 +25,7 @@ using namespace NTL;
 using namespace helib;
 using namespace he_cmp;
 
-// the main function that takes 8 arguments (type in Terminal: ./sorting_circuit argv[1] argv[2] argv[3] argv[4] argv[5] argv[6] argv[7] argv[8])
+// the main function that takes 8 arguments (type in Terminal: ./min_max_circuit argv[1] argv[2] argv[3] argv[4] argv[5] argv[6] argv[7] argv[8])
 // argv[1] - the plaintext modulus
 // argv[2] - the dimension of a vector space over a finite field
 // argv[3] - the order of the cyclotomic ring
