@@ -13,7 +13,7 @@ and finally
 
 ## How to use
 ### Integer comparison
-To test the basic comparison of integers, use the following syntax
+To test the basic comparison of integers, use the following command
   
     ./comparison_circuit circuit_type p d m q l runs print_debug_info
     
@@ -41,3 +41,14 @@ where the most arguments are analogous to the comparison circuit above. The addi
 + `N`: the number of values to be sorted (see Section 4.1 of the paper).
 
 By default, the sorting algorithm uses the univariate circuit. 
+
+### Minimum of an array
+To test the minimum function, run this command
+
+    ./min_max_circuit p d m q l N T runs print_debug_info
+    
+where
++ `N`: the number of values in the input array.
++ `T`: the number of tournament stages.
+
+Other arguments have the same meaning as above. The univariate circuit is used here by default.
