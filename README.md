@@ -32,3 +32,12 @@ The following line performs 10 tests of our bivariate comparison circuit compari
   
     ./comparison_circuit B 7 2 300 90 3 10 y
 
+### Sorting
+The sorting algorithm can be executed by the following line
+
+    ./sorting_circuit p d m q l N runs print_debug_info
+    
+where the most arguments are analogous to the comparison circuit above. The additional argument is
++ `N`: the number of values to be sorted (see Section 4.1 of the paper).
+
+By default, the sorting algorithm uses the univariate circuit. 
