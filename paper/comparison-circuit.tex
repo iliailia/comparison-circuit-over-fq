@@ -379,9 +379,10 @@ According to Lemma~\ref{lem:interpolation}, $\chi_{\F_p^-}(z)$ is equal to
   $$ d\cdot\left(T+ \lceil\log_2(p-1)\rceil + \lceil \log_2 d \rceil \right) + \lfloor\log_2(\log_p 2^b)/d)\rfloor+2. $$
   where $T$ is the number of homomorphic multiplications required to evaluate the comparison circuit over $\mathbb{F}_p$. In the work of Tan et al. $T = 3p-5$, while in our case it is $T = 2p-6$.
 
-  The univariate method allows to save even more multiplications since when computing $\LT_\S(x,y)$ we almost compute $\texttt{EQ}_\S(x,y)$ and so we have it almost for free when evaluating the lexicographical order (Remark 2). Thus, in this case the comparison of two $b$-bits integers requires
+  The univariate method allows to save even more multiplications since when computing $\LT_\S(x,y)$ we compute $1 - \EQ_\S(x,y)$. 
+  Hence, we obtain $\EQ_\S(x,y)$ almost for free when evaluating the lexicographical order (Remark 2). Thus, in this case the comparison of two $b$-bits integers requires
   $$ d\cdot\left(T + \lceil \log_2 d \rceil \right) + \lfloor\log_2(\log_p 2^b)/d)\rfloor+2. $$
-  with $T\approx \sqrt{2p-4}+3(\log_2(2p-4))/2$ by using Paterson-Stockmeyer algorithm.
+  with $T\approx \sqrt{2p-4}+3(\log_2(2p-4))/2$ by using the Paterson-Stockmeyer algorithm.
   
 % \subsection{Lexicographic order}\label{subsec:lexicographic_order}
 %   Let $\vx=(x_0,x_1,\ldots,x_{\ell-1})$ and $\vy=(y_0,y_1,\ldots,y_{\ell-1}) \in \F_\fieldcard^\ell$ for the lexicographical order $<$ defined by the choice of $\S$:
