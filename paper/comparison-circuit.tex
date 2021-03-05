@@ -369,17 +369,18 @@ According to Lemma~\ref{lem:interpolation}, $\chi_{\F_p^-}(z)$ is equal to
   \subsection{Impact on the overall complexity}
   In this section, we summarize the complexities of our method as compared to the work of Tan et al. for the evaluation of the less-than function using the lexicographical order method described in Section \ref{sec:background}.
 
-  For fixed $p$ and $d$ Tan et al. determined in \cite{TLWRK20} (Section 4.4), that the depth of the circuit evaluating the less-than function of two $b$-bits integers is 
+  For fixed $p$ and $d$, Tan et al.~\cite[Section 4.4]{TLWRK20} determined that the depth of the circuit evaluating the less-than function of two $b$-bits integers is equal to
   \begin{equation}
     \label{eq:circuit-depth}
     \lfloor \log_2 d \rfloor + \lfloor \log_2 (p-1) \rfloor + \lfloor \log_2 (\log_p 2^b)/d) \rfloor + 4.
   \end{equation}
-  
-  Note that our algorithms do not improve the depth of the circuit. Similarly, they determined that the number of homomorphic multiplications required to evaluate the less-than function of two $b$-bit integers with the bivariate interpolation is
+  Note that our algorithms do not decrease the depth of the circuit. 
+  Similarly, Tan et al. showed that the number of homomorphic multiplications required to evaluate the less-than function of two $b$-bit integers with the bivariate interpolation is
   $$ d\cdot\left(T+ \lceil\log_2(p-1)\rceil + \lceil \log_2 d \rceil \right) + \lfloor\log_2(\log_p 2^b)/d)\rfloor+2. $$
-  where $T$ is the number of homomorphic multiplications required to evaluate the comparison circuit over $\mathbb{F}_p$. In the work of Tan et al. $T = 3p-5$, while in our case it is $T = 2p-6$.
+  where $T$ is the number of homomorphic multiplications required to evaluate the comparison circuit over $\mathbb{F}_p$.
+  In the work of Tan et al. $T = 3p-5$, while in our case it is $T = 2p-6$.
 
-  The univariate method allows to save even more multiplications since when computing $\LT_\S(x,y)$ we compute $1 - \EQ_\S(x,y)$. 
+  The univariate method saves even more multiplications since one can extract $1 - \EQ_\S(x,y)$ while computing $\LT_\S(x,y)$. 
   Hence, we obtain $\EQ_\S(x,y)$ almost for free when evaluating the lexicographical order (Remark 2). Thus, in this case the comparison of two $b$-bits integers requires
   $$ d\cdot\left(T + \lceil \log_2 d \rceil \right) + \lfloor\log_2(\log_p 2^b)/d)\rfloor+2. $$
   with $T\approx \sqrt{2p-4}+3(\log_2(2p-4))/2$ by using the Paterson-Stockmeyer algorithm.
