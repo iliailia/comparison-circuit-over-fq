@@ -56,14 +56,27 @@
 \newcommand{\princhar}{\chi} %principal character of a finite field
 \DeclareMathOperator{\ReLU}{ReLU}
 
+\newif\ifeprint
+\eprinttrue
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\title{Comparison circuit over $\F_\fieldcard$; Faster homomorphic comparison operations for BGV and BFV}
-\date{}
-\author{}
+\title{Faster homomorphic comparison operations for BGV and BFV}
+\author{Ilia Iliashenko\inst{1} \and Vincent Zucca\inst{2,3}}
+\institute{imec-COSIC, Dept.\ Electrical Engineering, KU Leuven, Belgium \\ \email{ilia@esat.kuleuven.be}  \and DALI, Université de Perpignan Via Domitia, France, \\ \email{vincent.zucca@univ-perp.fr} \and
+    LIRMM, Univ Montpellier, Montpellier, France, \\ \email{vincent.zucca@lirmm.fr}
+}
 
 \begin{document}
 \maketitle
+
+\begin{abstract} 
+  Fully homomorphic encryption (FHE) allows to compute any function on encrypted values.
+  However, in practice, there is no universal FHE scheme that is efficient in all possible use cases.
+  In this work, we show that FHE schemes suitable for arithmetic circuits (e.g. BGV or BFV) have a similar performance as FHE schemes for non-arithmetic circuits (TFHE) in basic comparison tasks such as less-than, maximum and minimum operations.
+  Our implementation of the less-than function in the HElib library is up to 3 times faster than the prior work based on BGV/BFV.
+  It allows to compare a pair of 64-bit integers in 11 milliseconds, sort 64 32-bit integers in 19 seconds and find the minimum of 64 32-bit integers in 9.5 seconds on an average laptop without multi-threading.     
+\end{abstract}
 
 \section{Introduction}
 \label{sec:introduction}
