@@ -1,6 +1,6 @@
 # Faster homomorphic comparison operations for BGV and BFV
 
-This repository contains the LaTeX and C++ code of the homomorphic pattern matching algorithm from the paper "Faster homomorphic comparison operations for BGV and BFV" by Ilia Iliashenko and Vincent Zucca.
+This repository contains the LaTeX and C++ code of the homomorphic pattern matching algorithm from the paper ["Faster homomorphic comparison operations for BGV and BFV"](https://eprint.iacr.org/2021/315) by Ilia Iliashenko and Vincent Zucca.
 
 ## Installation guide
 To build the code, install [HElib](https://github.com/homenc/HElib) (>= 2.0.0), go to the `code` folder and run 
