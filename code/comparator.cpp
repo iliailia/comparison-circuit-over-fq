@@ -582,7 +582,7 @@ void Comparator::extraction_init()
 	//cout << "Trace matrix: " << trace_matrix << endl;
 	//cout << "Modulus: " << trace_matrix[0][0].modulus() << endl; 
 
-	//inv_trace_matrix = NTL::inv(trace_matrix);
+	inv_trace_matrix = NTL::inv(trace_matrix);
 	//cout << "Inverse of trace matrix" << inv_trace_matrix << endl;
 		
 
