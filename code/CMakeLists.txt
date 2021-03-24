@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(comparison_circuit
        	LANGUAGES CXX)
 
-find_package(helib 2.0.0 EXACT REQUIRED)
+find_package(helib REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
