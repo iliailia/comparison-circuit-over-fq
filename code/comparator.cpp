@@ -469,6 +469,7 @@ void Comparator::find_prim_root(ZZ_pE& root) const
 	ZZ qm1 = root.cardinality() - 1;
 
 	cout << "Slot order: " << qm1 << endl;
+	cout << "Slot poly: " << root.modulus() << endl;
 
 	vector<ZZ> facts;
 	factorize(facts, qm1); // factorization of slot order
@@ -563,9 +564,10 @@ void Comparator::extraction_init()
 	
 	ZZ_pE prim_elem;
 	prim_elem.init(def_poly_p);
+	prim_elem = conv<ZZ_pE>(ZZ_pX(INIT_MONO, 1, 1));
 
-	find_prim_root(prim_elem);
-	cout << "Primitive element " << prim_elem << endl;
+	//find_prim_root(prim_elem);
+	//cout << "Primitive element " << prim_elem << endl;
 
 	ZZ_pE coef;
 	coef.init(def_poly_p);
